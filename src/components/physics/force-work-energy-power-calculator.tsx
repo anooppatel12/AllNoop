@@ -16,9 +16,8 @@ export function ForceWorkEnergyPowerCalculator() {
   const [force, setForce] = useState('');
   const [distance, setDistance] = useState('');
   const [work, setWork] = useState('');
-  const [energy, setEnergy] = useState('');
-  const [time, setTime] = useState('');
   const [power, setPower] = useState('');
+  const [time, setTime] = useState('');
   
   const [result, setResult] = useState<string | null>(null);
   
@@ -28,9 +27,8 @@ export function ForceWorkEnergyPowerCalculator() {
     setForce('');
     setDistance('');
     setWork('');
-    setEnergy('');
-    setTime('');
     setPower('');
+    setTime('');
     setResult(null);
   };
   
@@ -43,8 +41,8 @@ export function ForceWorkEnergyPowerCalculator() {
     const f = parseFloat(force);
     const d = parseFloat(distance);
     const w = parseFloat(work);
-    const t = parseFloat(time);
     const p = parseFloat(power);
+    const t = parseFloat(time);
 
     switch(activeTab) {
         case 'force':
