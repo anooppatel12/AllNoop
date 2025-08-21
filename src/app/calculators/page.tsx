@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -57,6 +57,7 @@ const calculatorCategories = [
         { name: 'Normality Calculator', href: '/calculators/chemistry/normality', description: 'Calculate the normality of a solution' },
         { name: 'Dilution Calculator', href: '/calculators/chemistry/dilution', description: 'Calculate solution dilution parameters' },
         { name: 'pH & pOH Calculator', href: '/calculators/chemistry/ph-poh', description: 'Calculate pH, pOH, [H⁺], and [OH⁻]' },
+        { name: 'Molecular Weight Calculator', href: '/calculators/chemistry/molecular-weight', description: 'Calculate the molecular weight of a chemical formula' },
     ],
   },
   {
