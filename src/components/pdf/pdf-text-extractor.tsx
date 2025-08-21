@@ -9,7 +9,7 @@ import { UploadCloud, FileText, Loader2, Copy, Check } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
-import pdf from 'pdf-parse';
+import pdf from 'pdf-parse/lib/pdf-parse';
 
 export function PdfTextExtractor() {
   const [file, setFile] = useState<File | null>(null);

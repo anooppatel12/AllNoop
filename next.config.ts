@@ -22,15 +22,13 @@ const nextConfig: NextConfig = {
     if (!isServer) {
       config.resolve.fallback = {
         fs: false,
+        // pdf-parse uses `path` and `process`, so we provide fallbacks
+        path: false,
+        process: false,
       };
     }
     
-    // This is required to make `pdf-parse` work correctly.
-    config.module.rules.push({
-      test: /pdf-parse/,
-      use: ['null-loader'],
-    });
-    
+    // This is required to make `pdf-parse` work correctly on the client.
     config.externals.push('pdf-parse');
 
     return config;
