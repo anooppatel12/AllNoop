@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -35,6 +35,13 @@ const calculatorCategories = [
       { name: 'Pythagorean Theorem Calculator', href: '/calculators/math/pythagorean', description: 'Calculate the missing side of a right-angled triangle' },
       { name: 'Trigonometric Calculator', href: '/calculators/math/trigonometry', description: 'Calculate trig values for an angle' },
       { name: 'Geometry Calculator', href: '/calculators/math/geometry', description: 'Calculate area, perimeter, etc. for shapes' },
+    ],
+  },
+  {
+    name: 'Physics Calculators',
+    icon: Zap,
+    calculators: [
+        { name: 'Speed, Distance, Time Calculator', href: '/calculators/physics/speed-distance-time', description: 'Calculate speed, distance, or time' },
     ],
   },
   {
