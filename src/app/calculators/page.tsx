@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -29,6 +29,8 @@ const calculatorCategories = [
       { name: 'Percentage Calculator', href: '/calculators/math/percentage', description: 'Calculate percentages with ease' },
       { name: 'Age Calculator', href: '/calculators/math/age', description: 'Calculate age from date of birth' },
       { name: 'Date Calculator', href: '/calculators/math/date', description: 'Calculate the difference between dates' },
+      { name: 'Square & Square Root Calculator', href: '/calculators/math/square-root', description: 'Calculate square and square root of a number' },
+      { name: 'Cube & Cube Root Calculator', href: '/calculators/math/cube-root', description: 'Calculate cube and cube root of a number' },
     ],
   },
   {
