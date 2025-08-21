@@ -21,7 +21,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dataChannelRef = useRef<RTCDataChannel | null>(null);
   const isCallerRef = useRef(false);
-  
+
   useEffect(() => {
     const pc = new RTCPeerConnection(configuration);
     pcRef.current = pc;
