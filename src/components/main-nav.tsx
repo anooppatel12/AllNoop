@@ -17,18 +17,19 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
+import { DownloaderLink } from '@/features/downloader/DownloaderLink';
 
 const links = [
   { href: '/', label: 'Hashtag Generator', icon: Hash },
   { href: '/calculators', label: 'Calculators', icon: Calculator },
   { href: '/pdf-tools', label: 'PDF Tools', icon: FileText },
   { href: '/image-editor', label: 'Image Editor', icon: ImageIcon },
-  { href: '/video-downloader', label: 'Video Downloader', icon: Video },
   { href: '/contact', label: 'Contact', icon: MessageSquare },
 ];
 
 export function MainNav() {
   const pathname = usePathname();
+  const isDownloaderEnabled = process.env.NEXT_PUBLIC_ENABLE_VIDEO_DOWNLOADER === 'true';
 
   return (
     <SidebarMenu>
@@ -46,6 +47,20 @@ export function MainNav() {
           </SidebarMenuButton>
         </SidebarMenuItem>
       ))}
+       {isDownloaderEnabled && (
+         <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === '/tools/downloader'}
+              tooltip="Video Downloader"
+            >
+              <Link href="/tools/downloader">
+                <Video />
+                <span>Video Downloader</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+       )}
     </SidebarMenu>
   );
 }

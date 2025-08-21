@@ -29,7 +29,7 @@ export interface ProbeResponse {
   formats: Format[];
 }
 
-export default function DownloaderPage() {
+export function DownloaderUI() {
   const [probeResult, setProbeResult] = useState<ProbeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,10 +66,10 @@ export default function DownloaderPage() {
       <div className="container mx-auto max-w-4xl p-4 md:p-8">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <h1 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-            SmartToolHub Video Downloader
+            Video Downloader
           </h1>
           <p className="max-w-[700px] text-muted-foreground md:text-xl">
-            Paste a video URL → Get available formats → Download.
+            Paste a video URL from a supported platform to download it.
           </p>
         </div>
 

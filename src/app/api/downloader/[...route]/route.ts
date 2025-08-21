@@ -69,11 +69,13 @@ async function handler(req: NextRequest, { params }: { params: { route: string[]
         readable.pipe(stream);
 
         const safeTitle = (await ytdl.getInfo(url)).videoDetails.title.replace(/[^a-z0-9]/gi, '_');
+        const info = await ytdl.getInfo(url);
+        const format = ytdl.chooseFormat(info.formats, { quality: format_id });
 
         return new NextResponse(stream as any, {
             headers: {
-                'Content-Disposition': `attachment; filename="${safeTitle}.mp4"`,
-                'Content-Type': 'video/mp4',
+                'Content-Disposition': `attachment; filename="${safeTitle}.${format.container}"`,
+                'Content-Type': `video/${format.container}`,
             },
         });
     } catch (error: any) {

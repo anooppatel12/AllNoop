@@ -5,14 +5,15 @@ import ky from 'ky';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
-import type { Format } from './DownloaderUI';
+import type { Format, ProbeResponse } from './DownloaderUI';
 
 interface DownloadButtonProps {
   format: Format;
   url: string;
+  title: string;
 }
 
-export function DownloadButton({ format, url }: DownloadButtonProps) {
+export function DownloadButton({ format, url, title }: DownloadButtonProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
@@ -28,7 +29,7 @@ export function DownloadButton({ format, url }: DownloadButtonProps) {
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      const safeTitle = (document.title || 'video').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       
       a.href = downloadUrl;
       a.download = `${safeTitle}.${format.ext}`;
@@ -40,23 +41,25 @@ export function DownloadButton({ format, url }: DownloadButtonProps) {
       toast.success('Download started!', { id: format.format_id });
     } catch (error) {
       console.error('Download error:', error);
-      toast.error('Download failed. Please try another format.', { id: format.format_id });
+      const err = error as any;
+      const errorData = await err.response?.json();
+      toast.error(errorData?.error || 'Download failed. Please try another format.', { id: format.format_id });
     } finally {
       setIsDownloading(false);
     }
   };
 
   return (
-    <Button variant="outline" onClick={handleDownload} disabled={isDownloading}>
+    <Button variant="outline" onClick={handleDownload} disabled={isDownloading} className="w-full justify-start text-left h-auto">
       {isDownloading ? (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
       ) : (
         <Download className="mr-2 h-4 w-4" />
       )}
-      <div className="text-left">
-        <p>{format.resolution || format.ext}</p>
+      <div>
+        <p className="font-semibold">{format.resolution || format.note}</p>
         <p className="text-xs text-muted-foreground">
-          {format.filesize ? `${(format.filesize / 1024 / 1024).toFixed(2)} MB` : format.ext}
+          {format.filesize ? `${(format.filesize / 1024 / 1024).toFixed(2)} MB` : format.ext.toUpperCase()}
         </p>
       </div>
     </Button>

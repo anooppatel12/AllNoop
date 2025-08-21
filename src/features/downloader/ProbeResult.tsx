@@ -20,20 +20,22 @@ export function ProbeResult({ result, url }: ProbeResultProps) {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4 sm:flex-row">
-          <Image
-            src={result.thumbnail}
-            alt={result.title}
-            width={240}
-            height={135}
-            className="rounded-lg object-cover"
-            unoptimized // Necessary for external image URLs
-            data-ai-hint="video thumbnail"
-          />
+          <div className="w-full sm:w-1/3">
+             <Image
+                src={result.thumbnail}
+                alt={result.title}
+                width={240}
+                height={135}
+                className="rounded-lg object-cover w-full"
+                unoptimized // Necessary for external image URLs
+                data-ai-hint="video thumbnail"
+              />
+          </div>
           <div className="flex-1 space-y-3">
             <h3 className="font-semibold">{result.title}</h3>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {result.formats.map((format) => (
-                <DownloadButton key={format.format_id} format={format} url={url} />
+                <DownloadButton key={format.format_id} format={format} url={url} title={result.title} />
               ))}
             </div>
           </div>
