@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PdfSplitter } from '@/components/pdf/pdf-splitter';
 
 export default function SplitPdfPage() {
   return (
@@ -8,18 +8,11 @@ export default function SplitPdfPage() {
           Split PDF
         </h1>
         <p className="max-w-[700px] text-muted-foreground md:text-xl">
-          Divide a large PDF into multiple smaller files.
+          Extract one or more pages from a PDF file.
         </p>
       </div>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>This feature is under construction.</p>
-        </CardContent>
-      </Card>
+      <PdfSplitter />
     </div>
   );
 }
