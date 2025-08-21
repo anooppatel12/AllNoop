@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BmiCalculator } from '@/components/bmi-calculator';
 
 export default function CalculatorsPage() {
   return (
@@ -12,14 +12,7 @@ export default function CalculatorsPage() {
         </p>
       </div>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>This feature is under construction.</p>
-        </CardContent>
-      </Card>
+      <BmiCalculator />
     </div>
   );
 }
