@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -15,8 +15,12 @@ const calculatorCategories = [
   },
   {
     name: 'Financial',
-    icon: BrainCircuit,
-    calculators: [],
+    icon: PiggyBank,
+    calculators: [
+      { name: 'EMI Calculator', href: '/calculators/financial/emi', description: 'Calculate your Equated Monthly Instalment' },
+      { name: 'Interest Calculator', href: '/calculators/financial/interest', description: 'Calculate simple and compound interest' },
+      { name: 'Discount Calculator', href: '/calculators/financial/discount', description: 'Calculate the final price after a discount' },
+    ],
   },
   {
     name: 'Math & Academic',
