@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useWebRTC } from '@/hooks/use-webrtc';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,9 +21,12 @@ export function ChatRoom({ roomId }: { roomId: string }) {
   const { toast } = useToast();
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const { peerId, connectionState, sendMessage, error } = useWebRTC(roomId, (message) => {
+
+  const handleNewMessage = useCallback((message: string) => {
     setMessages((prev) => [...prev, { id: crypto.randomUUID(), text: message, sender: 'peer' }]);
-  });
+  }, []);
+
+  const { peerId, connectionState, sendMessage, error } = useWebRTC(roomId, handleNewMessage);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const handleSend = () => {
