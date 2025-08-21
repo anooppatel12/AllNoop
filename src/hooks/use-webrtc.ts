@@ -26,13 +26,11 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
   const dataChannel = useRef<RTCDataChannel | null>(null);
   const isConnecting = useRef(false);
 
-
   const sendMessage = (message: string) => {
     if (dataChannel.current?.readyState === 'open') {
       dataChannel.current.send(message);
     }
   };
-
 
   useEffect(() => {
     const myId = `peer_${crypto.randomUUID()}`;
@@ -132,11 +130,11 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
       isConnecting.current = false;
       if (pc.current) {
         pc.current.close();
-        pc.current = null;
       }
       remove(myPeerRef);
     };
   }, [roomId, onMessage]);
+
 
   return { peerId, connectionState, sendMessage, error };
 };
