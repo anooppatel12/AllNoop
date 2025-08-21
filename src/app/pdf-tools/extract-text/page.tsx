@@ -9,7 +9,7 @@ export default function ExtractTextPage() {
           Extract Text from PDF
         </h1>
         <p className="max-w-[700px] text-muted-foreground md:text-xl">
-          Upload a text-based PDF to extract its content. Scanned documents (images) are not supported.
+          Upload a text-based PDF to extract its content. This tool does not support scanned documents (image-based PDFs with no selectable text).
         </p>
       </div>
 

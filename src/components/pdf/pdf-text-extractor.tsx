@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -10,6 +9,7 @@ import { UploadCloud, FileText, Loader2, Copy, Check } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
+import pdf from 'pdf-parse';
 
 export function PdfTextExtractor() {
   const [file, setFile] = useState<File | null>(null);
@@ -43,10 +43,21 @@ export function PdfTextExtractor() {
     setIsExtracting(true);
     setExtractedText(null);
     setError(null);
-    
-    // Placeholder for actual text extraction logic
-    setError("PDF text extraction functionality is not yet implemented.");
-    setIsExtracting(false);
+
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const data = await pdf(arrayBuffer);
+        if (data.text.trim().length > 0) {
+            setExtractedText(data.text);
+        } else {
+            setError("No text could be extracted. This might be a scanned (image-based) PDF, which is not supported by this tool.");
+        }
+    } catch (err) {
+        console.error("Error extracting text: ", err);
+        setError("An error occurred while parsing the PDF. The file may be corrupt or protected.");
+    } finally {
+        setIsExtracting(false);
+    }
   };
 
   return (

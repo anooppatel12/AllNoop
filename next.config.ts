@@ -18,6 +18,26 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // This is required to make `pdf-parse` work correctly.
+    if (!isServer) {
+        config.resolve.alias = {
+            ...config.resolve.alias,
+            'pdf-parse': false,
+        }
+    }
+    // This is required to make `pdf-parse` work correctly in a server context.
+    config.module.rules.push({
+        test: /pdf-parse\/lib\/pdf.js\/v1.10.100\/build\/pdf.js$/,
+        loader: 'string-replace-loader',
+        options: {
+            search: 'require(\'fs\')',
+            replace: '{}',
+        }
+    });
+
+    return config;
+  }
 };
 
 export default nextConfig;
