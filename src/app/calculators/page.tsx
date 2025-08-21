@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater, Bed, Activity, Baby } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater, Bed, Activity, Baby, Flame } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -27,6 +27,17 @@ const calculatorCategories = [
       { name: 'Menstrual Cycle Calculator', href: '/calculators/pregnancy/menstrual-cycle', description: 'Track your menstrual cycle' },
       { name: 'Fertility Calculator', href: '/calculators/pregnancy/fertility', description: 'Estimate your fertility window' },
     ],
+  },
+  {
+    name: 'Nutrition & Diet',
+    icon: Flame,
+    calculators: [
+        { name: 'Protein Intake Calculator', href: '/calculators/nutrition/protein-intake', description: 'Calculate your daily protein needs' },
+        { name: 'Carbohydrate Intake Calculator', href: '/calculators/nutrition/carbohydrate-intake', description: 'Calculate your daily carb needs' },
+        { name: 'Water Intake Calculator', href: '/calculators/nutrition/water-intake', description: 'Estimate your daily water needs' },
+        { name: 'Macros Calculator', href: '/calculators/nutrition/macros', description: 'Calculate your macronutrient distribution' },
+        { name: 'Calorie Burn Calculator', href: '/calculators/nutrition/calorie-burn', description: 'Estimate calories burned during exercise' },
+    ]
   },
   {
     name: 'Financial',
