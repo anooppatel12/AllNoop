@@ -44,24 +44,24 @@ export default function RootLayout({
               <Sidebar collapsible="icon" className="bg-sidebar text-sidebar-foreground">
                 <SidebarRail />
                 <SidebarHeader>
-                  <Button variant="ghost" className="flex w-full items-center justify-start gap-2 px-2 text-lg font-semibold">
-                    <Shapes className="h-6 w-6 text-primary" />
-                    <span className="font-headline">OmniTool</span>
+                  <Button variant="ghost" className="flex w-full items-center justify-center gap-2 px-2 text-lg font-semibold group-data-[collapsible=icon]:justify-center">
+                    <Shapes className="h-6 w-6 shrink-0 text-primary" />
+                    <span className="font-headline group-data-[collapsible=icon]:hidden">OmniTool</span>
                   </Button>
                 </SidebarHeader>
                 <SidebarContent>
                   <MainNav />
                 </SidebarContent>
                 <SidebarFooter className="p-4 text-sm">
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col items-center gap-2 group-data-[collapsible=icon]:items-center">
                      <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <FileQuestion className="h-4 w-4" /> About
+                      <FileQuestion className="h-4 w-4 shrink-0" /> <span className="group-data-[collapsible=icon]:hidden">About</span>
                     </Link>
                      <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <Lock className="h-4 w-4" /> Privacy Policy
+                      <Lock className="h-4 w-4 shrink-0" /> <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
                     </Link>
                      <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <Shield className="h-4 w-4" /> Terms & Conditions
+                      <Shield className="h-4 w-4 shrink-0" /> <span className="group-data-[collapsible=icon]:hidden">Terms & Conditions</span>
                     </Link>
                   </div>
                 </SidebarFooter>
