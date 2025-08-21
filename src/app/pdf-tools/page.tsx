@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { View, Combine, Split, Minimize2, FileUp, FileDown, Scissors, RotateCw, ScanText, FileImage, Stamp, ListOrdered, Layers, Move, FileMinus2, Lock, Unlock, FileText as FileTextIcon, Edit, GitCompareArrows } from 'lucide-react';
+import { View, Combine, Split, Minimize2, FileUp, FileDown, Scissors, RotateCw, ScanText, FileImage, Stamp, ListOrdered, Layers, Move, FileMinus2, Lock, Unlock, FilePenLine, Edit, GitCompareArrows } from 'lucide-react';
 
 const pdfTools = [
     {
@@ -61,6 +61,12 @@ const pdfTools = [
 ];
 
 const advancedPdfTools = [
+     {
+        name: 'Edit Metadata',
+        description: 'Change the author, title, subject, and other metadata.',
+        icon: FilePenLine,
+        href: '/pdf-tools/edit-metadata',
+    },
     {
         name: 'Compare PDFs',
         description: 'Highlight the differences between two PDF files.',
