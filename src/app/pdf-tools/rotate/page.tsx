@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PdfRotator } from '@/components/pdf/pdf-rotator';
 
 export default function RotatePdfPage() {
   return (
@@ -12,14 +12,7 @@ export default function RotatePdfPage() {
         </p>
       </div>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>This feature is under construction.</p>
-        </CardContent>
-      </Card>
+      <PdfRotator />
     </div>
   );
 }
