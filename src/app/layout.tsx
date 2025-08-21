@@ -56,7 +56,7 @@ export default function RootLayout({
                 <SidebarFooter>
                    <SidebarMenuItem>
                       <SidebarMenuButton asChild tooltip="About">
-                        <Link href="#">
+                        <Link href="/about">
                             <Info />
                             <span className="group-data-[collapsible=icon]:hidden">About</span>
                         </Link>
@@ -64,7 +64,7 @@ export default function RootLayout({
                    </SidebarMenuItem>
                    <SidebarMenuItem>
                       <SidebarMenuButton asChild tooltip="Privacy Policy">
-                        <Link href="#">
+                        <Link href="/privacy-policy">
                             <Lock />
                             <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
                         </Link>
@@ -72,7 +72,7 @@ export default function RootLayout({
                    </SidebarMenuItem>
                    <SidebarMenuItem>
                       <SidebarMenuButton asChild tooltip="Terms & Conditions">
-                        <Link href="#">
+                        <Link href="/terms-and-conditions">
                             <FileText />
                             <span className="group-data-[collapsible=icon]:hidden">Terms & Conditions</span>
                         </Link>
