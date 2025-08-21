@@ -26,6 +26,7 @@ const calculatorCategories = [
     name: 'Math & Academic',
     icon: Sigma,
     calculators: [
+      { name: 'Basic Calculator', href: '/calculators/math/basic', description: 'Perform basic arithmetic operations' },
       { name: 'Percentage Calculator', href: '/calculators/math/percentage', description: 'Calculate percentages with ease' },
       { name: 'Age Calculator', href: '/calculators/math/age', description: 'Calculate age from date of birth' },
       { name: 'Date Calculator', href: '/calculators/math/date', description: 'Calculate the difference between dates' },
