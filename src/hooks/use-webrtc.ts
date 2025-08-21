@@ -26,11 +26,11 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
   const dataChannel = useRef<RTCDataChannel | null>(null);
   const isConnecting = useRef(false);
 
-  const sendMessage = (message: string) => {
+  const sendMessage = useCallback((message: string) => {
     if (dataChannel.current?.readyState === 'open') {
       dataChannel.current.send(message);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const myId = `peer_${crypto.randomUUID()}`;
@@ -38,9 +38,10 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
     
     isConnecting.current = true;
     
-    pc.current = new RTCPeerConnection(configuration);
+    const peerConnection = new RTCPeerConnection(configuration);
+    pc.current = peerConnection;
 
-    pc.current.onconnectionstatechange = () => {
+    const handleConnectionStateChange = () => {
         if(pc.current) {
             setConnectionState(pc.current.connectionState);
              if (pc.current.connectionState === 'connected') {
@@ -50,88 +51,98 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
         }
     };
     
-     pc.current.onicecandidate = (event) => {
+    peerConnection.onconnectionstatechange = handleConnectionStateChange;
+    
+     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         const candidateRef = ref(database, `rooms/${roomId}/iceCandidates/${myId}`);
         set(candidateRef, event.candidate.toJSON());
       }
     };
 
-    pc.current.ondatachannel = (event) => {
+    peerConnection.ondatachannel = (event) => {
       dataChannel.current = event.channel;
       dataChannel.current.onmessage = (e) => onMessage(e.data);
       dataChannel.current.onopen = () => console.log('Data channel open');
       dataChannel.current.onclose = () => console.log('Data channel closed');
     };
     
+    const roomRef = ref(database, `rooms/${roomId}`);
     const peersRef = ref(database, `rooms/${roomId}/peers`);
-    onValue(peersRef, async (snapshot) => {
-        if (!isConnecting.current) return;
-        const peers = snapshot.val() || {};
-        const otherPeers = Object.keys(peers).filter(id => id !== myId);
 
-        if(otherPeers.length > 0 && pc.current) { // We are the callee
-             const otherPeerId = otherPeers[0];
-             const offer = peers[otherPeerId].offer;
+    const setupSignaling = async () => {
+        onValue(peersRef, async (snapshot) => {
+            if (!isConnecting.current) return;
+            const peers = snapshot.val() || {};
+            const otherPeers = Object.keys(peers).filter(id => id !== myId);
 
-             if(offer && pc.current.signalingState === 'stable') {
-                await pc.current.setRemoteDescription(new RTCSessionDescription(offer));
-                const answer = await pc.current.createAnswer();
-                await pc.current.setLocalDescription(answer);
-                const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
-                set(myPeerRef, { answer });
-             }
+            if(otherPeers.length > 0 && pc.current) { // We are the callee
+                const otherPeerId = otherPeers[0];
+                const offer = peers[otherPeerId].offer;
 
-             const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${otherPeerId}`);
-             onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
-                 if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
-                     pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
-                 }
-             }, { onlyOnce: true });
-
-        } else if (pc.current) { // We are the caller
-             dataChannel.current = pc.current.createDataChannel('chat');
-             dataChannel.current.onmessage = (e) => onMessage(e.data);
-             dataChannel.current.onopen = () => console.log('Data channel open');
-             dataChannel.current.onclose = () => console.log('Data channel closed');
-
-             const offer = await pc.current.createOffer();
-             await pc.current.setLocalDescription(offer);
-             const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
-             await set(myPeerRef, { offer });
-
-             onValue(peersRef, (answerSnapshot) => {
-                const updatedPeers = answerSnapshot.val() || {};
-                const otherPeerId = Object.keys(updatedPeers).find(id => id !== myId && updatedPeers[id].answer);
-                if(otherPeerId) {
-                    const answer = updatedPeers[otherPeerId].answer;
-                    if (pc.current && pc.current.signalingState !== 'stable') {
-                         pc.current.setRemoteDescription(new RTCSessionDescription(answer));
-                    }
+                if(offer && pc.current.signalingState === 'stable') {
+                    await pc.current.setRemoteDescription(new RTCSessionDescription(offer));
+                    const answer = await pc.current.createAnswer();
+                    await pc.current.setLocalDescription(answer);
+                    const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
+                    set(myPeerRef, { answer });
                 }
-             }, { onlyOnce: true });
 
-            if(otherPeers.length > 0) {
-              const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${otherPeers[0]}`);
-              onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
-                  if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
-                      pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
-                  }
-              });
+                const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${otherPeerId}`);
+                onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
+                    if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
+                        pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
+                    }
+                });
+
+            } else if (pc.current) { // We are the caller
+                dataChannel.current = pc.current.createDataChannel('chat');
+                dataChannel.current.onmessage = (e) => onMessage(e.data);
+                dataChannel.current.onopen = () => console.log('Data channel open');
+                dataChannel.current.onclose = () => console.log('Data channel closed');
+
+                const offer = await pc.current.createOffer();
+                await pc.current.setLocalDescription(offer);
+                const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
+                await set(myPeerRef, { offer });
+
+                onValue(peersRef, (answerSnapshot) => {
+                    const updatedPeers = answerSnapshot.val() || {};
+                    const otherPeerId = Object.keys(updatedPeers).find(id => id !== myId && updatedPeers[id].answer);
+                    if(otherPeerId) {
+                        const answer = updatedPeers[otherPeerId].answer;
+                        if (pc.current && pc.current.signalingState !== 'stable') {
+                            pc.current.setRemoteDescription(new RTCSessionDescription(answer));
+                        }
+                    }
+                }, { onlyOnce: true });
+
+                if(otherPeers.length > 0) {
+                    const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${otherPeers[0]}`);
+                    onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
+                        if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
+                            pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
+                        }
+                    });
+                }
             }
-        }
-    }, { onlyOnce: true });
+        }, { onlyOnce: true });
+    };
+
+    setupSignaling();
 
     const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
     onDisconnect(myPeerRef).remove();
 
-
     return () => {
       isConnecting.current = false;
       if (pc.current) {
+        pc.current.onconnectionstatechange = null;
+        pc.current.onicecandidate = null;
+        pc.current.ondatachannel = null;
         pc.current.close();
       }
-      remove(myPeerRef);
+      remove(roomRef);
     };
   }, [roomId, onMessage]);
 
