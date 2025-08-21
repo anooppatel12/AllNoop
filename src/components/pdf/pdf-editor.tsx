@@ -466,8 +466,8 @@ export function PdfEditor() {
                         <ToolButton tool="circle"><Circle/></ToolButton>
                         <ToolButton tool="line"><Minus/></ToolButton>
                         <ToolButton tool="arrow"><ArrowRight/></ToolButton>
-                        <SignatureDialog setSignature={setSignature} setCurrentTool={setCurrentTool} />
-                        <StickerDialog setSticker={setSticker} setCurrentTool={setCurrentTool}/>
+                        <SignatureDialog setSignature={setSignature} setCurrentTool={setCurrentTool} currentTool={currentTool} />
+                        <StickerDialog setSticker={setSticker} setCurrentTool={setCurrentTool} currentTool={currentTool} />
                     </div>
 
                     {(currentTool === 'text' || currentTool === 'square' || currentTool === 'circle' || currentTool === 'line' || currentTool === 'arrow') && (
@@ -560,7 +560,7 @@ export function PdfEditor() {
 }
 
 
-function SignatureDialog({ setSignature, setCurrentTool }: { setSignature: (sig: string | null) => void, setCurrentTool: (tool: EditorTool) => void }) {
+function SignatureDialog({ setSignature, setCurrentTool, currentTool }: { setSignature: (sig: string | null) => void, setCurrentTool: (tool: EditorTool) => void, currentTool: EditorTool }) {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [typedSignature, setTypedSignature] = useState('');
     const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -719,7 +719,7 @@ function SignatureDialog({ setSignature, setCurrentTool }: { setSignature: (sig:
 }
 
 
-function StickerDialog({ setSticker, setCurrentTool }: { setSticker: (sticker: string | null) => void, setCurrentTool: (tool: EditorTool) => void }) {
+function StickerDialog({ setSticker, setCurrentTool, currentTool }: { setSticker: (sticker: string | null) => void, setCurrentTool: (tool: EditorTool) => void, currentTool: EditorTool }) {
     const [dialogOpen, setDialogOpen] = useState(false);
     
     const selectSticker = (emoji: string) => {
