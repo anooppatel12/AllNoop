@@ -9,7 +9,7 @@ import { UploadCloud, FileText, Loader2, Copy, Check } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
-import type * as PdfParse from 'pdf-parse';
+import pdf from 'pdf-parse';
 
 export function PdfTextExtractor() {
   const [file, setFile] = useState<File | null>(null);
@@ -45,7 +45,6 @@ export function PdfTextExtractor() {
     setError(null);
 
     try {
-        const pdf = (await import('pdf-parse')).default as typeof PdfParse;
         const arrayBuffer = await file.arrayBuffer();
         const data = await pdf(arrayBuffer);
         if (data.text.trim().length > 0) {

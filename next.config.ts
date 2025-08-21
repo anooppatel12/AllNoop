@@ -24,15 +24,14 @@ const nextConfig: NextConfig = {
         fs: false,
       };
     }
-    // This is required to make `pdf-parse` work correctly in a server context.
+    
+    // This is required to make `pdf-parse` work correctly.
     config.module.rules.push({
-        test: /pdf-parse\/lib\/pdf.js\/v1.10.100\/build\/pdf.js$/,
-        loader: 'string-replace-loader',
-        options: {
-            search: 'require(\'fs\')',
-            replace: '{}',
-        }
+      test: /pdf-parse/,
+      use: ['null-loader'],
     });
+    
+    config.externals.push('pdf-parse');
 
     return config;
   }
