@@ -87,9 +87,9 @@ const advancedPdfTools = [
     },
     {
         name: 'Rearrange Pages',
-        description: 'Drag and drop to reorder pages in a PDF. (Coming Soon)',
+        description: 'Drag and drop to reorder pages in a PDF.',
         icon: Move,
-        href: '#',
+        href: '/pdf-tools/rearrange-pages',
     },
     {
         name: 'Delete Pages',
