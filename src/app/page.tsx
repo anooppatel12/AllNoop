@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users } from 'lucide-react';
 import Link from 'next/link';
+import { FloatingElements } from '@/components/floating-elements';
 
 const features = [
   { name: 'AI Hashtag Generator', icon: Hash, href: '/hashtag-generator' },
@@ -16,6 +17,7 @@ export default function LandingPage() {
   return (
     <div className="relative overflow-hidden bg-background">
       <div className="absolute inset-0 bg-[url(/grid.svg)] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+      <FloatingElements />
       <div className="relative z-10 flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center p-4 text-center">
         <motion.h1
           initial={{ opacity: 0, y: -50 }}
