@@ -40,7 +40,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SidebarProvider>
-            <div className="min-h-screen">
+            <div className="relative flex min-h-screen">
               <Sidebar collapsible="icon" className="bg-sidebar text-sidebar-foreground">
                 <SidebarRail />
                 <SidebarHeader>
@@ -66,11 +66,13 @@ export default function RootLayout({
                   </div>
                 </SidebarFooter>
               </Sidebar>
-              <SidebarInset className="flex flex-col">
-                <AppHeader />
-                <main className="flex-1 overflow-y-auto">
-                  {children}
-                </main>
+              <SidebarInset>
+                <div className="flex h-full flex-col">
+                  <AppHeader />
+                  <main className="flex-1 overflow-y-auto">
+                    {children}
+                  </main>
+                </div>
               </SidebarInset>
             </div>
           </SidebarProvider>
