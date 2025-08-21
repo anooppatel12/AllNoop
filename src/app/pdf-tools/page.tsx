@@ -63,9 +63,9 @@ const advancedPdfTools = [
     },
     {
         name: 'Add Watermark',
-        description: 'Add a text or image watermark to your PDF. (Coming Soon)',
+        description: 'Add a text or image watermark to your PDF.',
         icon: Stamp,
-        href: '#',
+        href: '/pdf-tools/add-watermark',
     },
     {
         name: 'Add Page Numbers',
