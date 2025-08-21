@@ -8,6 +8,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarInset,
+  SidebarRail,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { MainNav } from '@/components/main-nav';
@@ -38,7 +39,8 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SidebarProvider>
             <div className="min-h-screen">
-              <Sidebar collapsible="offcanvas" className="bg-sidebar text-sidebar-foreground">
+              <Sidebar collapsible="icon" className="bg-sidebar text-sidebar-foreground">
+                <SidebarRail />
                 <SidebarHeader>
                   <Button variant="ghost" className="flex w-full items-center justify-start gap-2 px-2 text-lg font-semibold">
                     <Shapes className="h-6 w-6 text-primary" />
