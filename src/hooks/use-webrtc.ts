@@ -21,14 +21,18 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dataChannelRef = useRef<RTCDataChannel | null>(null);
   const isCallerRef = useRef(false);
-  const myId = useRef(`peer_${crypto.randomUUID()}`);
   
-  const roomRef = ref(database, `rooms/${roomId}`);
-  const signalingRef = ref(database, `rooms/${roomId}/signaling`);
-  const iceCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${myId.current}`);
-  const otherIceCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates`);
+  // Use a ref to ensure myId is stable across renders for a single component instance
+  const myIdRef = useRef(`peer_${crypto.randomUUID()}`);
 
   useEffect(() => {
+    // Moved ref creations inside useEffect
+    const myId = myIdRef.current;
+    const roomRef = ref(database, `rooms/${roomId}`);
+    const signalingRef = ref(database, `rooms/${roomId}/signaling`);
+    const iceCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${myId}`);
+    const otherIceCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates`);
+    
     const pc = new RTCPeerConnection(configuration);
     pcRef.current = pc;
     
@@ -56,7 +60,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
       const candidates = snapshot.val();
       if (candidates) {
         Object.keys(candidates).forEach(peerId => {
-          if (peerId !== myId.current) {
+          if (peerId !== myId) {
             pcRef.current?.addIceCandidate(new RTCIceCandidate(candidates[peerId])).catch(() => {});
           }
         });
@@ -100,10 +104,13 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
         pcRef.current.close();
       }
       pcRef.current = null;
-      remove(roomRef);
+      // Only the caller should remove the room data
+      if (isCallerRef.current) {
+          remove(roomRef);
+      }
     };
     
-  }, [roomId, onMessage]); // onMessage is now stable due to useCallback
+  }, [roomId, onMessage]); // Stable dependency array
 
   const sendMessage = useCallback((message: string) => {
     if (dataChannelRef.current?.readyState === 'open') {
