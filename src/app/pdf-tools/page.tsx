@@ -57,9 +57,9 @@ const pdfTools = [
 const advancedPdfTools = [
     {
         name: 'Extract Images from PDF',
-        description: 'Extract all images from a PDF file. (Coming Soon)',
+        description: 'Extract all images from a PDF file.',
         icon: FileImage,
-        href: '#',
+        href: '/pdf-tools/extract-images',
     },
     {
         name: 'Add Watermark',
@@ -71,6 +71,12 @@ const advancedPdfTools = [
         name: 'Add Page Numbers',
         description: 'Insert page numbers into your PDF. (Coming Soon)',
         icon: ListOrdered,
+        href: '#',
+    },
+    {
+        name: 'Add Background',
+        description: 'Add a color or image background. (Coming Soon)',
+        icon: Layers,
         href: '#',
     },
     {
