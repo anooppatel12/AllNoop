@@ -99,9 +99,9 @@ const advancedPdfTools = [
     },
     {
         name: 'Unlock PDF',
-        description: 'Remove a password from a PDF. (Coming Soon)',
+        description: 'Remove a password from a PDF.',
         icon: Unlock,
-        href: '#',
+        href: '/pdf-tools/unlock',
     },
 ]
 
