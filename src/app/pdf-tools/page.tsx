@@ -93,9 +93,9 @@ const advancedPdfTools = [
     },
     {
         name: 'Protect PDF',
-        description: 'Add a password to protect your PDF. (Coming Soon)',
+        description: 'Add a password to protect your PDF.',
         icon: Lock,
-        href: '#',
+        href: '/pdf-tools/protect',
     },
     {
         name: 'Unlock PDF',
