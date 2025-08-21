@@ -6,11 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UploadCloud, FileText, Loader2, Download, Text, Move, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { UploadCloud, Loader2, Download, Text, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
+import * as pdfjs from 'pdf.js-dist';
 import { useToast } from '@/hooks/use-toast';
 
+// Required for pdf.js to work
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdf.js-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
 type TextObject = {
+  id: number;
   text: string;
   x: number;
   y: number;
@@ -24,6 +29,7 @@ export function PdfEditor() {
   const { toast } = useToast();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfDoc, setPdfDoc] = useState<PDFDocument | null>(null);
+  const [pdfjsDoc, setPdfjsDoc] = useState<pdfjs.PDFDocumentProxy | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [textToAdd, setTextToAdd] = useState<string>('Your Text');
@@ -38,14 +44,17 @@ export function PdfEditor() {
   const [zoom, setZoom] = useState<number>(1);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [objectIdCounter, setObjectIdCounter] = useState(0);
+
 
   const renderPage = useCallback(async (pageNumber: number) => {
-    if (!pdfDoc) return;
+    if (!pdfjsDoc) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-
+    
+    setIsProcessing(true);
     try {
-      const page = pdfDoc.getPage(pageNumber - 1);
+      const page = await pdfjsDoc.getPage(pageNumber);
       const viewport = page.getViewport({ scale: zoom });
 
       canvas.height = viewport.height;
@@ -53,35 +62,34 @@ export function PdfEditor() {
       const context = canvas.getContext('2d');
       if (!context) return;
       
-      const pageObjects = objects.filter(o => o.pageIndex === pageNumber - 1);
+      const renderContext = {
+        canvasContext: context,
+        viewport: viewport,
+      };
       
-      // We need to render the PDF page to a temporary canvas and then draw it to the main canvas.
-      // This is a limitation of pdf-lib's drawing capabilities. For now, let's just draw the text.
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.fillStyle = "white";
-      context.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render(renderContext).promise;
 
-
-      // For a full implementation, we'd render the PDF page here.
-      // Since that's complex, we'll just show the added objects for now.
+      // Draw added objects on top
+      const pageObjects = objects.filter(o => o.pageIndex === pageNumber - 1);
       for (const obj of pageObjects) {
           context.fillStyle = `rgb(${obj.color.r * 255}, ${obj.color.g * 255}, ${obj.color.b * 255})`;
           context.font = `${obj.size * zoom}px ${obj.font}`;
-          context.fillText(obj.text, obj.x * zoom, canvas.height - (obj.y * zoom));
+          // pdf-lib's y-origin is bottom-left, canvas is top-left.
+          context.fillText(obj.text, obj.x * zoom, viewport.height - (obj.y * zoom));
       }
-      
 
     } catch (e: any) {
         toast({variant: 'destructive', title: 'Error rendering page', description: e.message});
+    } finally {
+      setIsProcessing(false);
     }
-
-  }, [pdfDoc, objects, zoom, toast]);
+  }, [pdfjsDoc, objects, zoom, toast]);
 
   useEffect(() => {
-    if (pdfDoc) {
+    if (pdfjsDoc) {
       renderPage(currentPage);
     }
-  }, [pdfDoc, currentPage, renderPage]);
+  }, [pdfjsDoc, currentPage, renderPage, zoom, objects]);
   
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +100,9 @@ export function PdfEditor() {
       try {
         const pdfBytes = await file.arrayBuffer();
         const doc = await PDFDocument.load(pdfBytes);
+        const pdfjsDocProxy = await pdfjs.getDocument({ data: pdfBytes }).promise;
         setPdfDoc(doc);
+        setPdfjsDoc(pdfjsDocProxy);
         setNumPages(doc.getPageCount());
         setCurrentPage(1);
         setObjects([]);
@@ -110,18 +120,20 @@ export function PdfEditor() {
       
       const rect = canvas.getBoundingClientRect();
       const x = (event.clientX - rect.left) / zoom;
+      // Convert canvas y (top-to-bottom) to PDF y (bottom-to-top)
       const y = (canvas.height - (event.clientY - rect.top)) / zoom;
 
       const newTextObject: TextObject = {
+          id: objectIdCounter,
           text: textToAdd,
           x, y,
           font, size: fontSize,
           color: hexToRgb(color) || {r: 0, g: 0, b: 0},
           pageIndex: currentPage - 1
       };
-
+      
+      setObjectIdCounter(prev => prev + 1);
       setObjects(prev => [...prev, newTextObject]);
-      renderPage(currentPage);
   };
   
    const hexToRgb = (hex: string) => {
@@ -238,16 +250,16 @@ export function PdfEditor() {
             ) : (
                 <>
                  <div className="flex items-center justify-center gap-4 p-2 border-b bg-background">
-                     <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1}><ChevronLeft/></Button>
+                     <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1 || isProcessing}><ChevronLeft/></Button>
                      <span>Page {currentPage} of {numPages}</span>
-                     <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.min(numPages, p + 1))} disabled={currentPage >= numPages}><ChevronRight/></Button>
+                     <Button variant="outline" size="icon" onClick={() => setCurrentPage(p => Math.min(numPages, p + 1))} disabled={currentPage >= numPages || isProcessing}><ChevronRight/></Button>
                      <div className="w-px h-6 bg-border mx-2"></div>
-                     <Button variant="outline" size="icon" onClick={() => setZoom(z => z - 0.2)}><ZoomOut/></Button>
+                     <Button variant="outline" size="icon" onClick={() => setZoom(z => z - 0.2)} disabled={isProcessing}><ZoomOut/></Button>
                      <span>{Math.round(zoom * 100)}%</span>
-                     <Button variant="outline" size="icon" onClick={() => setZoom(z => z + 0.2)}><ZoomIn/></Button>
+                     <Button variant="outline" size="icon" onClick={() => setZoom(z => z + 0.2)} disabled={isProcessing}><ZoomIn/></Button>
                  </div>
-                 <div className="flex-1 overflow-auto p-4">
-                     <canvas ref={canvasRef} className="border shadow-md mx-auto" onClick={handleCanvasClick}></canvas>
+                 <div className="flex-1 overflow-auto p-4 flex justify-center items-start">
+                     <canvas ref={canvasRef} className="border shadow-md cursor-text" onClick={handleCanvasClick}></canvas>
                  </div>
                 </>
             )}
