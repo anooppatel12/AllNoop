@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater, Bed, Activity } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater, Bed, Activity, Baby } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -16,6 +16,16 @@ const calculatorCategories = [
       { name: 'Sleep Calculator', href: '/calculators/health/sleep', description: 'Find the best time to wake up or go to sleep' },
       { name: 'Life Expectancy Calculator', href: '/calculators/health/life-expectancy', description: 'Estimate your remaining life expectancy' },
       { name: 'Heart Rate Calculator', href: '/calculators/health/heart-rate', description: 'Calculate your target heart rate for exercise' },
+    ],
+  },
+  {
+    name: 'Pregnancy & Women’s Health',
+    icon: Baby,
+    calculators: [
+      { name: 'Pregnancy Due Date Calculator', href: '/calculators/pregnancy/due-date', description: 'Estimate your pregnancy due date' },
+      { name: 'Ovulation Calculator', href: '/calculators/pregnancy/ovulation', description: 'Estimate your most fertile days' },
+      { name: 'Menstrual Cycle Calculator', href: '/calculators/pregnancy/menstrual-cycle', description: 'Track your menstrual cycle' },
+      { name: 'Fertility Calculator', href: '/calculators/pregnancy/fertility', description: 'Estimate your fertility window' },
     ],
   },
   {
