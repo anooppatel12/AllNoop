@@ -12,6 +12,7 @@ const calculatorCategories = [
       { name: 'BMR Calculator', href: '/calculators/bmr', description: 'Calculate your Basal Metabolic Rate' },
       { name: 'Calorie Calculator', href: '/calculators/calorie', description: 'Estimate your daily calorie needs' },
       { name: 'Kidney Function (eGFR) Calculator', href: '/calculators/health/egfr', description: 'Estimate your Glomerular Filtration Rate' },
+      { name: 'Diabetes Risk Calculator', href: '/calculators/health/diabetes-risk', description: 'Assess your risk for type 2 diabetes' },
     ],
   },
   {
