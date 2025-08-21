@@ -56,6 +56,7 @@ const calculatorCategories = [
         { name: 'Molarity & Molality Calculator', href: '/calculators/chemistry/molarity', description: 'Calculate molarity and molality of solutions' },
         { name: 'Normality Calculator', href: '/calculators/chemistry/normality', description: 'Calculate the normality of a solution' },
         { name: 'Dilution Calculator', href: '/calculators/chemistry/dilution', description: 'Calculate solution dilution parameters' },
+        { name: 'pH & pOH Calculator', href: '/calculators/chemistry/ph-poh', description: 'Calculate pH, pOH, [H⁺], and [OH⁻]' },
     ],
   },
   {
