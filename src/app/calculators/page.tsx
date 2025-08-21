@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater, Bed } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -13,6 +13,7 @@ const calculatorCategories = [
       { name: 'Calorie Calculator', href: '/calculators/calorie', description: 'Estimate your daily calorie needs' },
       { name: 'Kidney Function (eGFR) Calculator', href: '/calculators/health/egfr', description: 'Estimate your Glomerular Filtration Rate' },
       { name: 'Diabetes Risk Calculator', href: '/calculators/health/diabetes-risk', description: 'Assess your risk for type 2 diabetes' },
+      { name: 'Sleep Calculator', href: '/calculators/health/sleep', description: 'Find the best time to wake up or go to sleep' },
     ],
   },
   {
