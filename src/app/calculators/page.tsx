@@ -50,6 +50,13 @@ const calculatorCategories = [
     ],
   },
   {
+    name: 'Chemistry Calculators',
+    icon: FlaskConical,
+    calculators: [
+        { name: 'Molarity & Molality Calculator', href: '/calculators/chemistry/molarity', description: 'Calculate molarity and molality of solutions' },
+    ],
+  },
+  {
     name: 'Other Useful Calculators',
     icon: Atom,
     calculators: [
