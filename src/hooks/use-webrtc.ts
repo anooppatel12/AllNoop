@@ -113,7 +113,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
       remove(roomRef);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId]);
+  }, [roomId, onMessage]);
 
   return { connectionState, sendMessage };
 };
