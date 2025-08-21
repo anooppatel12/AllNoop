@@ -56,12 +56,6 @@ const pdfTools = [
 
 const advancedPdfTools = [
     {
-        name: 'Extract Text from PDF',
-        description: 'Extract text from a text-based PDF file.',
-        icon: FileTextIcon,
-        href: '/pdf-tools/extract-text',
-    },
-    {
         name: 'Extract Images from PDF',
         description: 'Extract all images from a PDF file.',
         icon: FileImage,
@@ -93,9 +87,9 @@ const advancedPdfTools = [
     },
     {
         name: 'Delete Pages',
-        description: 'Remove specific pages from a PDF file. (Coming Soon)',
+        description: 'Remove specific pages from a PDF file.',
         icon: FileMinus2,
-        href: '#',
+        href: '/pdf-tools/delete-pages',
     },
     {
         name: 'Protect PDF',
