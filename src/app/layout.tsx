@@ -66,9 +66,9 @@ export default function RootLayout({
                   </div>
                 </SidebarFooter>
               </Sidebar>
-              <SidebarInset>
+              <SidebarInset className="flex flex-col">
                 <AppHeader />
-                <main className="h-[calc(100vh-4rem)] overflow-y-auto">
+                <main className="flex-1 overflow-y-auto">
                   {children}
                 </main>
               </SidebarInset>
