@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater, Kidney } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -11,6 +11,7 @@ const calculatorCategories = [
       { name: 'BMI Calculator', href: '/calculators/bmi', description: 'Calculate your Body Mass Index' },
       { name: 'BMR Calculator', href: '/calculators/bmr', description: 'Calculate your Basal Metabolic Rate' },
       { name: 'Calorie Calculator', href: '/calculators/calorie', description: 'Estimate your daily calorie needs' },
+      { name: 'Kidney Function (eGFR) Calculator', href: '/calculators/health/egfr', description: 'Estimate your Glomerular Filtration Rate' },
     ],
   },
   {
@@ -75,10 +76,9 @@ const calculatorCategories = [
 ];
 
 export default function CalculatorsPage() {
-  // Replace the icon for the "Other" category to reflect the new calculator
-  const otherCategory = calculatorCategories.find(c => c.name === 'Other Useful Calculators');
-  if (otherCategory) {
-    otherCategory.icon = GlassWater;
+  const healthCategory = calculatorCategories.find(c => c.name === 'Health & Fitness');
+  if (healthCategory) {
+    healthCategory.icon = Kidney;
   }
   
   return (
