@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -34,7 +34,9 @@ const calculatorCategories = [
   {
     name: 'Other Useful Calculators',
     icon: Atom,
-    calculators: [],
+    calculators: [
+        { name: 'Tip Calculator', href: '/calculators/other/tip', description: 'Calculate the tip for a bill' },
+    ],
   }
 ];
 
