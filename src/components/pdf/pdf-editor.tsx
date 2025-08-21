@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UploadCloud, Loader2, Download, Text, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Highlighter, Underline, Strikethrough } from 'lucide-react';
+import { UploadCloud, Loader2, Download, Text, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Highlighter, Underline, Strikethrough, Square, Circle, Minus, ArrowRight } from 'lucide-react';
 import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +16,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-type EditorTool = 'text' | 'highlight' | 'underline' | 'strikethrough';
+type EditorTool = 'text' | 'highlight' | 'underline' | 'strikethrough' | 'square' | 'circle' | 'line' | 'arrow';
 
 type BaseObject = {
   id: number;
@@ -35,13 +35,16 @@ type TextObject = BaseObject & {
 
 type ShapeObject = BaseObject & {
     type: 'shape';
-    shape: 'rect' | 'line';
+    shape: 'rect' | 'line' | 'square' | 'circle' | 'arrow';
     x: number;
     y: number;
     width: number;
     height: number;
     color: { r: number, g: number, b: number };
     opacity: number;
+    endX?: number;
+    endY?: number;
+    thickness?: number;
 }
 
 type EditorObject = TextObject | ShapeObject;
@@ -108,16 +111,39 @@ export function PdfEditor() {
           } else if (obj.type === 'shape') {
             context.fillStyle = `rgba(${obj.color.r * 255}, ${obj.color.g * 255}, ${obj.color.b * 255}, ${obj.opacity})`;
             context.strokeStyle = `rgba(${obj.color.r * 255}, ${obj.color.g * 255}, ${obj.color.b * 255}, ${obj.opacity})`;
-            context.lineWidth = obj.height * zoom;
-            const canvasY = viewport.height - (obj.y * zoom);
-
-            if(obj.shape === 'rect') {
+            
+            if(obj.shape === 'rect' || obj.shape === 'square') {
+                const canvasY = viewport.height - (obj.y * zoom);
                 context.fillRect(obj.x * zoom, canvasY, obj.width * zoom, obj.height * zoom);
-            } else if (obj.shape === 'line') {
+            } else if (obj.shape === 'line' || obj.shape === 'arrow') {
+                context.lineWidth = (obj.thickness || 1) * zoom;
                 context.beginPath();
-                context.moveTo(obj.x * zoom, canvasY);
-                context.lineTo((obj.x + obj.width) * zoom, canvasY);
+                context.moveTo(obj.x * zoom, viewport.height - (obj.y * zoom));
+                context.lineTo((obj.endX || 0) * zoom, viewport.height - (obj.endY || 0) * zoom);
                 context.stroke();
+
+                if(obj.shape === 'arrow' && obj.endX && obj.endY) {
+                    const angle = Math.atan2((obj.endY - obj.y), (obj.endX - obj.x));
+                    const headlen = 10;
+                    context.beginPath();
+                    context.moveTo(obj.endX * zoom, viewport.height - obj.endY * zoom);
+                    context.lineTo(
+                        (obj.endX - headlen * Math.cos(angle - Math.PI / 6)) * zoom, 
+                        viewport.height - ((obj.endY - headlen * Math.sin(angle - Math.PI / 6)) * zoom)
+                    );
+                    context.moveTo(obj.endX * zoom, viewport.height - obj.endY * zoom);
+                    context.lineTo(
+                        (obj.endX - headlen * Math.cos(angle + Math.PI / 6)) * zoom,
+                        viewport.height - ((obj.endY - headlen * Math.sin(angle + Math.PI / 6)) * zoom)
+                    );
+                    context.stroke();
+                }
+
+            } else if(obj.shape === 'circle') {
+                const radius = obj.width / 2;
+                context.beginPath();
+                context.arc((obj.x + radius) * zoom, viewport.height - ((obj.y - radius) * zoom), radius * zoom, 0, 2 * Math.PI, false);
+                context.fill();
             }
           }
       }
@@ -201,19 +227,47 @@ export function PdfEditor() {
     
     const endCoords = getCanvasCoordinates(event);
     if (!endCoords) return;
-    
-    const newShape: ShapeObject = {
+
+    let newShape: ShapeObject;
+
+    const baseShape = {
         id: objectIdCounter,
-        type: 'shape',
-        shape: currentTool === 'highlight' ? 'rect' : 'line',
+        type: 'shape' as const,
         x: Math.min(startPos.x, endCoords.x),
-        y: startPos.y, // Keep the y position from the start of the drag
+        y: Math.max(startPos.y, endCoords.y),
         width: Math.abs(endCoords.x - startPos.x),
-        height: currentTool === 'highlight' ? 14 : 1, // thickness
-        color: currentTool === 'highlight' ? { r: 1, g: 1, b: 0 } : { r: 0, g: 0, b: 0 },
-        opacity: currentTool === 'highlight' ? 0.3 : 1.0,
+        height: Math.abs(endCoords.y - startPos.y),
         pageIndex: currentPage - 1,
-    };
+    }
+    
+    switch(currentTool) {
+        case 'highlight':
+            newShape = { ...baseShape, shape: 'rect', color: { r: 1, g: 1, b: 0 }, opacity: 0.3, y: startPos.y, height: 14 };
+            break;
+        case 'underline':
+             newShape = { ...baseShape, shape: 'line', color: {r: 0, g: 0, b: 0}, opacity: 1.0, endX: endCoords.x, endY: startPos.y, thickness: 1, y: startPos.y, x: startPos.x };
+            break;
+        case 'strikethrough':
+             newShape = { ...baseShape, shape: 'line', color: {r: 0, g: 0, b: 0}, opacity: 1.0, endX: endCoords.x, endY: startPos.y, thickness: 1, y: startPos.y, x: startPos.x };
+            break;
+        case 'square':
+            const size = Math.max(baseShape.width, baseShape.height);
+            newShape = { ...baseShape, shape: 'square', width: size, height: size, color: hexToRgb(color) || {r: 0, g: 0, b: 0}, opacity: 1 };
+            break;
+        case 'circle':
+             const radius = Math.max(baseShape.width, baseShape.height);
+             newShape = { ...baseShape, shape: 'circle', width: radius, height: radius, color: hexToRgb(color) || {r: 0, g: 0, b: 0}, opacity: 1 };
+            break;
+        case 'line':
+             newShape = { ...baseShape, shape: 'line', endX: endCoords.x, endY: endCoords.y, x: startPos.x, y: startPos.y, thickness: 2, color: hexToRgb(color) || {r: 0, g: 0, b: 0}, opacity: 1.0 };
+            break;
+        case 'arrow':
+             newShape = { ...baseShape, shape: 'arrow', endX: endCoords.x, endY: endCoords.y, x: startPos.x, y: startPos.y, thickness: 2, color: hexToRgb(color) || {r: 0, g: 0, b: 0}, opacity: 1.0 };
+            break;
+        default:
+            setStartPos(null);
+            return;
+    }
     
     setObjectIdCounter(prev => prev + 1);
     setObjects(prev => [...prev, newShape]);
@@ -262,14 +316,40 @@ export function PdfEditor() {
                         color: rgb(obj.color.r, obj.color.g, obj.color.b),
                         opacity: obj.opacity
                     });
-                } else if (obj.shape === 'line') {
-                    page.drawLine({
-                        start: { x: obj.x, y: obj.y - obj.height / 2 },
-                        end: { x: obj.x + obj.width, y: obj.y - obj.height / 2 },
-                        thickness: obj.height,
+                } else if (obj.shape === 'square') {
+                    page.drawSquare({
+                        x: obj.x,
+                        y: obj.y - obj.height,
+                        size: obj.width,
                         color: rgb(obj.color.r, obj.color.g, obj.color.b),
                         opacity: obj.opacity
-                    })
+                    });
+                } else if (obj.shape === 'circle') {
+                    page.drawCircle({
+                        x: obj.x + (obj.width / 2),
+                        y: obj.y - (obj.height / 2),
+                        size: obj.width / 2,
+                        color: rgb(obj.color.r, obj.color.g, obj.color.b),
+                        opacity: obj.opacity
+                    });
+                } else if (obj.shape === 'line' || obj.shape === 'arrow') {
+                    page.drawLine({
+                        start: { x: obj.x, y: obj.y },
+                        end: { x: obj.endX!, y: obj.endY! },
+                        thickness: obj.thickness,
+                        color: rgb(obj.color.r, obj.color.g, obj.color.b),
+                        opacity: obj.opacity
+                    });
+                    if(obj.shape === 'arrow') {
+                        const angle = Math.atan2((obj.endY! - obj.y), (obj.endX! - obj.x));
+                        const headlen = 10;
+                        const p1_x = obj.endX! - headlen * Math.cos(angle - Math.PI / 6);
+                        const p1_y = obj.endY! - headlen * Math.sin(angle - Math.PI / 6);
+                        const p2_x = obj.endX! - headlen * Math.cos(angle + Math.PI / 6);
+                        const p2_y = obj.endY! - headlen * Math.sin(angle + Math.PI / 6);
+                        page.drawLine({start: {x: obj.endX!, y: obj.endY!}, end: {x: p1_x, y: p1_y}, thickness: obj.thickness, color: rgb(obj.color.r, obj.color.g, obj.color.b), opacity: obj.opacity});
+                        page.drawLine({start: {x: obj.endX!, y: obj.endY!}, end: {x: p2_x, y: p2_y}, thickness: obj.thickness, color: rgb(obj.color.r, obj.color.g, obj.color.b), opacity: obj.opacity});
+                    }
                 }
             }
         }
@@ -314,39 +394,46 @@ export function PdfEditor() {
               <>
                  <div className="space-y-4">
                     <h3 className="font-semibold text-lg border-b pb-2">Tools</h3>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <ToolButton tool="text"><Text/></ToolButton>
                         <ToolButton tool="highlight"><Highlighter/></ToolButton>
                         <ToolButton tool="underline"><Underline/></ToolButton>
                         <ToolButton tool="strikethrough"><Strikethrough/></ToolButton>
+                        <ToolButton tool="square"><Square/></ToolButton>
+                        <ToolButton tool="circle"><Circle/></ToolButton>
+                        <ToolButton tool="line"><Minus/></ToolButton>
+                        <ToolButton tool="arrow"><ArrowRight/></ToolButton>
                     </div>
 
-                    {currentTool === 'text' && (
+                    {(currentTool === 'text' || currentTool === 'square' || currentTool === 'circle' || currentTool === 'line' || currentTool === 'arrow') && (
                         <div className="p-4 border rounded-md space-y-4 animate-in fade-in-50">
-                            <div className="space-y-2">
-                                <Label htmlFor="text-input">Text</Label>
-                                <Input id="text-input" value={textToAdd} onChange={(e) => setTextToAdd(e.target.value)} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="font-select">Font</Label>
-                                <Select value={font} onValueChange={setFont}>
-                                    <SelectTrigger id="font-select"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value={StandardFonts.Helvetica}>Helvetica</SelectItem>
-                                        <SelectItem value={StandardFonts.TimesRoman}>Times New Roman</SelectItem>
-                                        <SelectItem value={StandardFonts.Courier}>Courier</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            {currentTool === 'text' ? (
+                                <>
+                                <div className="space-y-2">
+                                    <Label htmlFor="text-input">Text</Label>
+                                    <Input id="text-input" value={textToAdd} onChange={(e) => setTextToAdd(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="font-select">Font</Label>
+                                    <Select value={font} onValueChange={setFont}>
+                                        <SelectTrigger id="font-select"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value={StandardFonts.Helvetica}>Helvetica</SelectItem>
+                                            <SelectItem value={StandardFonts.TimesRoman}>Times New Roman</SelectItem>
+                                            <SelectItem value={StandardFonts.Courier}>Courier</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="font-size">Size</Label>
                                     <Input id="font-size" type="number" value={fontSize} onChange={(e) => setFontSize(parseInt(e.target.value))} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="color-picker">Color</Label>
-                                    <Input id="color-picker" type="color" value={color} onChange={(e) => setColor(e.target.value)} className="p-1"/>
-                                </div>
+                                </>
+                            ) : null}
+
+                            <div className="space-y-2">
+                                <Label htmlFor="color-picker">Color</Label>
+                                <Input id="color-picker" type="color" value={color} onChange={(e) => setColor(e.target.value)} className="p-1"/>
                             </div>
                         </div>
                     )}
