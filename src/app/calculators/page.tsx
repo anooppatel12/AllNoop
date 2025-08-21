@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -37,6 +37,7 @@ const calculatorCategories = [
       { name: 'Geometry Calculator', href: '/calculators/math/geometry', description: 'Calculate area, perimeter, etc. for shapes' },
       { name: 'GPA Calculator', href: '/calculators/math/gpa', description: 'Calculate your Grade Point Average' },
       { name: 'Unit Converter', href: '/calculators/math/unit-converter', description: 'Convert between various units' },
+      { name: 'Probability Calculator', href: '/calculators/math/probability', description: 'Calculate the probability of events' },
     ],
   },
   {
