@@ -35,7 +35,6 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
         if(pc.current) {
             setConnectionState(pc.current.connectionState);
             if (pc.current.connectionState === 'connected') {
-                // Once connected, we can clean up the signaling server data
                 const roomRef = ref(database, `rooms/${roomId}`);
                 remove(roomRef);
             }
@@ -66,7 +65,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
             const peers = snapshot.val() || {};
             const otherPeerId = Object.keys(peers).find(id => id !== myId);
 
-            if (otherPeerId) { // We are the callee
+            if (otherPeerId) {
                 const offer = peers[otherPeerId].offer;
                 if (offer && pc.current.signalingState === 'stable') {
                     await pc.current.setRemoteDescription(new RTCSessionDescription(offer));
@@ -82,7 +81,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
                         }
                     });
                 }
-            } else { // We are the caller
+            } else {
                 dataChannel.current = pc.current.createDataChannel('chat');
                 dataChannel.current.onmessage = (e) => onMessage(e.data);
 
@@ -125,7 +124,6 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
         pc.current.ondatachannel = null;
         pc.current.close();
       }
-      // General cleanup of the room reference on component unmount
       remove(roomRef);
     };
   }, [roomId, onMessage]);

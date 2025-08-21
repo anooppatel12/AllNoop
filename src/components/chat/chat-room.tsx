@@ -70,6 +70,7 @@ export function ChatRoom({ roomId }: { roomId: string }) {
     }
   }
 
+  const isConnected = connectionState === 'connected';
 
   return (
     <div className="flex h-full flex-col p-4">
@@ -107,7 +108,7 @@ export function ChatRoom({ roomId }: { roomId: string }) {
               ))}
                {messages.length === 0 && (
                 <div className="text-center text-muted-foreground">
-                    {connectionState === 'connected' 
+                    {isConnected 
                         ? 'Messages are end-to-end encrypted. Start chatting!'
                         : 'Waiting for another person to join the room.'}
                 </div>
@@ -121,10 +122,10 @@ export function ChatRoom({ roomId }: { roomId: string }) {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Type your message..."
-              disabled={connectionState !== 'connected'}
+              placeholder={isConnected ? "Type your message..." : "Waiting for connection..."}
+              disabled={!isConnected}
             />
-            <Button onClick={handleSend} disabled={connectionState !== 'connected'}>
+            <Button onClick={handleSend} disabled={!isConnected}>
               <Send className="h-4 w-4" />
             </Button>
           </div>
