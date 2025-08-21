@@ -42,6 +42,19 @@ const nextConfig: NextConfig = {
 
     return config;
   },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Permissions-Policy',
+            value: 'clipboard-write self',
+          },
+        ],
+      },
+    ];
+  },
   env: {
     NEXT_PUBLIC_ENABLE_VIDEO_DOWNLOADER: process.env.NEXT_PUBLIC_ENABLE_VIDEO_DOWNLOADER,
   }

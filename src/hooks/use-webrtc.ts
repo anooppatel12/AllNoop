@@ -46,6 +46,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
       }
     };
 
+    // This handles the case where the other peer creates the data channel
     peerConnection.ondatachannel = (event) => {
       dataChannel.current = event.channel;
       dataChannel.current.onmessage = (e) => onMessage(e.data);
@@ -61,7 +62,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
             const peers = snapshot.val() || {};
             const otherPeerId = Object.keys(peers).find(id => id !== myId);
 
-            if (otherPeerId) {
+            if (otherPeerId) { // This peer is joining
                 const offer = peers[otherPeerId].offer;
                 if (offer && pc.current.signalingState === 'stable') {
                     await pc.current.setRemoteDescription(new RTCSessionDescription(offer));
@@ -73,11 +74,12 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
                      const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${otherPeerId}`);
                      onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
                         if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
-                            pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
+                            pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val())).catch(e => console.error("Error adding ICE candidate", e));
                         }
                     });
                 }
-            } else {
+            } else { // This peer is creating the room
+                // Create data channel before creating offer
                 dataChannel.current = pc.current.createDataChannel('chat');
                 dataChannel.current.onmessage = (e) => onMessage(e.data);
 
@@ -92,12 +94,12 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
                     if (answeringPeerId) {
                         const answer = updatedPeers[answeringPeerId].answer;
                         if (pc.current && pc.current.signalingState !== 'stable') {
-                            pc.current.setRemoteDescription(new RTCSessionDescription(answer));
+                            pc.current.setRemoteDescription(new RTCSessionDescription(answer)).catch(e => console.error("Error setting remote description", e));
                         }
                         const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${answeringPeerId}`);
                         onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
                             if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
-                                pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
+                                pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val())).catch(e => console.error("Error adding ICE candidate", e));
                             }
                         });
                     }
@@ -113,17 +115,16 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
     onDisconnect(myPeerRef).remove();
     onDisconnect(myCandidatesRef).remove();
 
-    const cleanup = () => {
+    return () => {
       if (pc.current) {
         pc.current.onconnectionstatechange = null;
         pc.current.onicecandidate = null;
         pc.current.ondatachannel = null;
         pc.current.close();
+        pc.current = null;
       }
       remove(roomRef);
     }
-    
-    return cleanup;
   }, [roomId, onMessage]);
 
   return { connectionState, sendMessage };

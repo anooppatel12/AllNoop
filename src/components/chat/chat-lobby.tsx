@@ -26,7 +26,20 @@ export function ChatLobby() {
   const handleCopyToClipboard = () => {
     if (!newRoomId) return;
     const url = `${window.location.origin}/chat/${newRoomId}`;
-    navigator.clipboard.writeText(url);
+
+    // Attempt to use the modern Clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+ try {
+ navigator.clipboard.writeText(url);
+ setHasCopied(true);
+ toast({ title: "Copied to clipboard!" });
+ setTimeout(() => setHasCopied(false), 2000);
+ return;
+      } catch (err) {
+ // Fallback to execCommand if writeText fails
+ console.error("Failed to write to clipboard using Clipboard API:", err);
+      }
+    }
     setHasCopied(true);
     toast({ title: "Copied to clipboard!" });
     setTimeout(() => setHasCopied(false), 2000);
