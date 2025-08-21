@@ -19,17 +19,17 @@ const nextConfig: NextConfig = {
     ],
   },
    webpack: (config, { isServer }) => {
+    // This is the correct configuration to handle pdf-parse in the browser.
+    // It replaces the server-side version with a browser-compatible one.
+    config.resolve.alias['pdf-parse'] = require.resolve('pdf-parse/lib/pdf-parse.js');
+    
     if (!isServer) {
       config.resolve.fallback = {
         fs: false,
-        // pdf-parse uses `path` and `process`, so we provide fallbacks
         path: false,
         process: false,
       };
     }
-    
-    // This is required to make `pdf-parse` work correctly on the client.
-    config.externals.push('pdf-parse');
 
     return config;
   }
