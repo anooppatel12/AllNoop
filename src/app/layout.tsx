@@ -53,15 +53,18 @@ export default function RootLayout({
                   <MainNav />
                 </SidebarContent>
                 <SidebarFooter className="p-4 text-sm">
-                  <div className="flex flex-col items-center gap-2 group-data-[collapsible=icon]:items-center">
+                  <div className="flex flex-col items-start gap-2 group-data-[collapsible=icon]:items-center">
                      <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <FileQuestion className="h-4 w-4 shrink-0" /> <span className="group-data-[collapsible=icon]:hidden">About</span>
+                      <FileQuestion className="h-4 w-4 shrink-0" />
+                      <span className="group-data-[collapsible=icon]:hidden">About</span>
                     </Link>
                      <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <Lock className="h-4 w-4 shrink-0" /> <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
+                      <Lock className="h-4 w-4 shrink-0" />
+                      <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
                     </Link>
                      <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <Shield className="h-4 w-4 shrink-0" /> <span className="group-data-[collapsible=icon]:hidden">Terms & Conditions</span>
+                      <Shield className="h-4 w-4 shrink-0" />
+                      <span className="group-data-[collapsible=icon]:hidden">Terms & Conditions</span>
                     </Link>
                   </div>
                 </SidebarFooter>
