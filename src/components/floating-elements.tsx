@@ -21,12 +21,16 @@ export function FloatingElements() {
       {icons.map((item, index) => (
         <motion.div
           key={index}
-          className="absolute text-muted-foreground/30"
+          className="absolute text-muted-foreground/30 cursor-pointer"
           style={{ top: item.top, left: item.left }}
           animate={{
             y: ['-10px', '10px', '-10px'],
             x: ['-5px', '5px', '-5px'],
             rotate: [0, 10, -10, 0],
+          }}
+          whileHover={{ 
+            scale: 1.5,
+            color: 'hsl(var(--primary))'
           }}
           transition={{
             duration: item.duration,
