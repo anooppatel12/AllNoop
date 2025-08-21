@@ -86,8 +86,6 @@ export function PdfBackgroundAdder() {
             width,
             height,
             color: rgb(colorRgb.r, colorRgb.g, colorRgb.b),
-            // To ensure it's in the background, we need to move it down.
-            // The content stream is drawn in order. We prepend to draw it first.
             prepend: true
           });
         }
