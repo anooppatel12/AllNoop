@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PdfCompressor } from '@/components/pdf/pdf-compressor';
 
 export default function CompressPdfPage() {
   return (
@@ -12,14 +12,7 @@ export default function CompressPdfPage() {
         </p>
       </div>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>This feature is under construction.</p>
-        </CardContent>
-      </Card>
+      <PdfCompressor />
     </div>
   );
 }
