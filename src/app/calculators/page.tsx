@@ -33,6 +33,7 @@ const calculatorCategories = [
       { name: 'Square & Square Root Calculator', href: '/calculators/math/square-root', description: 'Calculate square and square root of a number' },
       { name: 'Cube & Cube Root Calculator', href: '/calculators/math/cube-root', description: 'Calculate cube and cube root of a number' },
       { name: 'Pythagorean Theorem Calculator', href: '/calculators/math/pythagorean', description: 'Calculate the missing side of a right-angled triangle' },
+      { name: 'Trigonometric Calculator', href: '/calculators/math/trigonometry', description: 'Calculate trig values for an angle' },
     ],
   },
   {
