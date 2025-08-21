@@ -18,13 +18,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    // This is required to make `pdf-parse` work correctly.
+   webpack: (config, { isServer }) => {
     if (!isServer) {
-        config.resolve.alias = {
-            ...config.resolve.alias,
-            'pdf-parse': false,
-        }
+      config.resolve.fallback = {
+        fs: false,
+      };
     }
     // This is required to make `pdf-parse` work correctly in a server context.
     config.module.rules.push({
