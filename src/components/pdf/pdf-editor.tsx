@@ -63,8 +63,8 @@ type EditorObject = TextObject | ShapeObject | ImageObject;
 
 // Sample Emojis as base64
 const emojis = {
-  '😊': 'data:image/png;base64,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',
-  '😂': 'data:image/png;base64,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',
+  '😊': 'data:image/png;base64,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',
+  '😂': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAdNSURBVHhe7Zx7cBxVFMf/W4Y/vEkgITGwhCQQ3iwh4dG2aWvSgI1B0oM0mYwkD9OmjYgHZYiU2WTTJm3apI1Q0oQGaVtOqUxa20ZISJpEaXvwHkhCQsLwgSChx49EIrw//v+p252Zvbvdnd3b2d13+qknc2b3du5+d+/cud++u0IIIYQQQgghhBBCCCGEEEIIMdG7u7ua53l1dXVi9M+87/f7cRynVCr1er1arZa7u7uo0+ko5Xz8/QOAWCzGZDIBAK1WS6fToVKpjIyMwDAMBq+wWq3RaNRqtQwODqLVanEcB4DLy0vhcDihUGhycjIBoKioiFqttry8HAAMDAxwOp0A8PT0hMfjhcfjWSwWuVxuNpsBACaTqVwup1Kp3N3dffv2DY/HAwBLS0uUSiVSqRSNRoPBYJqmDQaD2Wz+4sULlmVNTk4mk8lsNlvP84iIiIaGBhwOhyAIpqamzGazVqsVjUZbWVkhEomamhr5fH52dpZMJqurq1GoVC6XC4VCxWJxaWkJjUZTqVQ4HK6srAwOhwMAWCxWKBQaGxsB4OzsDCk9Go1Wq9W6ri8vL5PJ5NzcHFmWNTExEYlEsizL8zyCIAwNDaFpmqlpmuM4juMEQUqlUqlUoihKlmVRFIqiKEmSNE1JkhJFkSRJIQRJksbHx4PBYFpaWjzPq9VqKIrm5+fBYDC32200GuM4DoVCYRgGNpsNi8Xq9Xq1Ws3n8/V6PSzLRqNxOp0mk0mlUmk0GlmWnTt3jqLoc+fOIRQK1Wo1vV5vNBpFUVStVuM4DgQCfr//6dOn8Pl8oVCourpKrVZDoVBVVVXkcvk///wDj8cDgLq6Oni9vr+/X9d1aZqdTocsy4PBoFarNTExQaVSBYMh3wWw2WwDAwNwHKcoiiAIQRCcnp5aW1tjNBpxHFdXVxcAarWaqakpFotFIBBobGwEQVBbWxvRaPTEiRP0ej1BEERReJ6HMAxRFMdxRFFEr9cDIDk5Ga/X297eBkBHR4dcLpcgCBzHdTqdcDiMoigURRRFkSRJj8fT0NBQKBRoNJper9doNOI4rv/34eFhAoGgoaFBMBgsLS19++YNarXa7/c3Nzejo6MwGGxvbycSiQoLC8nPz2ez2SqVitFo7O3tkclkfH19/f39AYCPj48v+fPz89hsNgA4nU4URcXFxc3Nze7ubkEQRFE8OzsLAKVSqVAoVCqV0Wi0xWJ5/Pjx0dERDocDAPx+f2dnJ1mW6/V6m82mVCppNJpIJDIxMQGFQi0vL8Nxhs/na7UaTdOYTCaZTAaj0ZidnYVH46hUKprm43K5/P39EQQBkUhUq9VyuVx1dZVarRZFUVVVFQA4OztLJBJRFM3lcgDweDx4PB4Oh6uqqgJAPM+j1+u1Wi0YDMbjcZfLBYPBDAwMMBgMuVy+r68PhUKhoaEhhUIBwOfzr6ys4PP5qampqamp8vPzycrKoqKiVCqVMAwDAAQCgUwmg8EgAGZmZoRCIU9PT6FQCAClUmlpaYmPjweAhYUFSqWSy+VyOBwOh8M3H8vlclwuZ15enkwmAwD7+/vhcLhOp4MgePDgQavVKpVK+f3+iIgIoVC4cuUKoihyucw//vCDWq02Go3RaBQFQXNzcwBAUVGRy+UqFAqlUgkAhUIhlUpVKhVRFGVZHgQB0WgUmUwmkwkAYDAY+Xw+Ho/P5XKpVGpqahIOh+fn50kkkoiICO7fv4+IiLC8vAwAuru7USqVSqVCp9NhMpkiIiKcnJyQyWTi4+NxHOc3J13X12q1YDAIAGi1WiaTSaVSycrK0mq1YBg2m82lpaWuri4ymdzPz8+rqysUCoVWq4UgCEURgUAgnU6HMAwIgjAMTdPwPC+KQrVayefz4XDYz8/P19dXKBTqdDotLS3l5eUIBAJcLpfNZlOpVLIsN5vNfr8PlmW1Wg2FQkqlkgULFqxevVqoVCqRSCiKEgQBFouloKAAg8GAIAiCIMViEQCUlpYCwO/3Z2ZmWllZIRaLs7OzycvLY2VlhUKhkMnkiIgIjY2Nbty4EUCj0dTW1hKJRJqmsbGxSSaTJSUlWCwWNpsti8Xa3NwcHh6moKCAnJyc1tbWWCx2bm4OSZIkSTAY5HK5bDYbPzs7qFQqnU4Xl8s1NDQUFBQkJCRw//59Ho+npKSEy+WCy+VisVi/3391dYXNZtO0rMhM0zAMh8Ph8Gg0WpZllmWVSqVQKDAYzPnz51kslsbGhrOzM5fLBYCwsLA///zT2trKwcEhJSWF0WjEYDBwOPzl5SWRSFSr1dXV1Y6ODnRdd3Nzo1AoymQyaDQay7IsyzKZTOI4bmVlRUtLS6PRCIWi4uIiHA6nqKgoLy9Pr9fT6XSzs7MAAIBGo4lEotLSUiKRSCQSURRFo9EsLCzw+/1yuVysVkvTNJvNtr29DQCGhoawsbEBQH5+PiMjI8lkshWzQgj17D3/1hNl4aU+rAAAAABJRU5ErkJggg==',
 };
 
 export function PdfEditor() {
@@ -95,7 +95,6 @@ export function PdfEditor() {
   const [zoom, setZoom] = useState<number>(1);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const sigCanvasRef = useRef<HTMLCanvasElement>(null);
   const [objectIdCounter, setObjectIdCounter] = useState(0);
 
 
@@ -467,22 +466,8 @@ export function PdfEditor() {
                         <ToolButton tool="circle"><Circle/></ToolButton>
                         <ToolButton tool="line"><Minus/></ToolButton>
                         <ToolButton tool="arrow"><ArrowRight/></ToolButton>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant={currentTool === 'signature' ? 'default' : 'outline'} size="icon" aria-label="Signature">
-                                    <Pen/>
-                                </Button>
-                            </DialogTrigger>
-                            <SignatureDialog setSignature={setSignature} setCurrentTool={setCurrentTool} />
-                        </Dialog>
-                         <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant={currentTool === 'sticker' ? 'default' : 'outline'} size="icon" aria-label="Sticker">
-                                    <Smile/>
-                                </Button>
-                            </DialogTrigger>
-                            <StickerDialog setSticker={setSticker} setCurrentTool={setCurrentTool}/>
-                        </Dialog>
+                        <SignatureDialog setSignature={setSignature} setCurrentTool={setCurrentTool} />
+                        <StickerDialog setSticker={setSticker} setCurrentTool={setCurrentTool}/>
                     </div>
 
                     {(currentTool === 'text' || currentTool === 'square' || currentTool === 'circle' || currentTool === 'line' || currentTool === 'arrow') && (
@@ -661,68 +646,75 @@ function SignatureDialog({ setSignature, setCurrentTool }: { setSignature: (sig:
     }
 
     return (
-        <DialogContent onOpenAutoFocus={(e) => {
-            const canvas = signatureCanvasRef.current;
-            if(canvas) {
-                const ctx = canvas.getContext('2d');
-                if(ctx) {
-                    ctx.strokeStyle = '#000000';
-                    ctx.lineWidth = 2;
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+                <Button variant={currentTool === 'signature' ? 'default' : 'outline'} size="icon" aria-label="Signature">
+                    <Pen/>
+                </Button>
+            </DialogTrigger>
+            <DialogContent onOpenAutoFocus={(e) => {
+                const canvas = signatureCanvasRef.current;
+                if(canvas) {
+                    const ctx = canvas.getContext('2d');
+                    if(ctx) {
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 2;
+                    }
                 }
-            }
-        }} open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogHeader>
-                <DialogTitle>Add Signature</DialogTitle>
-            </DialogHeader>
-            <Tabs defaultValue="draw" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="draw">Draw</TabsTrigger>
-                    <TabsTrigger value="type">Type</TabsTrigger>
-                    <TabsTrigger value="upload">Upload</TabsTrigger>
-                </TabsList>
-                <TabsContent value="draw" className="mt-4">
-                    <canvas 
-                        ref={signatureCanvasRef} 
-                        width="400" 
-                        height="150" 
-                        className="border rounded-md bg-white"
-                        onMouseDown={startDrawing}
-                        onMouseMove={draw}
-                        onMouseUp={stopDrawing}
-                        onMouseOut={stopDrawing}
-                        onTouchStart={startDrawing}
-                        onTouchMove={draw}
-                        onTouchEnd={stopDrawing}
-                    />
-                    <div className="mt-4 flex justify-end gap-2">
-                        <Button variant="ghost" onClick={clearSignature}>Clear</Button>
-                        <Button onClick={() => handleSaveSignature('draw')}>Save Signature</Button>
-                    </div>
-                </TabsContent>
-                 <TabsContent value="type" className="mt-4 space-y-4">
-                     <Input 
-                        placeholder="Type your name" 
-                        value={typedSignature} 
-                        onChange={(e) => setTypedSignature(e.target.value)} 
-                        className="font-[Homemade_Apple] text-2xl h-12"
-                        style={{fontFamily: "'Homemade Apple', cursive"}}
-                     />
-                      <div className="mt-4 flex justify-end">
-                         <Button onClick={() => handleSaveSignature('type')} disabled={!typedSignature}>Save Signature</Button>
-                     </div>
-                 </TabsContent>
-                 <TabsContent value="upload" className="mt-4">
-                     <div className="rounded-lg border-2 border-dashed border-muted-foreground/50 p-8 text-center">
-                        <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                        <p className="mt-4 text-sm text-muted-foreground">Upload an image of your signature.</p>
-                        <Input id="sig-upload" type="file" className="sr-only" onChange={handleSignatureUpload} accept="image/png, image/jpeg" />
-                        <Label htmlFor="sig-upload" className="mt-4 inline-flex h-10 cursor-pointer items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-                            Browse Image
-                        </Label>
-                    </div>
-                 </TabsContent>
-            </Tabs>
-        </DialogContent>
+            }}>
+                <DialogHeader>
+                    <DialogTitle>Add Signature</DialogTitle>
+                </DialogHeader>
+                <Tabs defaultValue="draw" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="draw">Draw</TabsTrigger>
+                        <TabsTrigger value="type">Type</TabsTrigger>
+                        <TabsTrigger value="upload">Upload</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="draw" className="mt-4">
+                        <canvas 
+                            ref={signatureCanvasRef} 
+                            width="400" 
+                            height="150" 
+                            className="border rounded-md bg-white"
+                            onMouseDown={startDrawing}
+                            onMouseMove={draw}
+                            onMouseUp={stopDrawing}
+                            onMouseOut={stopDrawing}
+                            onTouchStart={startDrawing}
+                            onTouchMove={draw}
+                            onTouchEnd={stopDrawing}
+                        />
+                        <div className="mt-4 flex justify-end gap-2">
+                            <Button variant="ghost" onClick={clearSignature}>Clear</Button>
+                            <Button onClick={() => handleSaveSignature('draw')}>Save Signature</Button>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="type" className="mt-4 space-y-4">
+                        <Input 
+                            placeholder="Type your name" 
+                            value={typedSignature} 
+                            onChange={(e) => setTypedSignature(e.target.value)} 
+                            className="font-[Homemade_Apple] text-2xl h-12"
+                            style={{fontFamily: "'Homemade Apple', cursive"}}
+                        />
+                        <div className="mt-4 flex justify-end">
+                            <Button onClick={() => handleSaveSignature('type')} disabled={!typedSignature}>Save Signature</Button>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="upload" className="mt-4">
+                        <div className="rounded-lg border-2 border-dashed border-muted-foreground/50 p-8 text-center">
+                            <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                            <p className="mt-4 text-sm text-muted-foreground">Upload an image of your signature.</p>
+                            <Input id="sig-upload" type="file" className="sr-only" onChange={handleSignatureUpload} accept="image/png, image/jpeg" />
+                            <Label htmlFor="sig-upload" className="mt-4 inline-flex h-10 cursor-pointer items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+                                Browse Image
+                            </Label>
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </DialogContent>
+        </Dialog>
     );
 }
 
@@ -737,22 +729,29 @@ function StickerDialog({ setSticker, setCurrentTool }: { setSticker: (sticker: s
     };
 
     return (
-        <DialogContent open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogHeader>
-                <DialogTitle>Choose a Sticker</DialogTitle>
-            </DialogHeader>
-            <div className="grid grid-cols-4 gap-4">
-                {Object.entries(emojis).map(([text, dataUrl]) => (
-                    <Button
-                        key={text}
-                        variant="outline"
-                        className="h-20 w-20 text-4xl"
-                        onClick={() => selectSticker(dataUrl)}
-                    >
-                       <img src={dataUrl} alt={text} />
-                    </Button>
-                ))}
-            </div>
-        </DialogContent>
+         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+                <Button variant={currentTool === 'sticker' ? 'default' : 'outline'} size="icon" aria-label="Sticker">
+                    <Smile/>
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Choose a Sticker</DialogTitle>
+                </DialogHeader>
+                <div className="grid grid-cols-4 gap-4">
+                    {Object.entries(emojis).map(([text, dataUrl]) => (
+                        <Button
+                            key={text}
+                            variant="outline"
+                            className="h-20 w-20 text-4xl"
+                            onClick={() => selectSticker(dataUrl)}
+                        >
+                        <img src={dataUrl} alt={text} />
+                        </Button>
+                    ))}
+                </div>
+            </DialogContent>
+        </Dialog>
     )
 }
