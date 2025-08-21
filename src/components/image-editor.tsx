@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Trash2, Wand2, RefreshCw, Crop, Wand, Check, X, Undo2, Redo2 } from 'lucide-react';
+import { UploadCloud, Download, Trash2, Wand2, RefreshCw, Crop, Wand, Check, X, Undo2, Redo2, UserSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   removeImageBackgroundAction,
@@ -42,6 +42,7 @@ export function ImageEditor() {
   const [isCropping, setIsCropping] = useState(false);
   const [cropRect, setCropRect] = useState<{x: number, y: number, width: number, height: number} | null>(null);
   const [startCropPos, setStartCropPos] = useState<{x: number, y: number} | null>(null);
+  const [isAspectRatioLocked, setIsAspectRatioLocked] = useState(false);
   
   // Filter state
   const [currentFilter, setCurrentFilter] = useState<Filter>('none');
@@ -135,6 +136,7 @@ export function ImageEditor() {
     setIsCropping(false);
     setCropRect(null);
     setStartCropPos(null);
+    setIsAspectRatioLocked(false);
     setCurrentFilter('none');
     setHistory([]);
     setHistoryIndex(-1);
@@ -234,12 +236,25 @@ export function ImageEditor() {
       const currentX = e.clientX - rect.left;
       const currentY = e.clientY - rect.top;
       
+      let width = Math.abs(currentX - startCropPos.x);
+      let height = Math.abs(currentY - startCropPos.y);
+
+      if (isAspectRatioLocked) {
+        width = height = Math.max(width, height);
+      }
+      
       const newRect = {
         x: Math.min(startCropPos.x, currentX),
         y: Math.min(startCropPos.y, currentY),
-        width: Math.abs(currentX - startCropPos.x),
-        height: Math.abs(currentY - startCropPos.y),
+        width: width,
+        height: height,
       };
+       if(currentX < startCropPos.x) {
+        newRect.x = startCropPos.x - width;
+      }
+      if(currentY < startCropPos.y) {
+        newRect.y = startCropPos.y - height;
+      }
       
       const imgToDraw = editedImage || image;
       if(imgToDraw) {
@@ -263,14 +278,29 @@ export function ImageEditor() {
       const rect = canvas.getBoundingClientRect();
       const endX = e.clientX - rect.left;
       const endY = e.clientY - rect.top;
+
+      let width = Math.abs(endX - startCropPos.x);
+      let height = Math.abs(endY - startCropPos.y);
       
-      setCropRect({
+      if (isAspectRatioLocked) {
+        width = height = Math.max(width, height);
+      }
+      
+      const finalRect = {
         x: Math.min(startCropPos.x, endX),
         y: Math.min(startCropPos.y, endY),
-        width: Math.abs(endX - startCropPos.x),
-        height: Math.abs(endY - startCropPos.y),
-      });
+        width: width,
+        height: height,
+      };
 
+      if(endX < startCropPos.x) {
+        finalRect.x = startCropPos.x - width;
+      }
+      if(endY < startCropPos.y) {
+        finalRect.y = startCropPos.y - height;
+      }
+      
+      setCropRect(finalRect);
       setStartCropPos(null);
   };
   
@@ -312,6 +342,7 @@ export function ImageEditor() {
     setIsCropping(false);
     setCropRect(null);
     setStartCropPos(null);
+    setIsAspectRatioLocked(false);
     const imgToDraw = editedImage || image;
     if (imgToDraw) drawImage(imgToDraw, currentFilter);
   };
@@ -397,9 +428,14 @@ export function ImageEditor() {
                   </TabsContent>
                    <TabsContent value="crop" className="mt-4 p-4 border rounded-lg space-y-4">
                       {!isCropping ? (
-                        <Button onClick={() => setIsCropping(true)} className="w-full">
-                            <Crop className="mr-2 h-4 w-4"/> Start Cropping
-                        </Button>
+                        <div className="space-y-2">
+                            <Button onClick={() => { setIsCropping(true); setIsAspectRatioLocked(false); }} className="w-full">
+                                <Crop className="mr-2 h-4 w-4"/> Freeform Crop
+                            </Button>
+                            <Button onClick={() => { setIsCropping(true); setIsAspectRatioLocked(true); }} className="w-full">
+                                <UserSquare className="mr-2 h-4 w-4"/> Profile Picture (1:1)
+                            </Button>
+                        </div>
                       ) : (
                         <div className="space-y-2">
                             <p className="text-sm text-muted-foreground text-center">Draw a rectangle on the image to crop.</p>
