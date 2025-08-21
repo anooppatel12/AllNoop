@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { View, Combine, Split, Minimize2, FileUp, FileDown, Scissors, RotateCw } from 'lucide-react';
@@ -28,14 +29,14 @@ const pdfTools = [
         href: '/pdf-tools/compress',
     },
     {
-        name: 'Convert to PDF',
-        description: 'Convert Word, Excel, PowerPoint, or images to PDF.',
+        name: 'Images to PDF',
+        description: 'Convert JPG, PNG, and other images to a PDF file.',
         icon: FileUp,
         href: '/pdf-tools/convert-to-pdf',
     },
     {
         name: 'Convert from PDF',
-        description: 'Convert PDFs to Word, Excel, PowerPoint, or images.',
+        description: 'Convert PDFs to Word, Excel, or images. (Coming Soon)',
         icon: FileDown,
         href: '/pdf-tools/convert-from-pdf',
     },
