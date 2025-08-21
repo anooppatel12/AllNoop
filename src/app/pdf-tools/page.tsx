@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { View, Combine, Split, Minimize2, FileUp, FileDown, Scissors, RotateCw, ScanText, FileImage, Stamp, ListOrdered, Layers, Move, FileMinus2, Lock, Unlock, FileText as FileTextIcon } from 'lucide-react';
+import { View, Combine, Split, Minimize2, FileUp, FileDown, Scissors, RotateCw, ScanText, FileImage, Stamp, ListOrdered, Layers, Move, FileMinus2, Lock, Unlock, FileText as FileTextIcon, Edit } from 'lucide-react';
 
 const pdfTools = [
     {
@@ -9,6 +9,12 @@ const pdfTools = [
         description: 'View a PDF online without downloading it.',
         icon: View,
         href: '/pdf-tools/viewer',
+    },
+     {
+        name: 'PDF Editor',
+        description: 'Add text, shapes, signatures, and highlights to a PDF.',
+        icon: Edit,
+        href: '/pdf-tools/edit',
     },
     {
         name: 'Merge PDF',
