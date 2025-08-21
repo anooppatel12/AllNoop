@@ -10,6 +10,7 @@ import {
   Home,
   Image as ImageIcon,
   MessageSquare,
+  Users,
   Video,
 } from 'lucide-react';
 import {
@@ -24,6 +25,7 @@ const links = [
   { href: '/calculators', label: 'Calculators', icon: Calculator },
   { href: '/pdf-tools', label: 'PDF Tools', icon: FileText },
   { href: '/image-editor', label: 'Image Editor', icon: ImageIcon },
+  { href: '/chat', label: 'P2P Chat', icon: Users },
   { href: '/contact', label: 'Contact', icon: MessageSquare },
 ];
 
@@ -37,7 +39,7 @@ export function MainNav() {
         <SidebarMenuItem key={link.label}>
           <SidebarMenuButton
             asChild
-            isActive={pathname === link.href}
+            isActive={pathname.startsWith(link.href) && (link.href !== '/' || pathname === '/')}
             tooltip={link.label}
           >
             <Link href={link.href}>
