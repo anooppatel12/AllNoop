@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { getDatabase, ref, set, onValue, off, remove } from 'firebase/database';
+import { getDatabase, ref, set, onValue, off, remove, onDisconnect } from 'firebase/database';
 import { getFirebaseApp } from '@/lib/firebase';
 
 const firebaseApp = getFirebaseApp();
@@ -22,25 +22,21 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
   const dataChannelRef = useRef<RTCDataChannel | null>(null);
   const isCallerRef = useRef(false);
   
-  // Use a ref to ensure myId is stable across renders for a single component instance
-  const myIdRef = useRef(`peer_${crypto.randomUUID()}`);
-
   useEffect(() => {
-    // Moved ref creations inside useEffect
-    const myId = myIdRef.current;
+    const pc = new RTCPeerConnection(configuration);
+    pcRef.current = pc;
+    const myId = `peer_${crypto.randomUUID()}`;
+
     const roomRef = ref(database, `rooms/${roomId}`);
     const signalingRef = ref(database, `rooms/${roomId}/signaling`);
     const iceCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${myId}`);
     const otherIceCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates`);
-    
-    const pc = new RTCPeerConnection(configuration);
-    pcRef.current = pc;
-    
+
     const handleConnectionStateChange = () => {
-        if(pcRef.current) {
-            setConnectionState(pcRef.current.connectionState);
-        }
-    }
+      if (pcRef.current) {
+        setConnectionState(pcRef.current.connectionState);
+      }
+    };
     pc.addEventListener('connectionstatechange', handleConnectionStateChange);
 
     pc.onicecandidate = (event) => {
@@ -48,12 +44,14 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
         set(iceCandidatesRef, event.candidate.toJSON());
       }
     };
-    
+
     pc.ondatachannel = (event) => {
       const channel = event.channel;
       channel.onmessage = (e) => onMessage(e.data);
       dataChannelRef.current = channel;
     };
+    
+    onDisconnect(roomRef).remove();
 
     const iceListener = onValue(otherIceCandidatesRef, (snapshot) => {
       if (!pcRef.current || pcRef.current.signalingState === 'closed') return;
@@ -65,18 +63,17 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
           }
         });
       }
-    });
+    }, { onlyOnce: false });
 
     const signalingListener = onValue(signalingRef, async (snapshot) => {
       if (!pcRef.current || pcRef.current.signalingState === 'closed') return;
-      
       const signalingData = snapshot.val();
       
       if (!signalingData) { 
         isCallerRef.current = true;
-        
-        dataChannelRef.current = pc.createDataChannel('chat');
-        dataChannelRef.current.onmessage = (e) => onMessage(e.data);
+        const channel = pc.createDataChannel('chat');
+        channel.onmessage = (e) => onMessage(e.data);
+        dataChannelRef.current = channel;
         
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
@@ -93,24 +90,24 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
             await pc.setRemoteDescription(new RTCSessionDescription(signalingData));
         }
       }
-    });
-    
+    }, { onlyOnce: false });
+
     return () => {
       pc.removeEventListener('connectionstatechange', handleConnectionStateChange);
       off(signalingRef, 'value', signalingListener);
       off(otherIceCandidatesRef, 'value', iceListener);
       
+      if (isCallerRef.current) {
+          remove(roomRef);
+      }
+      
       if (pcRef.current && pcRef.current.signalingState !== 'closed') {
         pcRef.current.close();
       }
       pcRef.current = null;
-      // Only the caller should remove the room data
-      if (isCallerRef.current) {
-          remove(roomRef);
-      }
     };
     
-  }, [roomId, onMessage]); // Stable dependency array
+  }, [roomId, onMessage]);
 
   const sendMessage = useCallback((message: string) => {
     if (dataChannelRef.current?.readyState === 'open') {
