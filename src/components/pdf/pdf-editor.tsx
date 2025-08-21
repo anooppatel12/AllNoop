@@ -11,7 +11,10 @@ import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 
 // Required for pdf.js to work
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdf.js-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
 
 type TextObject = {
   id: number;
@@ -266,3 +269,5 @@ export function PdfEditor() {
     </div>
   );
 }
+
+    
