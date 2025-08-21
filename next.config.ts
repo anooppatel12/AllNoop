@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
         fs: false,
         path: false,
         process: false,
+        os: false,
       };
     }
 
