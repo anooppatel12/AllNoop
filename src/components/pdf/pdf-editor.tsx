@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UploadCloud, Loader2, Download, Text, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
-import * as pdfjs from 'pdf.js-dist';
+import * as pdfjs from 'pdfjs-dist';
 import { useToast } from '@/hooks/use-toast';
 
 // Required for pdf.js to work
