@@ -101,7 +101,7 @@ export function ChatRoom({ roomId }: { roomId: string }) {
                     className={`max-w-xs rounded-lg px-4 py-2 ${
                       msg.sender === 'me'
                         ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground'
+                        : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                     }`}
                   >
                     {msg.text}
