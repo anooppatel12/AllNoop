@@ -35,6 +35,7 @@ export function ImageEditor() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingAction, setProcessingAction] = useState<'remove' | 'replace' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [prompt, setPrompt] = useState<string>('A beautiful beach');
   
@@ -182,6 +183,7 @@ export function ImageEditor() {
       if (!imgToProcess) return;
       
       setIsProcessing(true);
+      setProcessingAction(action);
       setError(null);
       
       const canvas = document.createElement('canvas');
@@ -216,6 +218,7 @@ export function ImageEditor() {
         toast({ variant: 'destructive', title: 'Error', description: e.message });
       } finally {
         setIsProcessing(false);
+        setProcessingAction(null);
       }
   }
 
@@ -414,7 +417,7 @@ export function ImageEditor() {
                   </TabsList>
                   <TabsContent value="ai" className="mt-4 p-4 border rounded-lg space-y-4">
                      <Button onClick={() => handleAiAction('remove')} className="w-full" disabled={isProcessing}>
-                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4" />}
+                        {isProcessing && processingAction === 'remove' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Trash2 className="mr-2 h-4 w-4" />}
                         Remove Background
                     </Button>
                     <div className="space-y-2">
@@ -422,7 +425,7 @@ export function ImageEditor() {
                         <Input id="bg-prompt" placeholder="e.g. A beautiful beach" value={prompt} onChange={(e) => setPrompt(e.target.value)} disabled={isProcessing}/>
                     </div>
                     <Button onClick={() => handleAiAction('replace')} className="w-full" disabled={isProcessing}>
-                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
+                        {isProcessing && processingAction === 'replace' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
                         Replace Background
                     </Button>
                   </TabsContent>

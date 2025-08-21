@@ -35,7 +35,7 @@ const removeImageBackgroundFlow = ai.defineFlow(
         prompt: [{
             media: { url: image },
         }, {
-            text: 'remove the background of this image, the output should have a transparent background'
+            text: 'Segment the main subject from the background. Make the background transparent.'
         }],
         config: {
             responseModalities: ['TEXT', 'IMAGE'],
