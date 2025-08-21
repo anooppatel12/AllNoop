@@ -14,6 +14,7 @@ const calculatorCategories = [
       { name: 'Kidney Function (eGFR) Calculator', href: '/calculators/health/egfr', description: 'Estimate your Glomerular Filtration Rate' },
       { name: 'Diabetes Risk Calculator', href: '/calculators/health/diabetes-risk', description: 'Assess your risk for type 2 diabetes' },
       { name: 'Sleep Calculator', href: '/calculators/health/sleep', description: 'Find the best time to wake up or go to sleep' },
+      { name: 'Life Expectancy Calculator', href: '/calculators/health/life-expectancy', description: 'Estimate your remaining life expectancy' },
     ],
   },
   {
