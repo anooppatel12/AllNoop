@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { getDatabase, ref, set, onValue, off, remove, onDisconnect } from 'firebase/database';
+import { getDatabase, ref, set, onValue, off, remove } from 'firebase/database';
 import { getFirebaseApp } from '@/lib/firebase';
 
 const firebaseApp = getFirebaseApp();
@@ -32,7 +32,11 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
     const pc = new RTCPeerConnection(configuration);
     pcRef.current = pc;
     
-    const handleConnectionStateChange = () => setConnectionState(pc.connectionState);
+    const handleConnectionStateChange = () => {
+        if(pcRef.current) {
+            setConnectionState(pcRef.current.connectionState);
+        }
+    }
     pc.addEventListener('connectionstatechange', handleConnectionStateChange);
 
     pc.onicecandidate = (event) => {
@@ -41,7 +45,6 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
       }
     };
     
-    // THIS IS THE FIX: Set up the data channel handler for the callee (receiver)
     pc.ondatachannel = (event) => {
       const channel = event.channel;
       channel.onmessage = (e) => onMessage(e.data);
@@ -61,10 +64,10 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
     });
 
     const signalingListener = onValue(signalingRef, async (snapshot) => {
+      if (!pcRef.current || pcRef.current.signalingState === 'closed') return;
+      
       const signalingData = snapshot.val();
       
-      if (!pcRef.current || pcRef.current.signalingState === 'closed') return;
-
       if (!signalingData) { 
         isCallerRef.current = true;
         
@@ -93,14 +96,14 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
       off(signalingRef, 'value', signalingListener);
       off(otherIceCandidatesRef, 'value', iceListener);
       
-      if (pc.signalingState !== 'closed') {
-        pc.close();
+      if (pcRef.current && pcRef.current.signalingState !== 'closed') {
+        pcRef.current.close();
       }
       pcRef.current = null;
       remove(roomRef);
     };
     
-  }, [roomId, onMessage, otherIceCandidatesRef, roomRef, signalingRef, iceCandidatesRef]);
+  }, [roomId, onMessage]); // onMessage is now stable due to useCallback
 
   const sendMessage = useCallback((message: string) => {
     if (dataChannelRef.current?.readyState === 'open') {
