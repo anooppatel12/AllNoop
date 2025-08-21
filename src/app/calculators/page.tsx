@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -39,6 +39,7 @@ const calculatorCategories = [
       { name: 'Unit Converter', href: '/calculators/math/unit-converter', description: 'Convert between various units' },
       { name: 'Probability Calculator', href: '/calculators/math/probability', description: 'Calculate the probability of events' },
       { name: 'Permutation & Combination Calculator', href: '/calculators/math/permutation-combination', description: 'Calculate nPr and nCr' },
+      { name: 'Mean, Median, Mode Calculator', href: '/calculators/math/mean-median-mode', description: 'Calculate statistical central tendency' },
     ],
   },
   {
