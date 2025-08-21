@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -26,7 +25,7 @@ export function ChatRoom({ roomId }: { roomId: string }) {
     setMessages((prev) => [...prev, { id: crypto.randomUUID(), text: message, sender: 'peer' }]);
   }, []);
 
-  const { peerId, connectionState, sendMessage, error } = useWebRTC(roomId, handleNewMessage);
+  const { connectionState, sendMessage } = useWebRTC(roomId, handleNewMessage);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const handleSend = () => {

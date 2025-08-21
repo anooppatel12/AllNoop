@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -11,21 +10,16 @@ const database = getDatabase(firebaseApp);
 const configuration = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    // You may add TURN servers here for more robust connections
   ],
 };
 
 type ConnectionState = RTCPeerConnectionState;
 
-export const useWebRTC = (roomId: string, onMessage: (message: string) => void): { peerId: string | null; connectionState: ConnectionState, sendMessage: (message: string) => void, error: string | null } => {
-  const [peerId, setPeerId] = useState<string | null>(null);
+export const useWebRTC = (roomId: string, onMessage: (message: string) => void) => {
   const [connectionState, setConnectionState] = useState<ConnectionState>('new');
-  const [error, setError] = useState<string | null>(null);
-  
   const pc = useRef<RTCPeerConnection | null>(null);
   const dataChannel = useRef<RTCDataChannel | null>(null);
-  const isConnecting = useRef(false);
-
+  
   const sendMessage = useCallback((message: string) => {
     if (dataChannel.current?.readyState === 'open') {
       dataChannel.current.send(message);
@@ -34,17 +28,14 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
 
   useEffect(() => {
     const myId = `peer_${crypto.randomUUID()}`;
-    setPeerId(myId);
-    
-    isConnecting.current = true;
-    
     const peerConnection = new RTCPeerConnection(configuration);
     pc.current = peerConnection;
 
     const handleConnectionStateChange = () => {
         if(pc.current) {
             setConnectionState(pc.current.connectionState);
-             if (pc.current.connectionState === 'connected') {
+            if (pc.current.connectionState === 'connected') {
+                // Once connected, we can clean up the signaling server data
                 const roomRef = ref(database, `rooms/${roomId}`);
                 remove(roomRef);
             }
@@ -53,7 +44,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
     
     peerConnection.onconnectionstatechange = handleConnectionStateChange;
     
-     peerConnection.onicecandidate = (event) => {
+    peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         const candidateRef = ref(database, `rooms/${roomId}/iceCandidates/${myId}`);
         set(candidateRef, event.candidate.toJSON());
@@ -63,8 +54,6 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
     peerConnection.ondatachannel = (event) => {
       dataChannel.current = event.channel;
       dataChannel.current.onmessage = (e) => onMessage(e.data);
-      dataChannel.current.onopen = () => console.log('Data channel open');
-      dataChannel.current.onclose = () => console.log('Data channel closed');
     };
     
     const roomRef = ref(database, `rooms/${roomId}`);
@@ -72,34 +61,30 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
 
     const setupSignaling = async () => {
         onValue(peersRef, async (snapshot) => {
-            if (!isConnecting.current) return;
+            if (!pc.current) return;
+            
             const peers = snapshot.val() || {};
-            const otherPeers = Object.keys(peers).filter(id => id !== myId);
+            const otherPeerId = Object.keys(peers).find(id => id !== myId);
 
-            if(otherPeers.length > 0 && pc.current) { // We are the callee
-                const otherPeerId = otherPeers[0];
+            if (otherPeerId) { // We are the callee
                 const offer = peers[otherPeerId].offer;
-
-                if(offer && pc.current.signalingState === 'stable') {
+                if (offer && pc.current.signalingState === 'stable') {
                     await pc.current.setRemoteDescription(new RTCSessionDescription(offer));
                     const answer = await pc.current.createAnswer();
                     await pc.current.setLocalDescription(answer);
                     const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
                     set(myPeerRef, { answer });
+
+                     const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${otherPeerId}`);
+                     onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
+                        if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
+                            pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
+                        }
+                    });
                 }
-
-                const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${otherPeerId}`);
-                onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
-                    if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
-                        pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
-                    }
-                });
-
-            } else if (pc.current) { // We are the caller
+            } else { // We are the caller
                 dataChannel.current = pc.current.createDataChannel('chat');
                 dataChannel.current.onmessage = (e) => onMessage(e.data);
-                dataChannel.current.onopen = () => console.log('Data channel open');
-                dataChannel.current.onclose = () => console.log('Data channel closed');
 
                 const offer = await pc.current.createOffer();
                 await pc.current.setLocalDescription(offer);
@@ -108,23 +93,20 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
 
                 onValue(peersRef, (answerSnapshot) => {
                     const updatedPeers = answerSnapshot.val() || {};
-                    const otherPeerId = Object.keys(updatedPeers).find(id => id !== myId && updatedPeers[id].answer);
-                    if(otherPeerId) {
-                        const answer = updatedPeers[otherPeerId].answer;
+                    const answeringPeerId = Object.keys(updatedPeers).find(id => id !== myId && updatedPeers[id].answer);
+                    if (answeringPeerId) {
+                        const answer = updatedPeers[answeringPeerId].answer;
                         if (pc.current && pc.current.signalingState !== 'stable') {
                             pc.current.setRemoteDescription(new RTCSessionDescription(answer));
                         }
+                        const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${answeringPeerId}`);
+                        onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
+                            if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
+                                pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
+                            }
+                        });
                     }
                 }, { onlyOnce: true });
-
-                if(otherPeers.length > 0) {
-                    const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${otherPeers[0]}`);
-                    onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
-                        if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
-                            pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
-                        }
-                    });
-                }
             }
         }, { onlyOnce: true });
     };
@@ -132,20 +114,21 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
     setupSignaling();
 
     const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
+    const myCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${myId}`);
     onDisconnect(myPeerRef).remove();
+    onDisconnect(myCandidatesRef).remove();
 
     return () => {
-      isConnecting.current = false;
       if (pc.current) {
         pc.current.onconnectionstatechange = null;
         pc.current.onicecandidate = null;
         pc.current.ondatachannel = null;
         pc.current.close();
       }
+      // General cleanup of the room reference on component unmount
       remove(roomRef);
     };
   }, [roomId, onMessage]);
 
-
-  return { peerId, connectionState, sendMessage, error };
+  return { connectionState, sendMessage };
 };
