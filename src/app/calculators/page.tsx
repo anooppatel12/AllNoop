@@ -46,6 +46,7 @@ const calculatorCategories = [
         { name: 'Speed, Distance, Time Calculator', href: '/calculators/physics/speed-distance-time', description: 'Calculate speed, distance, or time' },
         { name: 'Force, Work, Energy, Power Calculator', href: '/calculators/physics/force-work-energy-power', description: 'Calculate force, work, energy, or power' },
         { name: 'Gravitational Force Calculator', href: '/calculators/physics/gravitational-force', description: 'Calculate the gravitational force between two objects' },
+        { name: 'Projectile Motion Calculator', href: '/calculators/physics/projectile-motion', description: 'Calculate the trajectory of a projectile' },
     ],
   },
   {
