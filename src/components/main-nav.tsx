@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -41,18 +42,16 @@ export function MainNav() {
     <SidebarMenu>
       {links.map((link) => (
         <SidebarMenuItem key={link.label}>
-          <Link href={link.href === '/hashtag-generator' ? '/' : link.href} passHref legacyBehavior>
-            <SidebarMenuButton
-              isActive={currentPath === link.href || (pathname === '/' && link.href === '/hashtag-generator')}
-              asChild
-              tooltip={link.label}
-            >
-              <a>
-                <link.icon />
-                <span>{link.label}</span>
-              </a>
-            </SidebarMenuButton>
-          </Link>
+          <SidebarMenuButton
+            asChild
+            isActive={currentPath === link.href || (pathname === '/' && link.href === '/hashtag-generator')}
+            tooltip={link.label}
+          >
+            <Link href={link.href === '/hashtag-generator' ? '/' : link.href}>
+              <link.icon />
+              <span>{link.label}</span>
+            </Link>
+          </SidebarMenuButton>
         </SidebarMenuItem>
       ))}
     </SidebarMenu>
