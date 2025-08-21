@@ -55,6 +55,7 @@ const calculatorCategories = [
     calculators: [
         { name: 'Molarity & Molality Calculator', href: '/calculators/chemistry/molarity', description: 'Calculate molarity and molality of solutions' },
         { name: 'Normality Calculator', href: '/calculators/chemistry/normality', description: 'Calculate the normality of a solution' },
+        { name: 'Dilution Calculator', href: '/calculators/chemistry/dilution', description: 'Calculate solution dilution parameters' },
     ],
   },
   {
