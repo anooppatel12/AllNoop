@@ -21,9 +21,9 @@ export function ChatRoom({ roomId }: { roomId: string }) {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const handleNewMessage = useCallback((message: string) => {
+  const handleNewMessage = (message: string) => {
     setMessages((prev) => [...prev, { id: crypto.randomUUID(), text: message, sender: 'peer' }]);
-  }, []);
+  };
 
   const { connectionState, sendMessage } = useWebRTC(roomId, handleNewMessage);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
