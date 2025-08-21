@@ -16,6 +16,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
   webpack: (config, { isServer }) => {
@@ -36,6 +42,9 @@ const nextConfig: NextConfig = {
 
     return config;
   },
+  env: {
+    NEXT_PUBLIC_ENABLE_VIDEO_DOWNLOADER: process.env.NEXT_PUBLIC_ENABLE_VIDEO_DOWNLOADER,
+  }
 };
 
 export default nextConfig;
