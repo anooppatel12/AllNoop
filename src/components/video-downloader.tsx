@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -19,35 +18,37 @@ interface DownloadResult {
     quality: string;
     url: string;
     size?: string;
+    type: 'video' | 'audio';
   }[];
 }
 
-// Mock data to simulate API response
+// Enhanced mock data to simulate a real API response with various formats.
 const mockData: { [key in Platform]: DownloadResult } = {
   youtube: {
     thumbnail: 'https://placehold.co/600x400.png',
-    title: 'Sample YouTube Video Title',
+    title: 'Sample YouTube Video: A Journey Through the Mountains',
     formats: [
-      { quality: '1080p', url: '#', size: '50 MB' },
-      { quality: '720p', url: '#', size: '35 MB' },
-      { quality: '480p', url: '#', size: '20 MB' },
-      { quality: 'MP3', url: '#', size: '5 MB' },
+      { quality: '1080p', url: '#', size: '50 MB', type: 'video' },
+      { quality: '720p', url: '#', size: '35 MB', type: 'video' },
+      { quality: '480p', url: '#', size: '20 MB', type: 'video' },
+      { quality: '360p', url: '#', size: '12 MB', type: 'video' },
+      { quality: 'MP3', url: '#', size: '5 MB', type: 'audio' },
     ],
   },
   instagram: {
     thumbnail: 'https://placehold.co/400x400.png',
-    title: 'Sample Instagram Reel',
+    title: 'Sample Instagram Reel: Summer Vibes',
     formats: [
-      { quality: '1080p', url: '#', size: '15 MB' },
-      { quality: '720p', url: '#', size: '10 MB' },
+      { quality: '1080p', url: '#', size: '15 MB', type: 'video' },
+      { quality: '720p', url: '#', size: '10 MB', type: 'video' },
     ],
   },
   facebook: {
     thumbnail: 'https://placehold.co/600x315.png',
-    title: 'Sample Facebook Video',
+    title: 'Sample Facebook Video: How to Bake a Cake',
     formats: [
-      { quality: 'HD', url: '#', size: '40 MB' },
-      { quality: 'SD', url: '#', size: '25 MB' },
+      { quality: 'HD', url: '#', size: '40 MB', type: 'video' },
+      { quality: 'SD', url: '#', size: '25 MB', type: 'video' },
     ],
   },
 };
@@ -138,7 +139,7 @@ export function VideoDownloader() {
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                         {result.formats.map((format) => (
                             <Button key={format.quality} variant="outline" asChild>
-                                <a href={format.url}>
+                                <a href={format.url} onClick={(e) => { e.preventDefault(); alert('Backend for downloading not implemented yet.'); }}>
                                     <Download className="mr-2 h-4 w-4" />
                                     <div>
                                         <p>{format.quality}</p>
