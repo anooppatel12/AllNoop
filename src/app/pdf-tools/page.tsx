@@ -59,7 +59,7 @@ const advancedPdfTools = [
         name: 'Extract Text from PDF',
         description: 'Extract text from a PDF, with OCR support. (Coming Soon)',
         icon: ScanText,
-        href: '#',
+        href: '/pdf-tools/extract-text',
     },
     {
         name: 'Extract Images from PDF',
