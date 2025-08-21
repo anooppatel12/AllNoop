@@ -66,14 +66,12 @@ export default function RootLayout({
                   </div>
                 </SidebarFooter>
               </Sidebar>
-              <SidebarInset>
-                <div className="flex h-full max-h-screen flex-col">
+              <div className="flex-1 flex flex-col h-screen">
                   <AppHeader />
                   <main className="flex-1 overflow-y-auto">
                     {children}
                   </main>
-                </div>
-              </SidebarInset>
+              </div>
             </div>
           </SidebarProvider>
           <Toaster />
