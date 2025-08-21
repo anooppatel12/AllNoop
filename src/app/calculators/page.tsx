@@ -38,6 +38,7 @@ const calculatorCategories = [
       { name: 'GPA Calculator', href: '/calculators/math/gpa', description: 'Calculate your Grade Point Average' },
       { name: 'Unit Converter', href: '/calculators/math/unit-converter', description: 'Convert between various units' },
       { name: 'Probability Calculator', href: '/calculators/math/probability', description: 'Calculate the probability of events' },
+      { name: 'Permutation & Combination Calculator', href: '/calculators/math/permutation-combination', description: 'Calculate nPr and nCr' },
     ],
   },
   {
