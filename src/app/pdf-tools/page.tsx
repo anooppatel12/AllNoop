@@ -81,9 +81,9 @@ const advancedPdfTools = [
     },
     {
         name: 'Add Background',
-        description: 'Add a color or image background. (Coming Soon)',
+        description: 'Add a color or image background.',
         icon: Layers,
-        href: '#',
+        href: '/pdf-tools/add-background',
     },
     {
         name: 'Rearrange Pages',
