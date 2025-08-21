@@ -98,8 +98,8 @@ export function ChatRoom({ roomId }: { roomId: string }) {
                   className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-xs rounded-lg px-4 py-2 text-white ${
-                      msg.sender === 'me' ? 'bg-primary' : 'bg-secondary-foreground'
+                    className={`max-w-xs rounded-lg px-4 py-2 ${
+                      msg.sender === 'me' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
                     }`}
                   >
                     {msg.text}
