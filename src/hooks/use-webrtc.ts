@@ -34,10 +34,6 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
     const handleConnectionStateChange = () => {
         if(pc.current) {
             setConnectionState(pc.current.connectionState);
-            if (pc.current.connectionState === 'connected') {
-                const roomRef = ref(database, `rooms/${roomId}`);
-                remove(roomRef);
-            }
         }
     };
     
@@ -117,7 +113,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
     onDisconnect(myPeerRef).remove();
     onDisconnect(myCandidatesRef).remove();
 
-    return () => {
+    const cleanup = () => {
       if (pc.current) {
         pc.current.onconnectionstatechange = null;
         pc.current.onicecandidate = null;
@@ -125,7 +121,9 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
         pc.current.close();
       }
       remove(roomRef);
-    };
+    }
+    
+    return cleanup;
   }, [roomId, onMessage]);
 
   return { connectionState, sendMessage };
