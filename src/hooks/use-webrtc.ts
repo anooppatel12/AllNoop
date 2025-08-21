@@ -24,6 +24,8 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
   
   const pc = useRef<RTCPeerConnection | null>(null);
   const dataChannel = useRef<RTCDataChannel | null>(null);
+  const isConnecting = useRef(false);
+
 
   const sendMessage = (message: string) => {
     if (dataChannel.current?.readyState === 'open') {
@@ -31,28 +33,12 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
     }
   };
 
-  const cleanup = useCallback(() => {
-    if (pc.current) {
-        pc.current.close();
-        pc.current = null;
-    }
-    if (peerId) {
-        const peerRef = ref(database, `rooms/${roomId}/peers/${peerId}`);
-        remove(peerRef);
-    }
-    setConnectionState('disconnected');
-  }, [roomId, peerId]);
-
 
   useEffect(() => {
     const myId = `peer_${crypto.randomUUID()}`;
     setPeerId(myId);
     
-    const roomRef = ref(database, `rooms/${roomId}`);
-    const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
-    
-    // Set up onDisconnect listener to clean up Firebase
-    onDisconnect(myPeerRef).remove();
+    isConnecting.current = true;
     
     pc.current = new RTCPeerConnection(configuration);
 
@@ -60,7 +46,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
         if(pc.current) {
             setConnectionState(pc.current.connectionState);
              if (pc.current.connectionState === 'connected') {
-                // Once connected, we can remove the entire room signaling data
+                const roomRef = ref(database, `rooms/${roomId}`);
                 remove(roomRef);
             }
         }
@@ -82,6 +68,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
     
     const peersRef = ref(database, `rooms/${roomId}/peers`);
     onValue(peersRef, async (snapshot) => {
+        if (!isConnecting.current) return;
         const peers = snapshot.val() || {};
         const otherPeers = Object.keys(peers).filter(id => id !== myId);
 
@@ -93,6 +80,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
                 await pc.current.setRemoteDescription(new RTCSessionDescription(offer));
                 const answer = await pc.current.createAnswer();
                 await pc.current.setLocalDescription(answer);
+                const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
                 set(myPeerRef, { answer });
              }
 
@@ -102,7 +90,8 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
                      pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
                  }
              }, { onlyOnce: true });
-        } else { // We are the caller
+
+        } else if (pc.current) { // We are the caller
              dataChannel.current = pc.current.createDataChannel('chat');
              dataChannel.current.onmessage = (e) => onMessage(e.data);
              dataChannel.current.onopen = () => console.log('Data channel open');
@@ -110,6 +99,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
 
              const offer = await pc.current.createOffer();
              await pc.current.setLocalDescription(offer);
+             const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
              await set(myPeerRef, { offer });
 
              onValue(peersRef, (answerSnapshot) => {
@@ -123,20 +113,30 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void):
                 }
              }, { onlyOnce: true });
 
-            const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${otherPeers[0]}`);
-             onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
-                 if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
-                     pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
-                 }
-             });
+            if(otherPeers.length > 0) {
+              const otherPeerCandidatesRef = ref(database, `rooms/${roomId}/iceCandidates/${otherPeers[0]}`);
+              onValue(otherPeerCandidatesRef, (candidateSnapshot) => {
+                  if(candidateSnapshot.exists() && pc.current?.remoteDescription) {
+                      pc.current.addIceCandidate(new RTCIceCandidate(candidateSnapshot.val()));
+                  }
+              });
+            }
         }
     }, { onlyOnce: true });
 
+    const myPeerRef = ref(database, `rooms/${roomId}/peers/${myId}`);
+    onDisconnect(myPeerRef).remove();
+
 
     return () => {
-      cleanup();
+      isConnecting.current = false;
+      if (pc.current) {
+        pc.current.close();
+        pc.current = null;
+      }
+      remove(myPeerRef);
     };
-  }, [roomId, onMessage, cleanup]);
+  }, [roomId, onMessage]);
 
   return { peerId, connectionState, sendMessage, error };
 };
