@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -16,65 +17,54 @@ interface DownloadResult {
   thumbnail: string;
   title: string;
   formats: {
-    quality: string;
-    url: string;
-    size?: string;
-    type: 'video' | 'audio';
+    qualityLabel: string;
+    itag: number;
+    container: string;
+    hasVideo: boolean;
+    hasAudio: boolean;
+    contentLength?: string;
+    url?: string;
   }[];
 }
-
-// Enhanced mock data to simulate a real API response with various formats.
-const mockData: { [key in Platform]: DownloadResult } = {
-  youtube: {
-    thumbnail: 'https://placehold.co/600x400.png',
-    title: 'Sample YouTube Video: A Journey Through the Mountains',
-    formats: [
-      { quality: '1080p', url: '#', size: '50 MB', type: 'video' },
-      { quality: '720p', url: '#', size: '35 MB', type: 'video' },
-      { quality: '480p', url: '#', size: '20 MB', type: 'video' },
-      { quality: '360p', url: '#', size: '12 MB', type: 'video' },
-      { quality: 'MP3', url: '#', size: '5 MB', type: 'audio' },
-    ],
-  },
-  instagram: {
-    thumbnail: 'https://placehold.co/400x400.png',
-    title: 'Sample Instagram Reel: Summer Vibes',
-    formats: [
-      { quality: '1080p', url: '#', size: '15 MB', type: 'video' },
-      { quality: '720p', url: '#', size: '10 MB', type: 'video' },
-    ],
-  },
-  facebook: {
-    thumbnail: 'https://placehold.co/600x315.png',
-    title: 'Sample Facebook Video: How to Bake a Cake',
-    formats: [
-      { quality: 'HD', url: '#', size: '40 MB', type: 'video' },
-      { quality: 'SD', url: '#', size: '25 MB', type: 'video' },
-    ],
-  },
-};
 
 export function VideoDownloader() {
   const [platform, setPlatform] = useState<Platform>('youtube');
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<DownloadResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleFetchVideo = () => {
+  const handleFetchVideo = async () => {
     if (!url) return;
     setIsLoading(true);
     setResult(null);
+    setError(null);
 
-    // Simulate API call
-    setTimeout(() => {
-      setResult(mockData[platform]);
+    if (platform !== 'youtube') {
+      setError('Sorry, only YouTube downloads are supported at this time.');
       setIsLoading(false);
-    }, 2000);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/download?url=${encodeURIComponent(url)}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch video information.');
+      }
+      const data = await response.json();
+      setResult(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const reset = () => {
     setUrl('');
     setResult(null);
+    setError(null);
   };
 
   const handlePlatformChange = (value: string) => {
@@ -87,6 +77,10 @@ export function VideoDownloader() {
     instagram: <Instagram className="mr-2 h-5 w-5 text-pink-500" />,
     facebook: <Facebook className="mr-2 h-5 w-5 text-blue-600" />,
   };
+  
+  const handleDownload = (itag: number, title: string, container: string) => {
+      window.location.href = `/api/download?url=${encodeURIComponent(url)}&itag=${itag}&title=${encodeURIComponent(title)}&container=${container}`;
+  }
 
   return (
     <Card className="mt-8 w-full">
@@ -94,18 +88,18 @@ export function VideoDownloader() {
           <CardHeader>
             <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="youtube">{platformIcons['youtube']} YouTube</TabsTrigger>
-                <TabsTrigger value="instagram">{platformIcons['instagram']} Instagram</TabsTrigger>
-                <TabsTrigger value="facebook">{platformIcons['facebook']} Facebook</TabsTrigger>
+                <TabsTrigger value="instagram" disabled>{platformIcons['instagram']} Instagram</TabsTrigger>
+                <TabsTrigger value="facebook" disabled>{platformIcons['facebook']} Facebook</TabsTrigger>
             </TabsList>
           </CardHeader>
           <CardContent className="space-y-6">
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Demonstration Only</AlertTitle>
-              <AlertDescription>
-                This tool is a user interface demonstration. The download functionality is not implemented and will not work. Building a real video downloader requires a complex backend service that is beyond the scope of this tool.
-              </AlertDescription>
-            </Alert>
+            {error && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
                 <Label htmlFor="video-url">Video URL</Label>
                 <div className="relative">
@@ -126,7 +120,7 @@ export function VideoDownloader() {
                   Fetching Video...
                 </>
               ) : (
-                'Fetch Video (Demo)'
+                'Fetch Video'
               )}
             </Button>
           </CardContent>
@@ -146,14 +140,20 @@ export function VideoDownloader() {
                     <p className="font-semibold">{result.title}</p>
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                         {result.formats.map((format) => (
-                            <Button key={format.quality} variant="outline" asChild>
-                                <a href={format.url} onClick={(e) => { e.preventDefault(); alert('Backend for downloading not implemented yet.'); }}>
-                                    <Download className="mr-2 h-4 w-4" />
-                                    <div>
-                                        <p>{format.quality}</p>
-                                        {format.size && <p className="text-xs text-muted-foreground">{format.size}</p>}
-                                    </div>
-                                </a>
+                             <Button 
+                                key={format.itag} 
+                                variant="outline" 
+                                onClick={() => handleDownload(format.itag, result.title, format.container)}
+                              >
+                                <Download className="mr-2 h-4 w-4" />
+                                <div>
+                                    <p>{format.qualityLabel}</p>
+                                    {format.contentLength && 
+                                        <p className="text-xs text-muted-foreground">
+                                            {(parseInt(format.contentLength) / 1024 / 1024).toFixed(2)} MB
+                                        </p>
+                                    }
+                                </div>
                             </Button>
                         ))}
                     </div>
