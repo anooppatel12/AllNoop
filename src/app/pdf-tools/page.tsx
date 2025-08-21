@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { View, Combine, Split, Minimize2, FileUp, FileDown, Scissors, RotateCw, ScanText, FileImage, Stamp, ListOrdered, Layers, Move, FileMinus2, Lock, Unlock } from 'lucide-react';
+import { View, Combine, Split, Minimize2, FileUp, FileDown, Scissors, RotateCw, ScanText, FileImage, Stamp, ListOrdered, Layers, Move, FileMinus2, Lock, Unlock, FileText as FileTextIcon } from 'lucide-react';
 
 const pdfTools = [
     {
@@ -56,6 +56,12 @@ const pdfTools = [
 
 const advancedPdfTools = [
     {
+        name: 'Extract Text from PDF',
+        description: 'Extract text from a text-based PDF file.',
+        icon: FileTextIcon,
+        href: '/pdf-tools/extract-text',
+    },
+    {
         name: 'Extract Images from PDF',
         description: 'Extract all images from a PDF file.',
         icon: FileImage,
@@ -69,9 +75,9 @@ const advancedPdfTools = [
     },
     {
         name: 'Add Page Numbers',
-        description: 'Insert page numbers into your PDF. (Coming Soon)',
+        description: 'Insert page numbers into your PDF.',
         icon: ListOrdered,
-        href: '#',
+        href: '/pdf-tools/add-page-numbers',
     },
     {
         name: 'Add Background',
