@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater, Kidney } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -77,10 +77,6 @@ const calculatorCategories = [
 ];
 
 export default function CalculatorsPage() {
-  const healthCategory = calculatorCategories.find(c => c.name === 'Health & Fitness');
-  if (healthCategory) {
-    healthCategory.icon = Kidney;
-  }
   
   return (
     <div className="container mx-auto max-w-6xl p-4 md:p-8">
