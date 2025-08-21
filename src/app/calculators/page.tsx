@@ -1,22 +1,32 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater, Bed, Activity, Baby, Flame } from 'lucide-react';
+import { HeartPulse, FlaskConical, Atom, PiggyBank, Sigma, Zap, Baby, Flame, Weight } from 'lucide-react';
 
 const calculatorCategories = [
   {
     name: 'Health & Fitness',
     icon: HeartPulse,
     calculators: [
-      { name: 'BMI Calculator', href: '/calculators/bmi', description: 'Calculate your Body Mass Index' },
-      { name: 'BMR Calculator', href: '/calculators/bmr', description: 'Calculate your Basal Metabolic Rate' },
-      { name: 'Calorie Calculator', href: '/calculators/calorie', description: 'Estimate your daily calorie needs' },
       { name: 'Kidney Function (eGFR) Calculator', href: '/calculators/health/egfr', description: 'Estimate your Glomerular Filtration Rate' },
       { name: 'Diabetes Risk Calculator', href: '/calculators/health/diabetes-risk', description: 'Assess your risk for type 2 diabetes' },
       { name: 'Sleep Calculator', href: '/calculators/health/sleep', description: 'Find the best time to wake up or go to sleep' },
       { name: 'Life Expectancy Calculator', href: '/calculators/health/life-expectancy', description: 'Estimate your remaining life expectancy' },
       { name: 'Heart Rate Calculator', href: '/calculators/health/heart-rate', description: 'Calculate your target heart rate for exercise' },
     ],
+  },
+  {
+    name: 'Body Measurement & Fitness',
+    icon: Weight,
+    calculators: [
+        { name: 'BMI Calculator', href: '/calculators/bmi', description: 'Calculate your Body Mass Index' },
+        { name: 'BMR Calculator', href: '/calculators/bmr', description: 'Calculate your Basal Metabolic Rate' },
+        { name: 'Calorie Calculator', href: '/calculators/calorie', description: 'Estimate your daily calorie needs' },
+        { name: 'Body Fat Percentage Calculator', href: '/calculators/body-fat-percentage', description: 'Estimate your body fat percentage' },
+        { name: 'Waist-to-Hip Ratio Calculator', href: '/calculators/waist-to-hip-ratio', description: 'Calculate your waist-to-hip ratio' },
+        { name: 'Ideal Weight Calculator', href: '/calculators/ideal-weight', description: 'Calculate your ideal body weight' },
+        { name: 'Lean Body Mass Calculator', href: '/calculators/lean-body-mass', description: 'Calculate your lean body mass' },
+    ]
   },
   {
     name: 'Pregnancy & Women’s Health',
