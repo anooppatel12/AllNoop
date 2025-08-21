@@ -88,44 +88,70 @@ export function VideoDownloader() {
           <CardHeader>
             <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="youtube">{platformIcons['youtube']} YouTube</TabsTrigger>
-                <TabsTrigger value="instagram" disabled>{platformIcons['instagram']} Instagram</TabsTrigger>
-                <TabsTrigger value="facebook" disabled>{platformIcons['facebook']} Facebook</TabsTrigger>
+                <TabsTrigger value="instagram">{platformIcons['instagram']} Instagram</TabsTrigger>
+                <TabsTrigger value="facebook">{platformIcons['facebook']} Facebook</TabsTrigger>
             </TabsList>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {error && (
-              <Alert variant="destructive">
+          <TabsContent value="youtube">
+            <CardContent className="space-y-6">
+                <div className="space-y-2">
+                    <Label htmlFor="video-url-yt">Video URL</Label>
+                    <div className="relative">
+                        <LinkIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                        <Input 
+                            id="video-url-yt" 
+                            placeholder="Paste a YouTube URL" 
+                            className="pl-10"
+                            value={url}
+                            onChange={(e) => setUrl(e.target.value)}
+                        />
+                    </div>
+                </div>
+                 <Button onClick={handleFetchVideo} disabled={isLoading || !url} className="w-full">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Fetching Video...
+                    </>
+                  ) : (
+                    'Fetch Video'
+                  )}
+                </Button>
+            </CardContent>
+          </TabsContent>
+          <TabsContent value="instagram">
+             <CardContent>
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Coming Soon!</AlertTitle>
+                  <AlertDescription>
+                    Instagram downloader functionality is currently under development. Please check back later.
+                  </AlertDescription>
+                </Alert>
+            </CardContent>
+          </TabsContent>
+          <TabsContent value="facebook">
+             <CardContent>
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Coming Soon!</AlertTitle>
+                  <AlertDescription>
+                    Facebook downloader functionality is currently under development. Please check back later.
+                  </AlertDescription>
+                </Alert>
+            </CardContent>
+          </TabsContent>
+        </Tabs>
+      {error && platform === 'youtube' && (
+        <CardFooter>
+            <Alert variant="destructive" className="w-full">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <div className="space-y-2">
-                <Label htmlFor="video-url">Video URL</Label>
-                <div className="relative">
-                    <LinkIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    <Input 
-                        id="video-url" 
-                        placeholder={`Paste a ${platform} URL`} 
-                        className="pl-10"
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                    />
-                </div>
-            </div>
-             <Button onClick={handleFetchVideo} disabled={isLoading || !url} className="w-full">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Fetching Video...
-                </>
-              ) : (
-                'Fetch Video'
-              )}
-            </Button>
-          </CardContent>
-        </Tabs>
-      {result && (
+            </Alert>
+        </CardFooter>
+      )}
+      {result && platform === 'youtube' && (
         <CardFooter className="flex flex-col rounded-b-lg bg-muted p-6">
             <div className="flex w-full flex-col gap-4 sm:flex-row">
                 <Image
