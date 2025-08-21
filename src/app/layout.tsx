@@ -40,7 +40,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SidebarProvider>
-            <div className="relative flex min-h-screen">
+            <div className="flex min-h-screen w-full flex-col bg-background md:flex-row">
               <Sidebar collapsible="icon" className="bg-sidebar text-sidebar-foreground">
                 <SidebarHeader>
                   <Button variant="ghost" asChild className="flex w-full items-center justify-center gap-2 px-2 text-lg font-semibold group-data-[collapsible=icon]:justify-center">
@@ -58,7 +58,7 @@ export default function RootLayout({
                       <SidebarMenuButton asChild tooltip="About">
                         <Link href="#">
                             <Info />
-                            <span>About</span>
+                            <span className="group-data-[collapsible=icon]:hidden">About</span>
                         </Link>
                       </SidebarMenuButton>
                    </SidebarMenuItem>
@@ -66,7 +66,7 @@ export default function RootLayout({
                       <SidebarMenuButton asChild tooltip="Privacy Policy">
                         <Link href="#">
                             <Lock />
-                            <span>Privacy Policy</span>
+                            <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
                         </Link>
                       </SidebarMenuButton>
                    </SidebarMenuItem>
@@ -74,13 +74,13 @@ export default function RootLayout({
                       <SidebarMenuButton asChild tooltip="Terms & Conditions">
                         <Link href="#">
                             <FileText />
-                            <span>Terms & Conditions</span>
+                            <span className="group-data-[collapsible=icon]:hidden">Terms & Conditions</span>
                         </Link>
                       </SidebarMenuButton>
                    </SidebarMenuItem>
                 </SidebarFooter>
               </Sidebar>
-               <div className="flex flex-1 flex-col h-screen">
+              <div className="flex flex-1 flex-col h-screen max-h-screen">
                   <AppHeader />
                   <main className="flex-1 overflow-y-auto">
                     {children}
