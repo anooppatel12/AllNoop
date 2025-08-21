@@ -56,12 +56,6 @@ const pdfTools = [
 
 const advancedPdfTools = [
     {
-        name: 'Extract Text from PDF',
-        description: 'Extract text from a text-based (not scanned) PDF.',
-        icon: ScanText,
-        href: '/pdf-tools/extract-text',
-    },
-    {
         name: 'Extract Images from PDF',
         description: 'Extract all images from a PDF file. (Coming Soon)',
         icon: FileImage,
