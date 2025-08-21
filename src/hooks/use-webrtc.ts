@@ -35,20 +35,19 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
     const handleConnectionStateChange = () => setConnectionState(pc.connectionState);
     pc.addEventListener('connectionstatechange', handleConnectionStateChange);
 
-    // Setup ICE handling
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         set(iceCandidatesRef, event.candidate.toJSON());
       }
     };
     
-    // Setup data channel handling for callee
+    // THIS IS THE FIX: Set up the data channel handler for the callee (receiver)
     pc.ondatachannel = (event) => {
-      dataChannelRef.current = event.channel;
-      dataChannelRef.current.onmessage = (e) => onMessage(e.data);
+      const channel = event.channel;
+      channel.onmessage = (e) => onMessage(e.data);
+      dataChannelRef.current = channel;
     };
 
-    // Listen for ICE candidates from the other peer
     const iceListener = onValue(otherIceCandidatesRef, (snapshot) => {
       if (!pcRef.current || pcRef.current.signalingState === 'closed') return;
       const candidates = snapshot.val();
@@ -61,16 +60,14 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
       }
     });
 
-    // Signaling logic
     const signalingListener = onValue(signalingRef, async (snapshot) => {
       const signalingData = snapshot.val();
       
       if (!pcRef.current || pcRef.current.signalingState === 'closed') return;
 
-      if (!signalingData) { // This peer is the first one (caller)
+      if (!signalingData) { 
         isCallerRef.current = true;
         
-        // Create data channel for caller
         dataChannelRef.current = pc.createDataChannel('chat');
         dataChannelRef.current.onmessage = (e) => onMessage(e.data);
         
@@ -78,7 +75,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
         await pc.setLocalDescription(offer);
         await set(signalingRef, { type: 'offer', sdp: offer.sdp });
       
-      } else if (signalingData.type === 'offer' && !isCallerRef.current) { // This peer is the second one (callee)
+      } else if (signalingData.type === 'offer' && !isCallerRef.current) { 
         await pc.setRemoteDescription(new RTCSessionDescription(signalingData));
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
@@ -91,7 +88,6 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
       }
     });
     
-    // Cleanup on component unmount
     return () => {
       pc.removeEventListener('connectionstatechange', handleConnectionStateChange);
       off(signalingRef, 'value', signalingListener);
@@ -104,9 +100,7 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
       remove(roomRef);
     };
     
-  // onMessage is wrapped in useCallback in the parent component
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId, onMessage]);
+  }, [roomId, onMessage, otherIceCandidatesRef, roomRef, signalingRef, iceCandidatesRef]);
 
   const sendMessage = useCallback((message: string) => {
     if (dataChannelRef.current?.readyState === 'open') {
