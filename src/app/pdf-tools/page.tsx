@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { View, Combine, Split, Minimize2, FileUp, FileDown, Scissors, RotateCw } from 'lucide-react';
+import { View, Combine, Split, Minimize2, FileUp, FileDown, Scissors, RotateCw, ScanText, FileImage, Stamp, ListOrdered, Layers, Move, FileMinus2, Lock, Unlock } from 'lucide-react';
 
 const pdfTools = [
     {
@@ -54,6 +54,57 @@ const pdfTools = [
     },
 ];
 
+const advancedPdfTools = [
+    {
+        name: 'Extract Text from PDF',
+        description: 'Extract text from a PDF, with OCR support. (Coming Soon)',
+        icon: ScanText,
+        href: '#',
+    },
+    {
+        name: 'Extract Images from PDF',
+        description: 'Extract all images from a PDF file. (Coming Soon)',
+        icon: FileImage,
+        href: '#',
+    },
+    {
+        name: 'Add Watermark',
+        description: 'Add a text or image watermark to your PDF. (Coming Soon)',
+        icon: Stamp,
+        href: '#',
+    },
+    {
+        name: 'Add Page Numbers',
+        description: 'Insert page numbers into your PDF. (Coming Soon)',
+        icon: ListOrdered,
+        href: '#',
+    },
+    {
+        name: 'Rearrange Pages',
+        description: 'Drag and drop to reorder pages in a PDF. (Coming Soon)',
+        icon: Move,
+        href: '#',
+    },
+    {
+        name: 'Delete Pages',
+        description: 'Remove specific pages from a PDF file. (Coming Soon)',
+        icon: FileMinus2,
+        href: '#',
+    },
+    {
+        name: 'Protect PDF',
+        description: 'Add a password to protect your PDF. (Coming Soon)',
+        icon: Lock,
+        href: '#',
+    },
+    {
+        name: 'Unlock PDF',
+        description: 'Remove a password from a PDF. (Coming Soon)',
+        icon: Unlock,
+        href: '#',
+    },
+]
+
 export default function PdfToolsPage() {
   return (
     <div className="container mx-auto max-w-6xl p-4 md:p-8">
@@ -67,8 +118,27 @@ export default function PdfToolsPage() {
       </div>
 
        <div className="mt-12">
+            <h2 className="font-headline text-2xl font-bold">Basic Tools</h2>
             <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {pdfTools.map((tool) => (
+                <Link href={tool.href} key={tool.name} className="group">
+                <Card className="h-full transition-all group-hover:border-primary group-hover:shadow-lg">
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <tool.icon className="h-8 w-8 text-primary" />
+                        <div>
+                            <CardTitle>{tool.name}</CardTitle>
+                            <CardDescription className="mt-1">{tool.description}</CardDescription>
+                        </div>
+                    </CardHeader>
+                </Card>
+                </Link>
+            ))}
+            </div>
+      </div>
+       <div className="mt-12">
+            <h2 className="font-headline text-2xl font-bold">Advanced Tools</h2>
+            <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {advancedPdfTools.map((tool) => (
                 <Link href={tool.href} key={tool.name} className="group">
                 <Card className="h-full transition-all group-hover:border-primary group-hover:shadow-lg">
                     <CardHeader className="flex flex-row items-center gap-4">
