@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Trash2, Wand2, RefreshCw, Crop, Wand, Check, X } from 'lucide-react';
+import { UploadCloud, Download, Trash2, Wand2, RefreshCw, Crop, Wand, Check, X, Undo2, Redo2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   removeImageBackgroundAction,
@@ -17,13 +17,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { cn } from '@/lib/utils';
 
 type Tool = 'ai' | 'crop' | 'filters';
-type Filter = 'none' | 'grayscale' | 'sepia' | 'invert';
+type Filter = 'none' | 'grayscale' | 'sepia' | 'invert' | 'noisy' | 'stripe';
+type EditHistory = {
+    image: HTMLImageElement;
+    filter: Filter;
+};
 
 export function ImageEditor() {
   const { toast } = useToast();
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [editedImage, setEditedImage] = useState<HTMLImageElement | null>(null);
-  const [activeImage, setActiveImage] = useState<'original' | 'edited'>('original');
+  
+  const [history, setHistory] = useState<EditHistory[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+
   const [currentTool, setCurrentTool] = useState<Tool>('ai');
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,29 +45,74 @@ export function ImageEditor() {
   
   // Filter state
   const [currentFilter, setCurrentFilter] = useState<Filter>('none');
-
+  
+  const updateHistory = (newImage: HTMLImageElement, newFilter: Filter = 'none') => {
+      const newHistory = history.slice(0, historyIndex + 1);
+      setHistory([...newHistory, { image: newImage, filter: newFilter }]);
+      setHistoryIndex(newHistory.length);
+  };
+  
+  const undo = () => {
+      if (historyIndex > 0) {
+          setHistoryIndex(prev => prev - 1);
+      }
+  };
+  
+  const redo = () => {
+      if (historyIndex < history.length - 1) {
+          setHistoryIndex(prev => prev + 1);
+      }
+  };
+  
+  useEffect(() => {
+      if (historyIndex >= 0 && history[historyIndex]) {
+          const { image: stateImage, filter: stateFilter } = history[historyIndex];
+          setEditedImage(stateImage);
+          setCurrentFilter(stateFilter);
+      } else if (image) {
+          setEditedImage(image);
+          setCurrentFilter('none');
+      }
+  }, [historyIndex, history, image]);
 
   const drawImage = useCallback((img: HTMLImageElement, filter: Filter = 'none') => {
     const canvas = canvasRef.current;
     if (!canvas || !img) return;
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d', { willReadFrequently: true });
     if (!context) return;
     
     canvas.width = img.width;
     canvas.height = img.height;
     
-    if (filter !== 'none') {
+    context.filter = 'none';
+    if (['grayscale', 'sepia', 'invert'].includes(filter)) {
         context.filter = `${filter}(1)`;
-    } else {
-        context.filter = 'none';
     }
     
     context.drawImage(img, 0, 0);
     context.filter = 'none'; // Reset filter after drawing
+
+    if(filter === 'noisy') {
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const noise = (Math.random() - 0.5) * 50;
+            data[i] += noise;
+            data[i + 1] += noise;
+            data[i + 2] += noise;
+        }
+        context.putImageData(imageData, 0, 0);
+    } else if (filter === 'stripe') {
+        for (let i = 0; i < canvas.height; i += 10) {
+            context.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            context.fillRect(0, i, canvas.width, 5);
+        }
+    }
+
   }, []);
 
   useEffect(() => {
-    const imgToDraw = activeImage === 'edited' && editedImage ? editedImage : image;
+    const imgToDraw = editedImage || image;
     if (imgToDraw) {
       drawImage(imgToDraw, currentFilter);
     } else {
@@ -71,12 +123,11 @@ export function ImageEditor() {
         context.clearRect(0, 0, canvas.width, canvas.height);
       }
     }
-  }, [image, editedImage, activeImage, currentFilter, drawImage]);
+  }, [image, editedImage, currentFilter, drawImage]);
 
   const resetAll = () => {
     setImage(null);
     setEditedImage(null);
-    setActiveImage('original');
     setIsProcessing(false);
     setError(null);
     setPrompt('A beautiful beach');
@@ -85,6 +136,8 @@ export function ImageEditor() {
     setCropRect(null);
     setStartCropPos(null);
     setCurrentFilter('none');
+    setHistory([]);
+    setHistoryIndex(-1);
   }
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +151,11 @@ export function ImageEditor() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
-        img.onload = () => setImage(img);
+        img.onload = () => {
+            setImage(img);
+            setEditedImage(img);
+            updateHistory(img);
+        };
         img.onerror = () => toast({ variant: 'destructive', title: 'Error', description: 'Could not load the image file.' });
         if (e.target?.result) {
           img.src = e.target.result as string;
@@ -119,14 +176,18 @@ export function ImageEditor() {
   };
 
   const handleAiAction = async (action: 'remove' | 'replace') => {
-      const canvas = canvasRef.current;
-      const imgToProcess = (activeImage === 'edited' && editedImage) ? editedImage : image;
-      if (!imgToProcess || !canvas) return;
+      const imgToProcess = editedImage || image;
+      if (!imgToProcess) return;
       
       setIsProcessing(true);
       setError(null);
       
-      // We need to get the image data from the current canvas state to preserve any edits
+      const canvas = document.createElement('canvas');
+      canvas.width = imgToProcess.width;
+      canvas.height = imgToProcess.height;
+      const ctx = canvas.getContext('2d');
+      if(!ctx) return;
+      ctx.drawImage(imgToProcess, 0, 0);
       const imageDataUrl = canvas.toDataURL();
 
       try {
@@ -144,8 +205,7 @@ export function ImageEditor() {
           const img = new Image();
           img.onload = () => {
             setEditedImage(img);
-            setActiveImage('edited');
-            setCurrentFilter('none'); // Reset filter after AI action
+            updateHistory(img);
           };
           img.src = result.image;
         }
@@ -181,8 +241,7 @@ export function ImageEditor() {
         height: Math.abs(currentY - startCropPos.y),
       };
       
-      // Redraw image and then the crop rectangle
-      const imgToDraw = activeImage === 'edited' && editedImage ? editedImage : image;
+      const imgToDraw = editedImage || image;
       if(imgToDraw) {
         const ctx = canvas.getContext('2d');
         if(ctx) {
@@ -218,22 +277,31 @@ export function ImageEditor() {
   const applyCrop = () => {
     if (!cropRect) return;
     const canvas = canvasRef.current;
-    const imgToCrop = (activeImage === 'edited' && editedImage) ? editedImage : image;
+    const imgToCrop = editedImage || image;
     if (!canvas || !imgToCrop) return;
     
+    // Scale cropRect from canvas size to image size
+    const scaleX = imgToCrop.width / canvas.width;
+    const scaleY = imgToCrop.height / canvas.height;
+    
+    const sourceX = cropRect.x * scaleX;
+    const sourceY = cropRect.y * scaleY;
+    const sourceWidth = cropRect.width * scaleX;
+    const sourceHeight = cropRect.height * scaleY;
+
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
     if (!tempCtx) return;
     
-    tempCanvas.width = cropRect.width;
-    tempCanvas.height = cropRect.height;
+    tempCanvas.width = sourceWidth;
+    tempCanvas.height = sourceHeight;
     
-    tempCtx.drawImage(imgToCrop, cropRect.x, cropRect.y, cropRect.width, cropRect.height, 0, 0, cropRect.width, cropRect.height);
+    tempCtx.drawImage(imgToCrop, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
     
     const newImage = new Image();
     newImage.onload = () => {
         setEditedImage(newImage);
-        setActiveImage('edited');
+        updateHistory(newImage);
     }
     newImage.src = tempCanvas.toDataURL();
     
@@ -244,34 +312,53 @@ export function ImageEditor() {
     setIsCropping(false);
     setCropRect(null);
     setStartCropPos(null);
-    // Redraw to remove crop rectangle overlay
-    const imgToDraw = activeImage === 'edited' && editedImage ? editedImage : image;
+    const imgToDraw = editedImage || image;
     if (imgToDraw) drawImage(imgToDraw, currentFilter);
   };
   
-  // Filter Handler
   const applyFilter = (filter: Filter) => {
-    setCurrentFilter(filter);
     const canvas = canvasRef.current;
-    const imgToFilter = (activeImage === 'edited' && editedImage) ? editedImage : image;
+    const imgToFilter = image; // Always apply filters to the original image
     if (!canvas || !imgToFilter) return;
 
     const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
+    const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
     if(!tempCtx) return;
 
     tempCanvas.width = imgToFilter.width;
     tempCanvas.height = imgToFilter.height;
-    tempCtx.filter = `${filter}(1)`;
+    
+    tempCtx.filter = 'none';
+    if (['grayscale', 'sepia', 'invert'].includes(filter)) {
+      tempCtx.filter = `${filter}(1)`;
+    }
     tempCtx.drawImage(imgToFilter, 0, 0);
+    tempCtx.filter = 'none';
 
+    if (filter === 'noisy') {
+        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const noise = (Math.random() - 0.5) * 50;
+            data[i] += noise;
+            data[i + 1] += noise;
+            data[i + 2] += noise;
+        }
+        tempCtx.putImageData(imageData, 0, 0);
+    } else if (filter === 'stripe') {
+        for (let i = 0; i < tempCanvas.height; i += 10) {
+            tempCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            tempCtx.fillRect(0, i, tempCanvas.width, 5);
+        }
+    }
+    
     const newImage = new Image();
     newImage.onload = () => {
         setEditedImage(newImage);
-        setActiveImage('edited');
+        setCurrentFilter('none'); // The filter is baked in, so reset preview filter
+        updateHistory(newImage);
     };
     newImage.src = tempCanvas.toDataURL();
-    setCurrentFilter('none'); // Reset filter state after applying
   };
 
 
@@ -282,6 +369,12 @@ export function ImageEditor() {
         
         {image ? (
             <div className="space-y-6">
+                 <div className="p-4 border rounded-lg space-y-2">
+                    <div className="flex justify-center gap-2">
+                      <Button onClick={undo} disabled={historyIndex <= 0} variant="outline" size="icon"><Undo2 /></Button>
+                      <Button onClick={redo} disabled={historyIndex >= history.length - 1} variant="outline" size="icon"><Redo2 /></Button>
+                    </div>
+                </div>
                 <Tabs value={currentTool} onValueChange={(v) => setCurrentTool(v as Tool)} className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="ai"><Wand2 className="w-4 h-4 mr-2"/>AI Tools</TabsTrigger>
@@ -319,10 +412,12 @@ export function ImageEditor() {
                         </div>
                       )}
                   </TabsContent>
-                  <TabsContent value="filters" className="mt-4 p-4 border rounded-lg space-y-2">
-                      <Button onClick={() => applyFilter('grayscale')} className="w-full" variant="outline">Grayscale</Button>
-                      <Button onClick={() => applyFilter('sepia')} className="w-full" variant="outline">Sepia</Button>
-                      <Button onClick={() => applyFilter('invert')} className="w-full" variant="outline">Invert</Button>
+                  <TabsContent value="filters" className="mt-4 p-4 border rounded-lg grid grid-cols-2 gap-2">
+                      <Button onClick={() => applyFilter('grayscale')} variant="outline">Grayscale</Button>
+                      <Button onClick={() => applyFilter('sepia')} variant="outline">Sepia</Button>
+                      <Button onClick={() => applyFilter('invert')} variant="outline">Invert</Button>
+                      <Button onClick={() => applyFilter('noisy')} variant="outline">Noisy</Button>
+                      <Button onClick={() => applyFilter('stripe')} variant="outline">Stripe</Button>
                   </TabsContent>
                 </Tabs>
                 
@@ -373,12 +468,6 @@ export function ImageEditor() {
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
                  />
-                 {editedImage && (
-                    <div className="absolute top-2 right-2 flex gap-2">
-                        <Button size="sm" variant={activeImage === 'original' ? 'default' : 'secondary'} onClick={() => setActiveImage('original')}>Original</Button>
-                        <Button size="sm" variant={activeImage === 'edited' ? 'default' : 'secondary'} onClick={() => setActiveImage('edited')}>Edited</Button>
-                    </div>
-                 )}
                  {isProcessing && (
                     <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-2">
                         <Loader2 className="h-8 w-8 animate-spin" />
