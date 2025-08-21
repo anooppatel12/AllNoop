@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare, Zap, GraduationCap, Ruler, Weight, Dices, Baseline, Smoking, GlassWater } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -69,11 +69,18 @@ const calculatorCategories = [
     calculators: [
         { name: 'Tip Calculator', href: '/calculators/other/tip', description: 'Calculate the tip for a bill' },
         { name: 'Smoking Cost Calculator', href: '/calculators/other/smoking-cost', description: 'Calculate the cost of smoking' },
+        { name: 'Alcohol Unit Calculator', href: '/calculators/other/alcohol-unit', description: 'Calculate the units of alcohol in a drink' },
     ],
   }
 ];
 
 export default function CalculatorsPage() {
+  // Replace the icon for the "Other" category to reflect the new calculator
+  const otherCategory = calculatorCategories.find(c => c.name === 'Other Useful Calculators');
+  if (otherCategory) {
+    otherCategory.icon = GlassWater;
+  }
+  
   return (
     <div className="container mx-auto max-w-6xl p-4 md:p-8">
       <div className="flex flex-col items-center justify-center space-y-4 text-center">
