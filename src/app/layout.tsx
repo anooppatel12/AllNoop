@@ -7,12 +7,12 @@ import {
   SidebarHeader,
   SidebarContent,
   SidebarFooter,
-  SidebarInset,
-  SidebarRail,
+  SidebarMenuItem,
+  SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { MainNav } from '@/components/main-nav';
-import { Shapes, FileQuestion, Lock, Shield } from 'lucide-react';
+import { Shapes, Info, Lock, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { AppHeader } from '@/components/header';
 import { Toaster } from '@/components/ui/toaster';
@@ -42,34 +42,45 @@ export default function RootLayout({
           <SidebarProvider>
             <div className="relative flex min-h-screen">
               <Sidebar collapsible="icon" className="bg-sidebar text-sidebar-foreground">
-                <SidebarRail />
                 <SidebarHeader>
-                  <Button variant="ghost" className="flex w-full items-center justify-center gap-2 px-2 text-lg font-semibold group-data-[collapsible=icon]:justify-center">
-                    <Shapes className="h-6 w-6 shrink-0 text-primary" />
-                    <span className="font-headline group-data-[collapsible=icon]:hidden">OmniTool</span>
+                  <Button variant="ghost" asChild className="flex w-full items-center justify-center gap-2 px-2 text-lg font-semibold group-data-[collapsible=icon]:justify-center">
+                    <Link href="/">
+                      <Shapes className="h-6 w-6 shrink-0 text-primary" />
+                      <span className="font-headline group-data-[collapsible=icon]:hidden">OmniTool</span>
+                    </Link>
                   </Button>
                 </SidebarHeader>
                 <SidebarContent>
                   <MainNav />
                 </SidebarContent>
-                <SidebarFooter className="p-4 text-sm">
-                  <div className="flex flex-col items-start gap-2 group-data-[collapsible=icon]:items-center">
-                     <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <FileQuestion className="h-4 w-4 shrink-0" />
-                      <span className="group-data-[collapsible=icon]:hidden">About</span>
-                    </Link>
-                     <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <Lock className="h-4 w-4 shrink-0" />
-                      <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
-                    </Link>
-                     <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <Shield className="h-4 w-4 shrink-0" />
-                      <span className="group-data-[collapsible=icon]:hidden">Terms & Conditions</span>
-                    </Link>
-                  </div>
+                <SidebarFooter>
+                   <SidebarMenuItem>
+                      <SidebarMenuButton asChild tooltip="About">
+                        <Link href="#">
+                            <Info />
+                            <span>About</span>
+                        </Link>
+                      </SidebarMenuButton>
+                   </SidebarMenuItem>
+                   <SidebarMenuItem>
+                      <SidebarMenuButton asChild tooltip="Privacy Policy">
+                        <Link href="#">
+                            <Lock />
+                            <span>Privacy Policy</span>
+                        </Link>
+                      </SidebarMenuButton>
+                   </SidebarMenuItem>
+                   <SidebarMenuItem>
+                      <SidebarMenuButton asChild tooltip="Terms & Conditions">
+                        <Link href="#">
+                            <FileText />
+                            <span>Terms & Conditions</span>
+                        </Link>
+                      </SidebarMenuButton>
+                   </SidebarMenuItem>
                 </SidebarFooter>
               </Sidebar>
-              <div className="flex-1 flex flex-col h-screen">
+               <div className="flex flex-1 flex-col h-screen">
                   <AppHeader />
                   <main className="flex-1 overflow-y-auto">
                     {children}
