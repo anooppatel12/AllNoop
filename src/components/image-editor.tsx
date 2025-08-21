@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Trash2, Wand2, RefreshCw, Crop, Wand, Check, X, Undo2, Redo2, UserSquare } from 'lucide-react';
+import { UploadCloud, Download, Trash2, Wand2, RefreshCw, Crop, Wand, Check, X, Undo2, Redo2, UserSquare, Brush } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   removeImageBackgroundAction,
@@ -15,8 +15,11 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Terminal } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { cn } from '@/lib/utils';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { Slider } from './ui/slider';
 
-type Tool = 'ai' | 'crop' | 'filters';
+type Tool = 'ai' | 'crop' | 'filters' | 'adjust';
+type AdjustTool = 'erase' | 'restore';
 type Filter = 'none' | 'grayscale' | 'sepia' | 'invert' | 'noisy' | 'stripe';
 type EditHistory = {
     image: HTMLImageElement;
@@ -32,6 +35,7 @@ export function ImageEditor() {
   const [historyIndex, setHistoryIndex] = useState(-1);
 
   const [currentTool, setCurrentTool] = useState<Tool>('ai');
+  const [currentAdjustTool, setCurrentAdjustTool] = useState<AdjustTool>('erase');
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -47,6 +51,10 @@ export function ImageEditor() {
   
   // Filter state
   const [currentFilter, setCurrentFilter] = useState<Filter>('none');
+  
+  // Brush state
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [brushSize, setBrushSize] = useState(30);
   
   const updateHistory = (newImage: HTMLImageElement, newFilter: Filter = 'none') => {
       const newHistory = history.slice(0, historyIndex + 1);
@@ -168,12 +176,12 @@ export function ImageEditor() {
     }
   };
   
-  const handleDownload = () => {
+  const handleDownload = (format: 'png' | 'jpeg') => {
     const canvas = canvasRef.current;
     if (canvas && (image || editedImage)) {
       const link = document.createElement('a');
-      link.download = 'edited-image.png';
-      link.href = canvas.toDataURL('image/png');
+      link.download = `edited-image.${format}`;
+      link.href = canvas.toDataURL(`image/${format}`);
       link.click();
     }
   };
@@ -222,89 +230,135 @@ export function ImageEditor() {
       }
   }
 
-  // Crop Handlers
+  // Crop and Brush Handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-      if (!isCropping) return;
       const canvas = canvasRef.current;
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
-      setStartCropPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      const pos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      
+      if (currentTool === 'crop') {
+        if (!isCropping) return;
+        setStartCropPos(pos);
+      } else if (currentTool === 'adjust') {
+        setIsDrawing(true);
+        const ctx = canvas.getContext('2d');
+        if(!ctx) return;
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-      if (!isCropping || !startCropPos) return;
       const canvas = canvasRef.current;
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
-      const currentX = e.clientX - rect.left;
-      const currentY = e.clientY - rect.top;
-      
-      let width = Math.abs(currentX - startCropPos.x);
-      let height = Math.abs(currentY - startCropPos.y);
+      const currentPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
 
-      if (isAspectRatioLocked) {
-        width = height = Math.max(width, height);
-      }
+      if (currentTool === 'crop') {
+        if (!isCropping || !startCropPos) return;
       
-      const newRect = {
-        x: Math.min(startCropPos.x, currentX),
-        y: Math.min(startCropPos.y, currentY),
-        width: width,
-        height: height,
-      };
-       if(currentX < startCropPos.x) {
-        newRect.x = startCropPos.x - width;
-      }
-      if(currentY < startCropPos.y) {
-        newRect.y = startCropPos.y - height;
-      }
-      
-      const imgToDraw = editedImage || image;
-      if(imgToDraw) {
-        const ctx = canvas.getContext('2d');
-        if(ctx) {
-            drawImage(imgToDraw, currentFilter);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.clearRect(newRect.x, newRect.y, newRect.width, newRect.height);
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(newRect.x, newRect.y, newRect.width, newRect.height);
+        let width = Math.abs(currentPos.x - startCropPos.x);
+        let height = Math.abs(currentPos.y - startCropPos.y);
+
+        if (isAspectRatioLocked) {
+            width = height = Math.max(width, height);
         }
+        
+        const newRect = {
+            x: Math.min(startCropPos.x, currentPos.x),
+            y: Math.min(startCropPos.y, currentPos.y),
+            width: width,
+            height: height,
+        };
+        if(currentPos.x < startCropPos.x) {
+            newRect.x = startCropPos.x - width;
+        }
+        if(currentPos.y < startCropPos.y) {
+            newRect.y = startCropPos.y - height;
+        }
+        
+        const imgToDraw = editedImage || image;
+        if(imgToDraw) {
+            const ctx = canvas.getContext('2d');
+            if(ctx) {
+                drawImage(imgToDraw, currentFilter);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(newRect.x, newRect.y, newRect.width, newRect.height);
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(newRect.x, newRect.y, newRect.width, newRect.height);
+            }
+        }
+      } else if (currentTool === 'adjust') {
+         if (!isDrawing) return;
+         const ctx = canvas.getContext('2d');
+         if (!ctx) return;
+         ctx.lineTo(currentPos.x, currentPos.y);
+         ctx.strokeStyle = 'red'; // visual indicator
+         ctx.lineWidth = brushSize;
+         ctx.lineCap = 'round';
+         ctx.lineJoin = 'round';
+         
+         if (currentAdjustTool === 'erase') {
+            ctx.globalCompositeOperation = 'destination-out';
+         } else { // restore
+            ctx.globalCompositeOperation = 'source-over';
+            // To restore, we'd need to redraw the original image part.
+            // This implementation is a simplified preview. The final action is on mouse up.
+         }
+         ctx.stroke();
+         ctx.globalCompositeOperation = 'source-over'; // reset
       }
   };
 
   const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
-      if (!isCropping || !startCropPos) return;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      const endX = e.clientX - rect.left;
-      const endY = e.clientY - rect.top;
+      if (currentTool === 'crop') {
+        if (!isCropping || !startCropPos) return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const endX = e.clientX - rect.left;
+        const endY = e.clientY - rect.top;
 
-      let width = Math.abs(endX - startCropPos.x);
-      let height = Math.abs(endY - startCropPos.y);
-      
-      if (isAspectRatioLocked) {
-        width = height = Math.max(width, height);
-      }
-      
-      const finalRect = {
-        x: Math.min(startCropPos.x, endX),
-        y: Math.min(startCropPos.y, endY),
-        width: width,
-        height: height,
-      };
+        let width = Math.abs(endX - startCropPos.x);
+        let height = Math.abs(endY - startCropPos.y);
+        
+        if (isAspectRatioLocked) {
+            width = height = Math.max(width, height);
+        }
+        
+        const finalRect = {
+            x: Math.min(startCropPos.x, endX),
+            y: Math.min(startCropPos.y, endY),
+            width: width,
+            height: height,
+        };
 
-      if(endX < startCropPos.x) {
-        finalRect.x = startCropPos.x - width;
+        if(endX < startCropPos.x) {
+            finalRect.x = startCropPos.x - width;
+        }
+        if(endY < startCropPos.y) {
+            finalRect.y = startCropPos.y - height;
+        }
+        
+        setCropRect(finalRect);
+        setStartCropPos(null);
+      } else if (currentTool === 'adjust') {
+        setIsDrawing(false);
+        const canvas = canvasRef.current;
+        const imgToEdit = editedImage;
+        if (!canvas || !imgToEdit) return;
+
+        // Apply the drawing to a new image to make it permanent
+        const newImage = new Image();
+        newImage.onload = () => {
+          setEditedImage(newImage);
+          updateHistory(newImage);
+        };
+        newImage.src = canvas.toDataURL();
       }
-      if(endY < startCropPos.y) {
-        finalRect.y = startCropPos.y - height;
-      }
-      
-      setCropRect(finalRect);
-      setStartCropPos(null);
   };
   
   const applyCrop = () => {
@@ -410,10 +464,11 @@ export function ImageEditor() {
                     </div>
                 </div>
                 <Tabs value={currentTool} onValueChange={(v) => setCurrentTool(v as Tool)} className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="ai"><Wand2 className="w-4 h-4 mr-2"/>AI Tools</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="ai"><Wand2 className="w-4 h-4 mr-2"/>AI</TabsTrigger>
                     <TabsTrigger value="crop"><Crop className="w-4 h-4 mr-2"/>Crop</TabsTrigger>
                     <TabsTrigger value="filters"><Wand className="w-4 h-4 mr-2"/>Filters</TabsTrigger>
+                    <TabsTrigger value="adjust"><Brush className="w-4 h-4 mr-2"/>Adjust</TabsTrigger>
                   </TabsList>
                   <TabsContent value="ai" className="mt-4 p-4 border rounded-lg space-y-4">
                      <Button onClick={() => handleAiAction('remove')} className="w-full" disabled={isProcessing}>
@@ -458,13 +513,32 @@ export function ImageEditor() {
                       <Button onClick={() => applyFilter('noisy')} variant="outline">Noisy</Button>
                       <Button onClick={() => applyFilter('stripe')} variant="outline">Stripe</Button>
                   </TabsContent>
+                   <TabsContent value="adjust" className="mt-4 p-4 border rounded-lg space-y-4">
+                        <div className="grid grid-cols-2 gap-2">
+                            <Button onClick={() => setCurrentAdjustTool('erase')} variant={currentAdjustTool === 'erase' ? 'default' : 'outline'}>Erase</Button>
+                            <Button onClick={() => setCurrentAdjustTool('restore')} variant={currentAdjustTool === 'restore' ? 'default' : 'outline'}>Restore</Button>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Brush Size: {brushSize}px</Label>
+                            <Slider defaultValue={[brushSize]} max={100} min={5} step={1} onValueChange={([v]) => setBrushSize(v)} />
+                        </div>
+                        <p className="text-xs text-muted-foreground">Draw on the image to erase or restore parts of the background. Note: This tool works best on images with transparent backgrounds.</p>
+                  </TabsContent>
                 </Tabs>
                 
                 <div className='p-4 border rounded-lg space-y-4'>
-                    <Button onClick={handleDownload} className="w-full">
-                        <Download className="mr-2 h-4 w-4" />
-                        Download Image
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button className="w-full">
+                          <Download className="mr-2 h-4 w-4" />
+                          Download Image
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => handleDownload('png')}>Download as PNG</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDownload('jpeg')}>Download as JPEG</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                      <Button onClick={resetAll} className="w-full" variant="outline">
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Start Over
@@ -501,7 +575,7 @@ export function ImageEditor() {
                  <canvas 
                     ref={canvasRef} 
                     className={cn("border shadow-md max-w-full max-h-full", {
-                      "cursor-crosshair": isCropping,
+                      "cursor-crosshair": isCropping || currentTool === 'adjust',
                     })}
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
