@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Link as LinkIcon, Loader2, Youtube, Instagram, Facebook } from 'lucide-react';
+import { Download, Link as LinkIcon, Loader2, Youtube, Instagram, Facebook, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 type Platform = 'youtube' | 'instagram' | 'facebook';
 
@@ -98,6 +99,13 @@ export function VideoDownloader() {
             </TabsList>
           </CardHeader>
           <CardContent className="space-y-6">
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Demonstration Only</AlertTitle>
+              <AlertDescription>
+                This tool is a user interface demonstration. The download functionality is not implemented and will not work. Building a real video downloader requires a complex backend service that is beyond the scope of this tool.
+              </AlertDescription>
+            </Alert>
             <div className="space-y-2">
                 <Label htmlFor="video-url">Video URL</Label>
                 <div className="relative">
@@ -118,7 +126,7 @@ export function VideoDownloader() {
                   Fetching Video...
                 </>
               ) : (
-                'Fetch Video'
+                'Fetch Video (Demo)'
               )}
             </Button>
           </CardContent>
