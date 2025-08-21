@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot } from 'lucide-react';
+import { HeartPulse, BrainCircuit, FlaskConical, Atom, PiggyBank, Percent, Calculator, Sigma, Users, SquareRoot, Bot, FunctionSquare } from 'lucide-react';
 
 const calculatorCategories = [
   {
@@ -32,6 +32,7 @@ const calculatorCategories = [
       { name: 'Date Calculator', href: '/calculators/math/date', description: 'Calculate the difference between dates' },
       { name: 'Square & Square Root Calculator', href: '/calculators/math/square-root', description: 'Calculate square and square root of a number' },
       { name: 'Cube & Cube Root Calculator', href: '/calculators/math/cube-root', description: 'Calculate cube and cube root of a number' },
+      { name: 'Pythagorean Theorem Calculator', href: '/calculators/math/pythagorean', description: 'Calculate the missing side of a right-angled triangle' },
     ],
   },
   {
