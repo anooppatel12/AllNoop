@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { VideoDownloader } from '@/components/video-downloader';
 
 export default function VideoDownloaderPage() {
   return (
@@ -8,18 +9,11 @@ export default function VideoDownloaderPage() {
           Video Downloader
         </h1>
         <p className="max-w-[700px] text-muted-foreground md:text-xl">
-          Download videos from your favorite platforms. More coming soon!
+          Paste a URL from YouTube, Instagram, or Facebook to download videos.
         </p>
       </div>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>This feature is under construction.</p>
-        </CardContent>
-      </Card>
+      <VideoDownloader />
     </div>
   );
 }
