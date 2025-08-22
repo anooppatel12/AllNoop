@@ -22,8 +22,6 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       </defs>
       <path d="M18,6H16A4,4,0,0,0,8,6H6A2,2,0,0,0,4,8V18a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V8A2,2,0,0,0,18,6ZM10,6a2,2,0,0,1,4,0Z" fill="url(#logoGradient)" />
       <path d="M11,12H9v2h2v2h2V14h2V12H13V10H11Z" fill="hsl(var(--card-foreground))" />
-      <rect x="15" y="11" width="1" height="1" fill="hsl(var(--card-foreground))" />
-       <rect x="16" y="10" width="1" height="1" fill="hsl(var(--card-foreground))" />
     </svg>
   );
 }
