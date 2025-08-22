@@ -231,7 +231,7 @@ export function FakeMessageGenerator() {
                 </div>
              )}
              {mode === 'whatsapp' && (
-                <div className="w-full max-w-[320px] bg-[url('https://i.ibb.co/7z0H5V6/whatsapp-bg.png')] bg-cover bg-center shadow-lg flex flex-col h-[550px] border">
+                <div className="w-full max-w-[320px] bg-stone-200 dark:bg-stone-800 shadow-lg flex flex-col h-[550px] border">
                     <header className="bg-[#005E54] dark:bg-[#2A2F32] text-white p-2.5 flex items-center gap-3">
                          <Avatar className="h-8 w-8">
                             <AvatarFallback>{waOtherSender.charAt(0).toUpperCase()}</AvatarFallback>
@@ -259,5 +259,3 @@ export function FakeMessageGenerator() {
     </Card>
   );
 }
-
-    
