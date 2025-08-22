@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Gamepad2 } from 'lucide-react';
+import { Gamepad2, Puzzle } from 'lucide-react';
 
 const games = [
     {
@@ -10,6 +10,12 @@ const games = [
         icon: Gamepad2,
         href: '/games/tic-tac-toe',
     },
+    {
+        name: 'Sudoku',
+        description: 'Challenge your mind with a classic game of Sudoku.',
+        icon: Puzzle,
+        href: '/games/sudoku',
+    }
 ];
 
 export default function GamesPage() {

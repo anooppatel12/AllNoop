@@ -1,7 +1,7 @@
 
 'use client';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2 } from 'lucide-react';
+import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle } from 'lucide-react';
 import Link from 'next/link';
 import { FloatingElements } from '@/components/floating-elements';
 
@@ -16,6 +16,7 @@ const features = [
   { name: 'Games', icon: Gamepad2, href: '/games' },
   { name: 'P2P Chat', icon: Users, href: '/chat' },
   { name: 'Contact', icon: MessageSquare, href: '/contact' },
+  { name: 'Sudoku', icon: Puzzle, href: '/games/sudoku' },
 ];
 
 export default function LandingPage() {
