@@ -117,7 +117,8 @@ export function FakeMessageGenerator() {
             cacheBust: true, 
             pixelRatio: 2,
             fetchRequestInit: {
-                mode: 'no-cors'
+                mode: 'cors',
+                credentials: 'omit'
             }
         });
         const link = document.createElement('a');
@@ -281,17 +282,17 @@ export function FakeMessageGenerator() {
                 </div>
              </div>
              <div ref={waPreviewRef} className={cn("contents", mode !== 'whatsapp' && "hidden")}>
-                <div className="w-full max-w-[320px] bg-stone-200 dark:bg-stone-800 shadow-lg flex flex-col h-[550px] border">
-                    <header className="bg-[#005E54] dark:bg-[#2A2F32] text-white p-2.5 flex items-center gap-3">
+                <div className="w-full max-w-[320px] bg-stone-200 dark:bg-[#111b21] shadow-lg flex flex-col h-[550px] border">
+                    <header className="bg-[#005E54] dark:bg-[#202c33] text-white p-2.5 flex items-center gap-3">
                          <Avatar className="h-8 w-8">
                             <AvatarFallback>{waOtherSender.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <h3 className="font-semibold text-sm">{waOtherSender}</h3>
                     </header>
-                    <main className="flex-1 p-3 overflow-y-auto space-y-1.5 flex flex-col bg-stone-100 dark:bg-stone-900">
+                    <main className="flex-1 p-3 overflow-y-auto space-y-1.5 flex flex-col bg-stone-100 dark:bg-[#0b141a]">
                         {waMessages.map(msg => (
                              <div key={msg.id} className={cn("flex w-full", msg.sender === 'me' ? 'justify-end' : 'justify-start')}>
-                                <div className={cn("rounded-lg p-1.5 px-2.5 max-w-[80%] relative shadow", msg.sender === 'me' ? 'bg-[#DCF8C6] dark:bg-[#056162]' : 'bg-white dark:bg-[#2A2F32]')}>
+                                <div className={cn("rounded-lg p-1.5 px-2.5 max-w-[80%] relative shadow", msg.sender === 'me' ? 'bg-[#DCF8C6] dark:bg-[#005c4b]' : 'bg-white dark:bg-[#202c33]')}>
                                     <p className="text-sm text-black dark:text-white pr-4">{msg.content}</p>
                                     <div className="text-xs text-gray-500 dark:text-gray-400 text-right -mt-1 -mr-1 flex items-center justify-end gap-1">
                                         <span>{msg.time}</span>
