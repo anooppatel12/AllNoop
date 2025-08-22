@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Trash2, Wand2, RefreshCw, Crop, Wand, Check, X, Undo2, Redo2, UserSquare, Brush } from 'lucide-react';
+import { UploadCloud, Download, Trash2, Wand2, RefreshCw, Crop, Wand, Check, X, Undo2, Redo2, UserSquare, Brush, Ratio } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   removeImageBackgroundAction,
@@ -15,12 +15,15 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Terminal } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { cn } from '@/lib/utils';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Slider } from './ui/slider';
+import { Checkbox } from './ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
-type Tool = 'ai' | 'crop' | 'filters' | 'adjust';
+type Tool = 'ai' | 'crop' | 'filters' | 'adjust' | 'export';
 type AdjustTool = 'erase' | 'restore';
 type Filter = 'none' | 'grayscale' | 'sepia' | 'invert' | 'noisy' | 'stripe';
+type ExportFormat = 'png' | 'jpeg';
+
 type EditHistory = {
     image: HTMLImageElement;
     filter: Filter;
@@ -47,7 +50,7 @@ export function ImageEditor() {
   const [isCropping, setIsCropping] = useState(false);
   const [cropRect, setCropRect] = useState<{x: number, y: number, width: number, height: number} | null>(null);
   const [startCropPos, setStartCropPos] = useState<{x: number, y: number} | null>(null);
-  const [isAspectRatioLocked, setIsAspectRatioLocked] = useState(false);
+  const [isCropAspectRatioLocked, setIsCropAspectRatioLocked] = useState(false);
   
   // Filter state
   const [currentFilter, setCurrentFilter] = useState<Filter>('none');
@@ -55,6 +58,13 @@ export function ImageEditor() {
   // Brush state
   const [isDrawing, setIsDrawing] = useState(false);
   const [brushSize, setBrushSize] = useState(30);
+
+  // Export state
+  const [resizeWidth, setResizeWidth] = useState<number>(0);
+  const [resizeHeight, setResizeHeight] = useState<number>(0);
+  const [isResizeAspectRatioLocked, setIsResizeAspectRatioLocked] = useState(true);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
+  const [jpegQuality, setJpegQuality] = useState(0.9);
   
   const updateHistory = (newImage: HTMLImageElement, newFilter: Filter = 'none') => {
       const newHistory = history.slice(0, historyIndex + 1);
@@ -78,9 +88,15 @@ export function ImageEditor() {
       if (historyIndex >= 0 && history[historyIndex]) {
           const { image: stateImage, filter: stateFilter } = history[historyIndex];
           setEditedImage(stateImage);
+          if(stateImage){
+            setResizeWidth(stateImage.width);
+            setResizeHeight(stateImage.height);
+          }
           setCurrentFilter(stateFilter);
       } else if (image) {
           setEditedImage(image);
+          setResizeWidth(image.width);
+          setResizeHeight(image.height);
           setCurrentFilter('none');
       }
   }, [historyIndex, history, image]);
@@ -145,10 +161,12 @@ export function ImageEditor() {
     setIsCropping(false);
     setCropRect(null);
     setStartCropPos(null);
-    setIsAspectRatioLocked(false);
+    setIsCropAspectRatioLocked(false);
     setCurrentFilter('none');
     setHistory([]);
     setHistoryIndex(-1);
+    setResizeWidth(0);
+    setResizeHeight(0);
   }
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,6 +184,8 @@ export function ImageEditor() {
             setImage(img);
             setEditedImage(img);
             updateHistory(img);
+            setResizeWidth(img.width);
+            setResizeHeight(img.height);
         };
         img.onerror = () => toast({ variant: 'destructive', title: 'Error', description: 'Could not load the image file.' });
         if (e.target?.result) {
@@ -176,14 +196,23 @@ export function ImageEditor() {
     }
   };
   
-  const handleDownload = (format: 'png' | 'jpeg') => {
-    const canvas = canvasRef.current;
-    if (canvas && (image || editedImage)) {
-      const link = document.createElement('a');
-      link.download = `edited-image.${format}`;
-      link.href = canvas.toDataURL(`image/${format}`);
-      link.click();
-    }
+  const handleDownload = () => {
+    const imgToDownload = editedImage || image;
+    if (!imgToDownload) return;
+
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    if(!tempCtx) return;
+
+    tempCanvas.width = resizeWidth;
+    tempCanvas.height = resizeHeight;
+
+    tempCtx.drawImage(imgToDownload, 0, 0, resizeWidth, resizeHeight);
+
+    const link = document.createElement('a');
+    link.download = `edited-image.${exportFormat}`;
+    link.href = tempCanvas.toDataURL(`image/${exportFormat}`, exportFormat === 'jpeg' ? jpegQuality : undefined);
+    link.click();
   };
 
   const handleAiAction = async (action: 'remove' | 'replace') => {
@@ -261,7 +290,7 @@ export function ImageEditor() {
         let width = Math.abs(currentPos.x - startCropPos.x);
         let height = Math.abs(currentPos.y - startCropPos.y);
 
-        if (isAspectRatioLocked) {
+        if (isCropAspectRatioLocked) {
             width = height = Math.max(width, height);
         }
         
@@ -305,8 +334,6 @@ export function ImageEditor() {
             ctx.globalCompositeOperation = 'destination-out';
          } else { // restore
             ctx.globalCompositeOperation = 'source-over';
-            // To restore, we'd need to redraw the original image part.
-            // This implementation is a simplified preview. The final action is on mouse up.
          }
          ctx.stroke();
          ctx.globalCompositeOperation = 'source-over'; // reset
@@ -325,7 +352,7 @@ export function ImageEditor() {
         let width = Math.abs(endX - startCropPos.x);
         let height = Math.abs(endY - startCropPos.y);
         
-        if (isAspectRatioLocked) {
+        if (isCropAspectRatioLocked) {
             width = height = Math.max(width, height);
         }
         
@@ -351,7 +378,6 @@ export function ImageEditor() {
         const imgToEdit = editedImage;
         if (!canvas || !imgToEdit) return;
 
-        // Apply the drawing to a new image to make it permanent
         const newImage = new Image();
         newImage.onload = () => {
           setEditedImage(newImage);
@@ -367,7 +393,6 @@ export function ImageEditor() {
     const imgToCrop = editedImage || image;
     if (!canvas || !imgToCrop) return;
     
-    // Scale cropRect from canvas size to image size
     const scaleX = imgToCrop.width / canvas.width;
     const scaleY = imgToCrop.height / canvas.height;
     
@@ -399,14 +424,14 @@ export function ImageEditor() {
     setIsCropping(false);
     setCropRect(null);
     setStartCropPos(null);
-    setIsAspectRatioLocked(false);
+    setIsCropAspectRatioLocked(false);
     const imgToDraw = editedImage || image;
     if (imgToDraw) drawImage(imgToDraw, currentFilter);
   };
   
   const applyFilter = (filter: Filter) => {
     const canvas = canvasRef.current;
-    const imgToFilter = image; // Always apply filters to the original image
+    const imgToFilter = image;
     if (!canvas || !imgToFilter) return;
 
     const tempCanvas = document.createElement('canvas');
@@ -443,11 +468,29 @@ export function ImageEditor() {
     const newImage = new Image();
     newImage.onload = () => {
         setEditedImage(newImage);
-        setCurrentFilter('none'); // The filter is baked in, so reset preview filter
+        setCurrentFilter('none');
         updateHistory(newImage);
     };
     newImage.src = tempCanvas.toDataURL();
   };
+  
+  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newWidth = parseInt(e.target.value) || 0;
+    setResizeWidth(newWidth);
+    if(isResizeAspectRatioLocked && image){
+      const aspectRatio = image.width / image.height;
+      setResizeHeight(Math.round(newWidth / aspectRatio));
+    }
+  }
+
+  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newHeight = parseInt(e.target.value) || 0;
+    setResizeHeight(newHeight);
+    if(isResizeAspectRatioLocked && image){
+      const aspectRatio = image.width / image.height;
+      setResizeWidth(Math.round(newHeight * aspectRatio));
+    }
+  }
 
 
   return (
@@ -461,14 +504,16 @@ export function ImageEditor() {
                     <div className="flex justify-center gap-2">
                       <Button onClick={undo} disabled={historyIndex <= 0} variant="outline" size="icon"><Undo2 /></Button>
                       <Button onClick={redo} disabled={historyIndex >= history.length - 1} variant="outline" size="icon"><Redo2 /></Button>
+                      <Button onClick={resetAll} variant="destructive" size="icon"><RefreshCw /></Button>
                     </div>
                 </div>
                 <Tabs value={currentTool} onValueChange={(v) => setCurrentTool(v as Tool)} className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="ai"><Wand2 className="w-4 h-4 mr-2"/>AI</TabsTrigger>
-                    <TabsTrigger value="crop"><Crop className="w-4 h-4 mr-2"/>Crop</TabsTrigger>
-                    <TabsTrigger value="filters"><Wand className="w-4 h-4 mr-2"/>Filters</TabsTrigger>
-                    <TabsTrigger value="adjust"><Brush className="w-4 h-4 mr-2"/>Adjust</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="ai"><Wand2/></TabsTrigger>
+                    <TabsTrigger value="crop"><Crop/></TabsTrigger>
+                    <TabsTrigger value="filters"><Wand/></TabsTrigger>
+                    <TabsTrigger value="adjust"><Brush/></TabsTrigger>
+                    <TabsTrigger value="export"><Download/></TabsTrigger>
                   </TabsList>
                   <TabsContent value="ai" className="mt-4 p-4 border rounded-lg space-y-4">
                      <Button onClick={() => handleAiAction('remove')} className="w-full" disabled={isProcessing}>
@@ -487,11 +532,11 @@ export function ImageEditor() {
                    <TabsContent value="crop" className="mt-4 p-4 border rounded-lg space-y-4">
                       {!isCropping ? (
                         <div className="space-y-2">
-                            <Button onClick={() => { setIsCropping(true); setIsAspectRatioLocked(false); }} className="w-full">
+                            <Button onClick={() => { setIsCropping(true); setIsCropAspectRatioLocked(false); }} className="w-full">
                                 <Crop className="mr-2 h-4 w-4"/> Freeform Crop
                             </Button>
-                            <Button onClick={() => { setIsCropping(true); setIsAspectRatioLocked(true); }} className="w-full">
-                                <UserSquare className="mr-2 h-4 w-4"/> Profile Picture (1:1)
+                            <Button onClick={() => { setIsCropping(true); setIsCropAspectRatioLocked(true); }} className="w-full">
+                                <UserSquare className="mr-2 h-4 w-4"/> Square (1:1)
                             </Button>
                         </div>
                       ) : (
@@ -522,28 +567,39 @@ export function ImageEditor() {
                             <Label>Brush Size: {brushSize}px</Label>
                             <Slider defaultValue={[brushSize]} max={100} min={5} step={1} onValueChange={([v]) => setBrushSize(v)} />
                         </div>
-                        <p className="text-xs text-muted-foreground">Draw on the image to erase or restore parts of the background. Note: This tool works best on images with transparent backgrounds.</p>
+                        <p className="text-xs text-muted-foreground">Draw on the image to erase or restore parts. Note: This tool works best on images with transparent backgrounds.</p>
                   </TabsContent>
-                </Tabs>
-                
-                <div className='p-4 border rounded-lg space-y-4'>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button className="w-full">
+                  <TabsContent value="export" className="mt-4 p-4 border rounded-lg space-y-4">
+                      <div className="space-y-2">
+                          <Label>Resize</Label>
+                          <div className="flex items-center gap-2">
+                              <Input type="number" placeholder="Width" value={resizeWidth} onChange={handleWidthChange}/>
+                              <Ratio className={cn("h-6 w-6 cursor-pointer", isResizeAspectRatioLocked ? "text-primary": "text-muted-foreground")} onClick={() => setIsResizeAspectRatioLocked(prev => !prev)}/>
+                              <Input type="number" placeholder="Height" value={resizeHeight} onChange={handleHeightChange}/>
+                          </div>
+                      </div>
+                      <div className="space-y-2">
+                          <Label>Format</Label>
+                          <Select value={exportFormat} onValueChange={(v: ExportFormat) => setExportFormat(v)}>
+                              <SelectTrigger><SelectValue/></SelectTrigger>
+                              <SelectContent>
+                                  <SelectItem value="png">PNG</SelectItem>
+                                  <SelectItem value="jpeg">JPEG</SelectItem>
+                              </SelectContent>
+                          </Select>
+                      </div>
+                      {exportFormat === 'jpeg' && (
+                          <div className="space-y-2">
+                              <Label>Quality: {Math.round(jpegQuality * 100)}%</Label>
+                              <Slider value={[jpegQuality]} onValueChange={([v]) => setJpegQuality(v)} min={0.1} max={1} step={0.1} />
+                          </div>
+                      )}
+                       <Button onClick={handleDownload} className="w-full">
                           <Download className="mr-2 h-4 w-4" />
                           Download Image
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleDownload('png')}>Download as PNG</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDownload('jpeg')}>Download as JPEG</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                     <Button onClick={resetAll} className="w-full" variant="outline">
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Start Over
-                    </Button>
-                </div>
+                  </TabsContent>
+                </Tabs>
 
                  {error && (
                     <Alert variant="destructive">
