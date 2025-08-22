@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { marked } from 'marked';
@@ -53,14 +53,12 @@ export function MarkdownPreviewer() {
   const [markdown, setMarkdown] = useState(defaultMarkdown);
   const { toast } = useToast();
 
-  const rawHtml = marked(markdown, { 
-    gfm: true,
-    breaks: true,
-  });
-
-  const getHtml = () => {
-    return { __html: rawHtml };
-  };
+  const rawHtml = useMemo(() => {
+    return marked(markdown, { 
+      gfm: true,
+      breaks: true,
+    });
+  }, [markdown]);
 
   const handleCopyHtml = () => {
       navigator.clipboard.writeText(rawHtml)
@@ -100,7 +98,7 @@ export function MarkdownPreviewer() {
             </CardHeader>
             <div
                 id="preview"
-                dangerouslySetInnerHTML={getHtml()}
+                dangerouslySetInnerHTML={{ __html: rawHtml }}
                 className="prose dark:prose-invert h-[600px] w-full overflow-auto rounded-md border bg-muted p-4"
             />
         </div>
