@@ -12,8 +12,8 @@ const BOARD_HEIGHT = 600;
 
 // Paddle
 const PADDLE_WIDTH = 100;
-const PADDLE_HEIGHT = 20;
-const PADDLE_Y = BOARD_HEIGHT - 40;
+const PADDLE_HEIGHT = 10;
+const PADDLE_Y = BOARD_HEIGHT - 30;
 const PADDLE_SPEED = 10;
 
 // Ball
@@ -50,7 +50,7 @@ export function BrickBreakerGame() {
   const paddleX = useRef(BOARD_WIDTH / 2 - PADDLE_WIDTH / 2);
   const ball = useRef({
     x: BOARD_WIDTH / 2,
-    y: PADDLE_Y - BALL_RADIUS,
+    y: PADDLE_Y - BALL_RADIUS - 5,
     dx: 4,
     dy: -4,
   });
@@ -105,29 +105,26 @@ export function BrickBreakerGame() {
 
   }, []);
   
+  const resetRound = useCallback(() => {
+     ball.current = {
+        x: BOARD_WIDTH / 2,
+        y: PADDLE_Y - BALL_RADIUS - 5,
+        dx: Math.random() > 0.5 ? 4 : -4,
+        dy: -4
+    };
+    paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
+    draw();
+  }, [draw]);
+
   const resetGame = useCallback(() => {
     setGameState('waiting');
     setScore(0);
     setLives(3);
-    paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
-    ball.current = {
-        x: BOARD_WIDTH / 2,
-        y: PADDLE_Y - BALL_RADIUS,
-        dx: 4,
-        dy: -4
-    };
     createBricks();
+    resetRound();
     if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
-    // Draw initial state
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        // A short delay to ensure canvas is ready in the DOM
-        setTimeout(() => draw(), 0);
-      }
-    }
-  }, [createBricks, draw]);
+    draw();
+  }, [createBricks, draw, resetRound]);
 
   const startGame = () => {
     if (gameState === 'playing') return;
@@ -160,25 +157,19 @@ export function BrickBreakerGame() {
     // Wall collision (top)
     if (b.y + b.dy < BALL_RADIUS) {
       b.dy = -b.dy;
-    } else if (b.y + b.dy > BOARD_HEIGHT - BALL_RADIUS) {
-        // Paddle collision
-        if(b.x > paddleX.current && b.x < paddleX.current + PADDLE_WIDTH && b.y < PADDLE_Y){
+    } else if (b.y > PADDLE_Y - BALL_RADIUS) {
+        // Check for paddle collision
+        if(b.x > paddleX.current && b.x < paddleX.current + PADDLE_WIDTH){
              b.dy = -b.dy;
-        } else {
-            // Ball missed paddle
+        } else if (b.y > BOARD_HEIGHT - BALL_RADIUS) {
+            // Ball missed paddle and hit the bottom
             setLives(prevLives => {
                  const newLives = prevLives - 1;
                  if(newLives <= 0) {
                     setGameState('gameover');
                 } else {
-                    ball.current = {
-                        x: BOARD_WIDTH / 2,
-                        y: PADDLE_Y - BALL_RADIUS,
-                        dx: 4,
-                        dy: -4
-                    };
-                    paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
                     setGameState('waiting'); // Wait for user to restart round
+                    resetRound();
                 }
                 return newLives;
             });
@@ -204,20 +195,16 @@ export function BrickBreakerGame() {
 
     draw();
     animationFrameId.current = requestAnimationFrame(gameLoop);
-  }, [gameState, draw]);
+  }, [gameState, draw, resetRound]);
   
   useEffect(() => {
     if (gameState === 'playing') {
        animationFrameId.current = requestAnimationFrame(gameLoop);
     }
-    // Initial draw for waiting state
-    if (gameState === 'waiting' && lives > 0) {
-      draw();
-    }
     return () => {
         if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     }
-  }, [gameState, gameLoop, draw, lives]);
+  }, [gameState, gameLoop]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -243,9 +230,9 @@ export function BrickBreakerGame() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
-       if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+      if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     };
-     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
