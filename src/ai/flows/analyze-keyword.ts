@@ -10,12 +10,12 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const AnalyzeKeywordInputSchema = z.object({
+const AnalyzeKeywordInputSchema = z.object({
   keyword: z.string().describe('The keyword or hashtag to analyze.'),
 });
 export type AnalyzeKeywordInput = z.infer<typeof AnalyzeKeywordInputSchema>;
 
-export const AnalyzeKeywordOutputSchema = z.object({
+const AnalyzeKeywordOutputSchema = z.object({
   searchVolume: z.string().describe('Estimated search volume (e.g., High, Medium, Low).'),
   competition: z.string().describe('Estimated competition level (e.g., High, Medium, Low).'),
   relatedKeywords: z.array(z.string()).describe('A list of related keywords or hashtags.'),
