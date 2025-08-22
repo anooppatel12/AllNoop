@@ -7,6 +7,7 @@ import { FloatingElements } from '@/components/floating-elements';
 import { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 
 const SnakeIcon = () => (
@@ -96,18 +97,18 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.8 }}
-          className="relative mt-12 w-full max-w-2xl z-20"
+          className="relative mt-12 w-full max-w-2xl"
         >
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-30" />
             <Input
               type="search"
               placeholder="Search for a tool... (e.g., 'PDF', 'BMI', 'Password')"
-              className="w-full h-14 pl-12 pr-4 text-lg rounded-full shadow-lg"
+              className="relative w-full h-14 pl-12 pr-4 text-lg rounded-full shadow-lg z-20"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <Card className="absolute top-full mt-2 w-full max-h-80 overflow-y-auto text-left shadow-2xl">
+              <Card className="absolute top-full mt-2 w-full max-h-80 overflow-y-auto text-left shadow-2xl z-50">
                 {filteredFeatures.length > 0 ? (
                   filteredFeatures.map(feature => (
                     <Link href={feature.href} key={feature.name} className="block hover:bg-muted" onClick={() => setSearchQuery('')}>
@@ -130,7 +131,7 @@ export default function LandingPage() {
 
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16">
+      <div className={cn("relative z-10 mx-auto max-w-7xl px-4 pb-16", searchQuery && "pointer-events-none")}>
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
