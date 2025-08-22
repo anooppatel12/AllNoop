@@ -47,10 +47,17 @@ export function RandomJokeQuoteGenerator() {
     setError(null);
     setQuote(null);
     try {
-      const response = await fetch('https://api.quotable.io/random');
+      // Using a different, more stable API for quotes
+      const response = await fetch('https://api.freeapi.app/api/v1/public/quotes/random');
        if (!response.ok) throw new Error('Failed to fetch quote. Please try again.');
-      const data: Quote = await response.json();
-      setQuote(data);
+      const apiResponse = await response.json();
+
+      if(apiResponse.success && apiResponse.data) {
+        const data: Quote = apiResponse.data;
+        setQuote(data);
+      } else {
+        throw new Error(apiResponse.message || 'Failed to parse quote data.');
+      }
     } catch (e: any) {
       setError(e.message);
     } finally {
