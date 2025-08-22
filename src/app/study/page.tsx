@@ -16,12 +16,6 @@ const studyTools = [
         icon: BookOpenCheck,
         href: '/study/quiz-creator',
     },
-    {
-        name: 'Resume/CV Builder',
-        description: 'Create a professional resume. (Coming Soon)',
-        icon: GraduationCap,
-        href: '#',
-    },
 ];
 
 export default function StudyWorkPage() {
