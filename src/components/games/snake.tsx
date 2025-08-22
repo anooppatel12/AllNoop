@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -195,29 +195,3 @@ export function SnakeGame() {
     </Card>
   );
 }
-
-// Custom hook for requestAnimationFrame-based interval
-function useInterval(callback: () => void, delay: number | null) {
-  const savedCallback = React.useRef(callback);
-
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  useEffect(() => {
-    if (delay !== null) {
-      let id: number;
-      let lastTime = Date.now();
-      const tick = () => {
-        if (Date.now() - lastTime >= delay) {
-            savedCallback.current();
-            lastTime = Date.now();
-        }
-        id = requestAnimationFrame(tick);
-      };
-      id = requestAnimationFrame(tick);
-      return () => cancelAnimationFrame(id);
-    }
-  }, [delay]);
-}
-
