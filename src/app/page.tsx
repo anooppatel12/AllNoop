@@ -112,7 +112,7 @@ export default function LandingPage() {
               <Card className="absolute top-full mt-2 w-full max-h-80 overflow-y-auto text-left shadow-2xl z-50">
                 {filteredFeatures.length > 0 ? (
                   filteredFeatures.map(feature => (
-                    <Link href={feature.href} key={feature.name} className="block hover:bg-muted" onClick={() => { setSearchQuery(''); setLoadingTool(feature.href); }}>
+                    <Link href={feature.href} key={feature.name} className="block hover:bg-muted" onClick={() => { setLoadingTool(feature.href); }}>
                        <div className="flex items-center gap-4 p-4">
                         <div className="rounded-lg bg-primary/10 p-2 text-primary">
                           <feature.icon className="h-6 w-6" />
