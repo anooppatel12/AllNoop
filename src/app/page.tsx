@@ -23,7 +23,7 @@ const features = [
   { name: 'PDF Tools', icon: FileText, href: '/pdf-tools' },
   { name: 'Image Editor', icon: ImageIcon, href: '/image-editor' },
   { name: 'Text Formatter', icon: Baseline, href: '/tools/text-formatter' },
-  { name: 'Markdown Previewer', icon: BookOpenCheck, href: '/study/markdown-previewer' },
+  { name: 'Study / Work Tools', icon: BookOpenCheck, href: '/study' },
   { name: 'QR Code Tools', icon: QrCode, href: '/tools/qrcode' },
   { name: 'Password Generator', icon: Lock, href: '/tools/password-generator' },
   { name: 'Meme Generator', icon: VenetianMask, href: '/fun-tools/meme-generator' },

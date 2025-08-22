@@ -39,7 +39,7 @@ const links = [
   { href: '/tools/qrcode', label: 'QR Code Tools', icon: QrCode },
   { href: '/tools/password-generator', label: 'Password Generator', icon: Lock },
   {
-    href: '/study/markdown-previewer',
+    href: '/study',
     label: 'Study / Work',
     icon: BookOpenCheck,
   },
