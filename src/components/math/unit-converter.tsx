@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -51,44 +51,52 @@ export function UnitConverter() {
   const [fromValue, setFromValue] = useState('1');
   const [toValue, setToValue] = useState('');
   
-  useEffect(() => {
-    const units = Object.keys(conversionOptions[conversionType].units);
-    setFromUnit(units[0]);
-    setToUnit(units[1] || units[0]);
-  }, [conversionType]);
-
-  const convert = () => {
+  const convert = useCallback(() => {
     const value = parseFloat(fromValue);
     if (isNaN(value)) {
-        setToValue('');
-        return;
+      setToValue('');
+      return;
     }
-    
+
     if (conversionType === 'temperature') {
       let tempInCelsius: number;
       if (fromUnit === 'celsius') tempInCelsius = value;
-      else if (fromUnit === 'fahrenheit') tempInCelsius = (value - 32) * 5/9;
+      else if (fromUnit === 'fahrenheit') tempInCelsius = (value - 32) * 5 / 9;
       else tempInCelsius = value - 273.15; // Kelvin
 
       let result: number;
       if (toUnit === 'celsius') result = tempInCelsius;
-      else if (toUnit === 'fahrenheit') result = (tempInCelsius * 9/5) + 32;
+      else if (toUnit === 'fahrenheit') result = (tempInCelsius * 9 / 5) + 32;
       else result = tempInCelsius + 273.15; // Kelvin
 
       setToValue(result.toFixed(4));
     } else {
       const type = conversionType as 'length' | 'mass';
-      const fromRate = conversionOptions[type].units[fromUnit as Unit<typeof type>].toBase;
-      const toRate = conversionOptions[type].units[toUnit as Unit<typeof type>].toBase;
-      const baseValue = value * fromRate;
-      const result = baseValue / toRate;
-      setToValue(result.toFixed(4));
+      const fromUnitData = conversionOptions[type].units[fromUnit as Unit<typeof type>];
+      const toUnitData = conversionOptions[type].units[toUnit as Unit<typeof type>];
+      
+      if(fromUnitData && toUnitData) {
+        const fromRate = fromUnitData.toBase;
+        const toRate = toUnitData.toBase;
+        const baseValue = value * fromRate;
+        const result = baseValue / toRate;
+        setToValue(result.toFixed(4));
+      } else {
+        setToValue('');
+      }
     }
-  };
+  }, [conversionType, fromUnit, toUnit, fromValue]);
+  
+  useEffect(() => {
+    const units = Object.keys(conversionOptions[conversionType].units);
+    setFromUnit(units[0]);
+    setToUnit(units[1] || units[0]);
+    setFromValue('1');
+  }, [conversionType]);
 
   useEffect(() => {
     convert();
-  }, [fromValue, fromUnit, toUnit, conversionType]);
+  }, [fromValue, fromUnit, toUnit, conversionType, convert]);
   
 
   const handleFromValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
