@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -43,13 +42,14 @@ export function PongGame() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    const style = getComputedStyle(canvas);
-    const secondaryColor = style.getPropertyValue('--secondary').trim() || '#e2e8f0'; // fallback slate-200
-    const primaryColor = style.getPropertyValue('--primary').trim() || '#3b82f6'; // fallback blue-500
-    const foregroundColor = style.getPropertyValue('--card-foreground').trim() || '#0f172a'; // fallback slate-900
-    const borderColor = style.getPropertyValue('--border').trim() || '#cbd5e1'; // fallback slate-300
+    // Use theme colors with fallbacks for guaranteed visibility
+    const style = getComputedStyle(canvas.parentElement!);
+    const secondaryColor = style.getPropertyValue('--secondary').trim() || '#f1f5f9';
+    const primaryColor = style.getPropertyValue('--primary').trim() || '#3b82f6';
+    const foregroundColor = style.getPropertyValue('--card-foreground').trim() || '#0f172a';
+    const borderColor = style.getPropertyValue('--border').trim() || '#cbd5e1';
 
-    // Clear board
+    // Clear board with a visible background color
     ctx.fillStyle = secondaryColor;
     ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
     
