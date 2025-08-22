@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Gamepad2, Puzzle, BrainCircuit, Hand } from 'lucide-react';
+import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -32,6 +32,12 @@ const games = [
         description: 'Play a classic game of Tic-Tac-Toe against a friend.',
         icon: Gamepad2,
         href: '/games/tic-tac-toe',
+    },
+    {
+        name: 'Guess the Number',
+        description: 'Guess the number between 1 and 100.',
+        icon: HelpCircle,
+        href: '/games/guess-the-number',
     },
     {
         name: 'Sudoku',
