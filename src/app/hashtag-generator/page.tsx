@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -15,6 +16,12 @@ import { useToast } from '@/hooks/use-toast';
 import { generateCaptions, generateHashtags } from '../actions';
 import type { GenerateSocialMediaCaptionsOutput } from '@/ai/flows/generate-social-media-captions';
 import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'AI Hashtag & Caption Generator',
+    description: 'Instantly generate trending hashtags and engaging social media captions for any topic. Boost your online presence with our free AI-powered tool.',
+  };
 
 const FormSchema = z.object({
   topic: z.string().min(2, {
@@ -76,9 +83,9 @@ export default function HashtagGeneratorPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
           Hashtag & Caption Generator
         </h1>
-        <p className="max-w-[700px] text-muted-foreground md:text-xl">
+        <h2 className="max-w-[700px] text-muted-foreground md:text-xl">
           Enter a topic or keyword to instantly generate trending hashtags and engaging captions for your social media.
-        </p>
+        </h2>
       </div>
 
       <Card className="mt-8">
@@ -146,37 +153,37 @@ export default function HashtagGeneratorPage() {
               <CardContent className="space-y-6">
                 {captions?.instagramReelsCaption && (
                   <div>
+                    <h3 className="font-headline text-lg font-semibold">Instagram Reels</h3>
                     <div className="flex items-center justify-between">
-                      <h3 className="font-headline text-lg font-semibold">Instagram Reels</h3>
+                      <p className="mt-2 rounded-md bg-muted p-4 text-muted-foreground">{captions.instagramReelsCaption}</p>
                       <Button variant="ghost" size="icon" onClick={() => handleCopy(captions.instagramReelsCaption, 'insta')}>
                         {copyState['insta'] ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                       </Button>
                     </div>
-                    <p className="mt-2 rounded-md bg-muted p-4 text-muted-foreground">{captions.instagramReelsCaption}</p>
                   </div>
                 )}
                 <Separator />
                 {captions?.tiktokCaption && (
                   <div>
+                    <h3 className="font-headline text-lg font-semibold">TikTok</h3>
                     <div className="flex items-center justify-between">
-                      <h3 className="font-headline text-lg font-semibold">TikTok</h3>
+                      <p className="mt-2 rounded-md bg-muted p-4 text-muted-foreground">{captions.tiktokCaption}</p>
                       <Button variant="ghost" size="icon" onClick={() => handleCopy(captions.tiktokCaption, 'tiktok')}>
                         {copyState['tiktok'] ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                       </Button>
                     </div>
-                    <p className="mt-2 rounded-md bg-muted p-4 text-muted-foreground">{captions.tiktokCaption}</p>
                   </div>
                 )}
                 <Separator />
                 {captions?.youtubeShortsDescription && (
                   <div>
+                    <h3 className="font-headline text-lg font-semibold">YouTube Shorts</h3>
                     <div className="flex items-center justify-between">
-                      <h3 className="font-headline text-lg font-semibold">YouTube Shorts</h3>
+                      <p className="mt-2 rounded-md bg-muted p-4 text-muted-foreground">{captions.youtubeShortsDescription}</p>
                       <Button variant="ghost" size="icon" onClick={() => handleCopy(captions.youtubeShortsDescription, 'youtube')}>
                         {copyState['youtube'] ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                       </Button>
                     </div>
-                    <p className="mt-2 rounded-md bg-muted p-4 text-muted-foreground">{captions.youtubeShortsDescription}</p>
                   </div>
                 )}
               </CardContent>

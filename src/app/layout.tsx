@@ -20,9 +20,62 @@ import { Toaster } from '@/components/ui/toaster';
 import { CustomCursor } from '@/components/ui/custom-cursor';
 import { Logo } from '@/components/ui/logo';
 
+const defaultUrl = 'https://allnoop.com'; // Replace with your actual domain
+
 export const metadata: Metadata = {
-  title: 'AllNoop',
-  description: 'An all-in-one toolkit with calculators, PDF and image tools, downloaders, and AI content generators.',
+  metadataBase: new URL(defaultUrl),
+  title: {
+    default: 'AllNoop: Free Online Tools for Every Need',
+    template: '%s | AllNoop',
+  },
+  description: 'Your all-in-one toolkit with free online calculators, PDF and image editors, password generators, AI content tools, and much more. AllNoop makes your digital life easier.',
+  keywords: ['online tools', 'free tools', 'calculator', 'pdf editor', 'image editor', 'password generator', 'qr code generator', 'Allnoop', 'allnoop.com'],
+  openGraph: {
+    title: 'AllNoop: Free Online Tools for Every Need',
+    description: 'The ultimate suite of free online utilities. Calculators, PDF tools, image editing, AI generators, and more, all in one place.',
+    url: defaultUrl,
+    siteName: 'AllNoop',
+    images: [
+      {
+        url: `${defaultUrl}/og-image.png`, // Update with your actual OG image path
+        width: 1200,
+        height: 630,
+        alt: 'AllNoop - Free Online Tools',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AllNoop: Free Online Tools for Every Need',
+    description: 'Discover a powerful collection of free online tools on AllNoop. From calculators to creative AI, we have everything you need.',
+    // creator: '@yourtwitterhandle', // Add your Twitter handle
+    images: [`${defaultUrl}/og-image.png`], // Update with your actual OG image path
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  url: defaultUrl,
+  name: 'AllNoop',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${defaultUrl}/search?q={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
 };
 
 export default function RootLayout({
@@ -33,6 +86,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
