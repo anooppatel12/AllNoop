@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
 
 const easyText = "the quick brown fox jumps over the lazy dog a man a plan a canal panama hello world practice makes perfect see you later alligator";
 const mediumText = "Technology has revolutionized the way we live and work. From smartphones to artificial intelligence, innovation continues to shape our future. The internet connects billions of people, providing access to information and opportunities like never before.";
