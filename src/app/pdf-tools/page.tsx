@@ -1,7 +1,11 @@
 
+'use client';
+
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { View, Combine, Split, Minimize2, FileUp, FileDown, Scissors, RotateCw, ScanText, FileImage, Stamp, ListOrdered, Layers, Move, FileMinus2, Lock, Unlock, FilePenLine, Edit, GitCompareArrows } from 'lucide-react';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 const pdfTools = [
     {
@@ -124,6 +128,8 @@ const advancedPdfTools = [
 ]
 
 export default function PdfToolsPage() {
+  const [loadingTool, setLoadingTool] = useState<string | null>(null);
+
   return (
     <div className="container mx-auto max-w-6xl p-4 md:p-8">
       <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -139,8 +145,8 @@ export default function PdfToolsPage() {
             <h2 className="font-headline text-2xl font-bold">Basic Tools</h2>
             <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {pdfTools.map((tool) => (
-                <Link href={tool.href} key={tool.name} className="group">
-                <Card className="h-full transition-all group-hover:border-primary group-hover:shadow-lg">
+                <Link href={tool.href} key={tool.name} className="group" onClick={() => setLoadingTool(tool.href)}>
+                <Card className={cn("h-full transition-all group-hover:border-primary group-hover:shadow-lg", loadingTool === tool.href && "animate-glow")}>
                     <CardHeader className="flex flex-row items-center gap-4">
                         <tool.icon className="h-8 w-8 text-primary" />
                         <div>
@@ -157,8 +163,8 @@ export default function PdfToolsPage() {
             <h2 className="font-headline text-2xl font-bold">Advanced Tools</h2>
             <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {advancedPdfTools.map((tool) => (
-                <Link href={tool.href} key={tool.name} className="group">
-                <Card className="h-full transition-all group-hover:border-primary group-hover:shadow-lg">
+                <Link href={tool.href} key={tool.name} className="group" onClick={() => setLoadingTool(tool.href)}>
+                <Card className={cn("h-full transition-all group-hover:border-primary group-hover:shadow-lg", loadingTool === tool.href && "animate-glow")}>
                     <CardHeader className="flex flex-row items-center gap-4">
                         <tool.icon className="h-8 w-8 text-primary" />
                         <div>

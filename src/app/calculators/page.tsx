@@ -1,7 +1,11 @@
 
+'use client';
+
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { HeartPulse, FlaskConical, Atom, PiggyBank, Sigma, Zap, Baby, Flame, Weight } from 'lucide-react';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 const calculatorCategories = [
   {
@@ -112,7 +116,8 @@ const calculatorCategories = [
 ];
 
 export default function CalculatorsPage() {
-  
+  const [loadingTool, setLoadingTool] = useState<string | null>(null);
+
   return (
     <div className="container mx-auto max-w-6xl p-4 md:p-8">
       <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -134,8 +139,8 @@ export default function CalculatorsPage() {
             {category.calculators.length > 0 ? (
               <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {category.calculators.map((calculator) => (
-                  <Link href={calculator.href} key={calculator.name} className="group">
-                    <Card className="h-full transition-all group-hover:border-primary group-hover:shadow-lg">
+                  <Link href={calculator.href} key={calculator.name} className="group" onClick={() => setLoadingTool(calculator.href)}>
+                    <Card className={cn("h-full transition-all group-hover:border-primary group-hover:shadow-lg", loadingTool === calculator.href && "animate-glow")}>
                       <CardHeader>
                         <CardTitle>{calculator.name}</CardTitle>
                         <CardDescription>{calculator.description}</CardDescription>

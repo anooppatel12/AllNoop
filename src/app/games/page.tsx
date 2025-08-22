@@ -1,7 +1,12 @@
 
+'use client';
+
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Gamepad2, Puzzle, BrainCircuit } from 'lucide-react';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+
 
 const SnakeIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-snake"><path d="M9.5 12a2.5 2.5 0 0 1 0-5h0A2.5 2.5 0 0 1 12 9.5v0a2.5 2.5 0 0 1-5 0h0a2.5 2.5 0 0 1 2.5-2.5v0a2.5 2.5 0 0 1 0 5h0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 1 5 0h0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 1 0-5" /><path d="M7 17a2 2 0 1 0-4 0" /></svg>
@@ -67,6 +72,8 @@ const games = [
 ];
 
 export default function GamesPage() {
+  const [loadingTool, setLoadingTool] = useState<string | null>(null);
+
   return (
     <div className="container mx-auto max-w-6xl p-4 md:p-8">
       <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -81,8 +88,8 @@ export default function GamesPage() {
        <div className="mt-12">
             <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {games.map((tool) => (
-                <Link href={tool.href} key={tool.name} className="group">
-                <Card className="h-full transition-all group-hover:border-primary group-hover:shadow-lg">
+                <Link href={tool.href} key={tool.name} className="group" onClick={() => setLoadingTool(tool.href)}>
+                <Card className={cn("h-full transition-all group-hover:border-primary group-hover:shadow-lg", loadingTool === tool.href && "animate-glow")}>
                     <CardHeader className="flex flex-row items-center gap-4">
                         <tool.icon className="h-8 w-8 text-primary" />
                         <div>
