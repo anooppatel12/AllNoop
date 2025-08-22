@@ -13,7 +13,7 @@ const features = [
   { name: 'Meme Generator', icon: VenetianMask, href: '/fun-tools/meme-generator' },
   { name: 'Typing Speed Test', icon: Keyboard, href: '/fun-tools/typing-speed-test' },
   { name: 'Joke & Quote Generator', icon: Quote, href: '/fun-tools/random-joke-quote-generator' },
-  { name: 'Tic-Tac-Toe', icon: Gamepad2, href: '/fun-tools/tic-tac-toe' },
+  { name: 'Games', icon: Gamepad2, href: '/games' },
   { name: 'P2P Chat', icon: Users, href: '/chat' },
   { name: 'Contact', icon: MessageSquare, href: '/contact' },
 ];
