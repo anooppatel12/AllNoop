@@ -56,6 +56,7 @@ const calculatorCategories = [
       { name: 'EMI Calculator', href: '/calculators/financial/emi', description: 'Calculate your Equated Monthly Instalment' },
       { name: 'Interest Calculator', href: '/calculators/financial/interest', description: 'Calculate simple and compound interest' },
       { name: 'Discount Calculator', href: '/calculators/financial/discount', description: 'Calculate the final price after a discount' },
+      { name: 'Currency Converter', href: '/calculators/financial/currency-converter', description: 'Convert between different currencies' },
     ],
   },
   {
