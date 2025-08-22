@@ -24,6 +24,7 @@ const BrickBreakerIcon = () => (
 
 const features = [
   { name: 'AI Hashtag Generator', icon: Hash, href: '/hashtag-generator' },
+  { name: 'Keyword Analyzer', icon: Search, href: '/tools/keyword-analyzer' },
   { name: 'Calculators', icon: Calculator, href: '/calculators' },
   { name: 'PDF Tools', icon: FileText, href: '/pdf-tools' },
   { name: 'Image Editor', icon: ImageIcon, href: '/image-editor' },
@@ -34,7 +35,7 @@ const features = [
   { name: 'Meme Generator', icon: VenetianMask, href: '/fun-tools/meme-generator' },
   { name: 'Fake Message Generator', icon: MessageCircle, href: '/fun-tools/fake-message-generator' },
   { name: 'Typing Speed Test', icon: Keyboard, href: '/fun-tools/typing-speed-test' },
-  { name: 'Joke & Quote Generator', icon: Quote, href: '/fun-tools/random-joke-quote-generator' },
+  { name: 'Joke &amp; Quote Generator', icon: Quote, href: '/fun-tools/random-joke-quote-generator' },
   { name: 'Games', icon: Gamepad2, href: '/games' },
   { name: 'P2P Chat', icon: Users, href: '/chat' },
   { name: 'Contact', icon: MessageSquare, href: '/contact' },

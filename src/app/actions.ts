@@ -15,6 +15,7 @@ import {
   type ReplaceImageBackgroundInput,
 } from '@/ai/flows/replace-image-background';
 import { generateQuote } from '@/ai/flows/generate-quote';
+import { analyzeKeyword, type AnalyzeKeywordInput } from '@/ai/flows/analyze-keyword';
 
 
 export async function generateHashtags(topic: string) {
@@ -65,4 +66,14 @@ export async function replaceImageBackgroundAction(input: ReplaceImageBackground
     console.error('Error replacing background', e);
     return { error: e.message || 'An unexpected error occurred.' };
   }
+}
+
+export async function analyzeKeywordAction(input: AnalyzeKeywordInput) {
+    try {
+        const result = await analyzeKeyword(input);
+        return { analysis: result };
+    } catch (error) {
+        console.error(error);
+        return { error: 'Failed to analyze keyword. Please try again.' };
+    }
 }

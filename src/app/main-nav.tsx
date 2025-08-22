@@ -21,6 +21,7 @@ import {
   Lock,
   Baseline,
   BookOpenCheck,
+  Search,
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -32,6 +33,7 @@ import { DownloaderLink } from '@/features/downloader/DownloaderLink';
 const links = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/hashtag-generator', label: 'Hashtag Generator', icon: Hash },
+  { href: '/tools/keyword-analyzer', label: 'Keyword Analyzer', icon: Search },
   { href: '/calculators', label: 'Calculators', icon: Calculator },
   { href: '/pdf-tools', label: 'PDF Tools', icon: FileText },
   { href: '/image-editor', label: 'Image Editor', icon: ImageIcon },
