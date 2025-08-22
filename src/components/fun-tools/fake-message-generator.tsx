@@ -282,7 +282,7 @@ export function FakeMessageGenerator() {
                 </div>
              </div>
              <div ref={waPreviewRef} className={cn("contents", mode !== 'whatsapp' && "hidden")}>
-                <div className="w-full max-w-[320px] bg-stone-200 dark:bg-[#111b21] shadow-lg flex flex-col h-[550px] border">
+                <div className="w-full max-w-[320px] bg-stone-100 dark:bg-[#0b141a] shadow-lg flex flex-col h-[550px] border">
                     <header className="bg-[#005E54] dark:bg-[#202c33] text-white p-2.5 flex items-center gap-3">
                          <Avatar className="h-8 w-8">
                             <AvatarFallback>{waOtherSender.charAt(0).toUpperCase()}</AvatarFallback>
