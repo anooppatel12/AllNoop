@@ -1,20 +1,18 @@
 
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { toPng } from 'html-to-image';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '../ui/button';
-import { RefreshCw, Battery, Wifi, Signal, Check, CheckCheck, Trash2, Plus, MessageSquare, Reply, Download } from 'lucide-react';
+import { RefreshCw, Battery, Wifi, Signal, Check, CheckCheck, Trash2, Plus, MessageSquare, Reply } from 'lucide-react';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { useToast } from '@/hooks/use-toast';
 
 type Message = {
     id: number;
@@ -25,7 +23,6 @@ type Message = {
 };
 
 export function FakeMessageGenerator() {
-  const { toast } = useToast();
   const [mode, setMode] = useState<'sms' | 'email' | 'whatsapp'>('sms');
 
   // Refs for download
@@ -91,47 +88,6 @@ export function FakeMessageGenerator() {
     setEmailSubject('Urgent: Project Update');
     setEmailBody('Hi team,\n\nPlease find the attached documents for the quarterly review. We need to have this finalized by EOD.\n\nThanks,\nYour Boss');
   }
-
-  const handleDownload = useCallback(async () => {
-    let elementToCapture: HTMLDivElement | null = null;
-    let fileName = 'fake-message.png';
-
-    if (mode === 'sms' && smsPreviewRef.current) {
-      elementToCapture = smsPreviewRef.current;
-      fileName = 'fake-sms.png';
-    } else if (mode === 'email' && emailPreviewRef.current) {
-      elementToCapture = emailPreviewRef.current;
-      fileName = 'fake-email.png';
-    } else if (mode === 'whatsapp' && waPreviewRef.current) {
-      elementToCapture = waPreviewRef.current;
-      fileName = 'fake-whatsapp-chat.png';
-    }
-
-    if (elementToCapture === null) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not find the element to download.' });
-      return;
-    }
-
-    try {
-        const dataUrl = await toPng(elementToCapture, { 
-            cacheBust: true, 
-            pixelRatio: 2,
-            allowTaint: true,
-            fetchRequestInit: {
-                mode: 'cors',
-                credentials: 'omit'
-            }
-        });
-        const link = document.createElement('a');
-        link.download = fileName;
-        link.href = dataUrl;
-        link.click();
-      } catch (err) {
-        console.error(err);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not generate the image.' });
-      }
-  }, [mode, toast]);
-
 
   const ReadReceipt = ({ status }: { status?: 'sent' | 'delivered' | 'read' }) => {
       if (status === 'read') return <CheckCheck className="h-4 w-4 text-blue-500"/>;
@@ -232,9 +188,6 @@ export function FakeMessageGenerator() {
                     </div>
                      <Button onClick={addWaMessage} variant="outline" className="w-full"><Plus className="mr-2 h-4 w-4"/>Add Message</Button>
                 </TabsContent>
-                <Button onClick={handleDownload} variant="default" className="w-full">
-                    <Download className="mr-2 h-4 w-4"/>Download as Image
-                </Button>
             </div>
 
             {/* PREVIEW */}
