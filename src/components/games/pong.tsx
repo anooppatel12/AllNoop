@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -42,19 +43,25 @@ export function PongGame() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
+    const style = getComputedStyle(canvas);
+    const secondaryColor = style.getPropertyValue('--secondary').trim() || '#e2e8f0'; // fallback slate-200
+    const primaryColor = style.getPropertyValue('--primary').trim() || '#3b82f6'; // fallback blue-500
+    const foregroundColor = style.getPropertyValue('--card-foreground').trim() || '#0f172a'; // fallback slate-900
+    const borderColor = style.getPropertyValue('--border').trim() || '#cbd5e1'; // fallback slate-300
+
     // Clear board
-    ctx.fillStyle = getComputedStyle(canvas).getPropertyValue('--secondary');
+    ctx.fillStyle = secondaryColor;
     ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
     
     // Draw paddles
-    ctx.fillStyle = getComputedStyle(canvas).getPropertyValue('--primary');
+    ctx.fillStyle = primaryColor;
     ctx.fillRect(10, paddle1Y.current, PADDLE_WIDTH, PADDLE_HEIGHT);
     ctx.fillRect(BOARD_WIDTH - PADDLE_WIDTH - 10, paddle2Y.current, PADDLE_WIDTH, PADDLE_HEIGHT);
 
     // Draw ball
     ctx.beginPath();
     ctx.arc(ball.current.x, ball.current.y, BALL_SIZE, 0, Math.PI * 2);
-    ctx.fillStyle = getComputedStyle(canvas).getPropertyValue('--card-foreground');
+    ctx.fillStyle = foregroundColor;
     ctx.fill();
     ctx.closePath();
     
@@ -63,7 +70,7 @@ export function PongGame() {
     ctx.setLineDash([5, 15]);
     ctx.moveTo(BOARD_WIDTH / 2, 0);
     ctx.lineTo(BOARD_WIDTH / 2, BOARD_HEIGHT);
-    ctx.strokeStyle = getComputedStyle(canvas).getPropertyValue('--border');
+    ctx.strokeStyle = borderColor;
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.setLineDash([]);
@@ -86,7 +93,9 @@ export function PongGame() {
     paddle1Y.current = BOARD_HEIGHT / 2 - PADDLE_HEIGHT / 2;
     paddle2Y.current = BOARD_HEIGHT / 2 - PADDLE_HEIGHT / 2;
     resetBall(1);
-  }, []);
+    // Ensure the board is drawn on reset
+    setTimeout(() => draw(), 0);
+  }, [draw]);
   
   const startGame = () => {
     if(gameState !== 'playing') {
@@ -156,11 +165,6 @@ export function PongGame() {
         setGameState('gameover');
     }
   }, [score]);
-
-  useEffect(() => {
-    resetGame();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   
   useInterval(gameLoop, gameState === 'playing' ? 1000/60 : null);
 
@@ -172,17 +176,13 @@ export function PongGame() {
     window.addEventListener('keyup', handleKeyUp);
     
     // Initial draw
-    const canvas = canvasRef.current;
-    if(canvas){
-        // A short delay to allow theme variables to be available
-        setTimeout(() => draw(), 100);
-    }
+    setTimeout(() => resetGame(), 100);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [draw]);
+  }, [resetGame]);
 
   return (
     <Card className="mt-8 mx-auto max-w-2xl w-full">
@@ -194,9 +194,9 @@ export function PongGame() {
         <div className="relative w-full aspect-[600/400] bg-secondary border-4 border-primary rounded-md overflow-hidden">
            <canvas ref={canvasRef} width={BOARD_WIDTH} height={BOARD_HEIGHT} />
             {(gameState === 'gameover' || gameState === 'waiting') && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white z-10 p-4">
-                   {gameState === 'gameover' && winner && <p className="text-4xl font-bold">{winner} Wins!</p>}
-                   {gameState === 'waiting' && <p className="text-2xl font-bold">Press Start to Play</p>}
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white z-10 p-4 text-center">
+                   {gameState === 'gameover' && winner && <h2 className="text-4xl font-bold">{winner} Wins!</h2>}
+                   {gameState === 'waiting' && <h2 className="text-2xl font-bold">Press Start to Play</h2>}
                      <Button onClick={startGame} className="mt-4">
                         <RefreshCw className="mr-2 h-4 w-4" />
                         {gameState === 'gameover' ? 'Play Again' : 'Start Game'}
