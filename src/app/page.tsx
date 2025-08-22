@@ -1,6 +1,7 @@
+
 'use client';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask } from 'lucide-react';
+import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard } from 'lucide-react';
 import Link from 'next/link';
 import { FloatingElements } from '@/components/floating-elements';
 
@@ -9,7 +10,8 @@ const features = [
   { name: 'Calculators', icon: Calculator, href: '/calculators' },
   { name: 'PDF Tools', icon: FileText, href: '/pdf-tools' },
   { name: 'Image Editor', icon: ImageIcon, href: '/image-editor' },
-  { name: 'Fun Tools', icon: VenetianMask, href: '/fun-tools/meme-generator' },
+  { name: 'Meme Generator', icon: VenetianMask, href: '/fun-tools/meme-generator' },
+  { name: 'Typing Speed Test', icon: Keyboard, href: '/fun-tools/typing-speed-test' },
   { name: 'P2P Chat', icon: Users, href: '/chat' },
   { name: 'Contact', icon: MessageSquare, href: '/contact' },
 ];

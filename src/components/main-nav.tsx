@@ -27,7 +27,8 @@ const links = [
   { href: '/calculators', label: 'Calculators', icon: Calculator },
   { href: '/pdf-tools', label: 'PDF Tools', icon: FileText },
   { href: '/image-editor', label: 'Image Editor', icon: ImageIcon },
-  { href: '/fun-tools/meme-generator', label: 'Fun Tools', icon: VenetianMask },
+  { href: '/fun-tools/meme-generator', label: 'Meme Generator', icon: VenetianMask },
+  { href: '/fun-tools/typing-speed-test', label: 'Typing Speed Test', icon: VenetianMask },
   { href: '/chat', label: 'P2P Chat', icon: Users },
   { href: '/contact', label: 'Contact', icon: MessageSquare },
 ];
