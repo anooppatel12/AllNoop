@@ -84,6 +84,15 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+     /* Hide the default cursor for a custom experience */
+    cursor: none;
+  }
+  /* Style interactive elements to use pointer cursor so our hook can detect it */
+  button, a, [role="button"], input[type="submit"], input[type="button"], label, select {
+    cursor: none; /* We hide the cursor but the effect will show a pointer */
+  }
+  button:hover, a:hover, [role="button"]:hover, input[type="submit"]:hover, input[type="button"]:hover, label:hover, select:hover {
+    cursor: pointer;
   }
 }
 
@@ -114,4 +123,30 @@ body {
 .dark ::-webkit-scrollbar-thumb {
    background-color: hsl(var(--primary) / 0.7);
    box-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+}
+
+/* Custom Cursor Styles */
+.custom-cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background-color: hsl(var(--primary));
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  transition: width 0.2s, height 0.2s, background-color 0.2s;
+}
+
+.custom-cursor-outline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9998;
+  backdrop-filter: blur(1px);
 }

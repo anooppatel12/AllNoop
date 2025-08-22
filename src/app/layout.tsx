@@ -16,6 +16,7 @@ import { Shapes, Info, Lock, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { AppHeader } from '@/components/header';
 import { Toaster } from '@/components/ui/toaster';
+import { CustomCursor } from '@/components/ui/custom-cursor';
 
 export const metadata: Metadata = {
   title: 'OmniTool',
@@ -39,6 +40,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <CustomCursor />
           <SidebarProvider>
             <div className="flex min-h-screen w-full flex-col bg-background md:flex-row">
               <Sidebar collapsible="icon" className="bg-sidebar text-sidebar-foreground">
