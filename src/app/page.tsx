@@ -1,7 +1,7 @@
 
 'use client';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode } from 'lucide-react';
+import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { FloatingElements } from '@/components/floating-elements';
 
@@ -24,6 +24,7 @@ const features = [
   { name: 'Image Editor', icon: ImageIcon, href: '/image-editor' },
   { name: 'QR Code Tools', icon: QrCode, href: '/tools/qrcode' },
   { name: 'Meme Generator', icon: VenetianMask, href: '/fun-tools/meme-generator' },
+  { name: 'Fake Message Generator', icon: MessageCircle, href: '/fun-tools/fake-message-generator' },
   { name: 'Typing Speed Test', icon: Keyboard, href: '/fun-tools/typing-speed-test' },
   { name: 'Joke & Quote Generator', icon: Quote, href: '/fun-tools/random-joke-quote-generator' },
   { name: 'Games', icon: Gamepad2, href: '/games' },
