@@ -19,6 +19,26 @@ import { AppHeader } from '@/components/header';
 import { Toaster } from '@/components/ui/toaster';
 import { CustomCursor } from '@/components/ui/custom-cursor';
 import { Logo } from '@/components/ui/logo';
+import { Inter, Space_Grotesk, Homemade_Apple } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+})
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['500', '700'],
+  variable: '--font-space-grotesk',
+})
+
+const homemadeApple = Homemade_Apple({
+    subsets: ['latin'],
+    weight: ['400'],
+    variable: '--font-homemade-apple',
+})
+
 
 const defaultUrl = 'https://allnoop.com'; // Replace with your actual domain
 
@@ -91,14 +111,8 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Homemade+Apple&display=swap" rel="stylesheet" />
-
       </head>
-      <body className="font-body antialiased">
+      <body className={cn("font-body antialiased", inter.variable, spaceGrotesk.variable, homemadeApple.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <CustomCursor />
           <SidebarProvider>
@@ -133,10 +147,10 @@ export default function RootLayout({
                       </SidebarMenuButton>
                    </SidebarMenuItem>
                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild tooltip="Terms & Conditions">
+                      <SidebarMenuButton asChild tooltip="Terms &amp; Conditions">
                         <Link href="/terms-and-conditions">
                             <FileText />
-                            <span className="group-data-[collapsible=icon]:hidden">Terms & Conditions</span>
+                            <span className="group-data-[collapsible=icon]:hidden">Terms &amp; Conditions</span>
                         </Link>
                       </SidebarMenuButton>
                    </SidebarMenuItem>
