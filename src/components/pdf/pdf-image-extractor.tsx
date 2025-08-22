@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { UploadCloud, FileText, Loader2, Download, Image as ImageIcon, AlertCircle } from 'lucide-react';
-import { PDFDocument, PDFImage, PDFName, PDFRawStream } from 'pdf-lib';
+import { PDFDocument, PDFImage, PDFName, PDFObject, PDFRawStream } from 'pdf-lib';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 
@@ -44,7 +44,6 @@ export function PdfImageExtractor() {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const pdfDoc = await PDFDocument.load(arrayBuffer, { 
-        // Ignore errors for slightly corrupt PDFs
         ignoreEncryption: true,
       });
       const images: ExtractedImage[] = [];
@@ -54,18 +53,17 @@ export function PdfImageExtractor() {
       for (const page of pages) {
           const imageXObjects = new Map<string, PDFImage>();
 
-          // Get page resources
           const resources = page.node.Resources();
           if (!resources) continue;
 
-          // Get XObject resources
           const xobjects = resources.lookup(PDFName.of('XObject'));
           if (!xobjects || !('entries' in xobjects)) continue;
 
-          // Iterate over XObjects
           for (const [key, value] of xobjects.entries()) {
-              const stream = value as PDFRawStream;
-              if (stream.dict.get(PDFName.of('Subtype')) === PDFName.of('Image')) {
+              // The value can be a reference, so we need to look it up.
+              const stream = pdfDoc.context.lookup(value) as PDFRawStream;
+              
+              if (stream?.dict?.get(PDFName.of('Subtype')) === PDFName.of('Image')) {
                   try {
                         const pdfImage = await pdfDoc.embedJpg(stream.contents);
                         imageXObjects.set(key.toString(), pdfImage);
