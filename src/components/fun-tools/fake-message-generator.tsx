@@ -110,8 +110,8 @@ export function FakeMessageGenerator() {
                         {smsMessages.map((msg, index) => (
                              <div key={msg.id} className="flex items-start gap-2 rounded-lg border p-2">
                                 <RadioGroup value={msg.sender} onValueChange={(v) => updateSmsMessage(index, 'sender', v)} className="mt-2">
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="them" id={`sms-${msg.id}-them`}/><Label htmlFor={`sms-${msg.id}-them`}><Reply className="h-4 w-4"/></Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="me" id={`sms-${msg.id}-me`} /><Label htmlFor={`sms-${msg.id}-me`}><MessageSquare className="h-4 w-4"/></Label></div>
+                                    <div className="flex items-center space-x-2"><RadioGroupItem value="them" id={`sms-${msg.id}-them`}/><Label htmlFor={`sms-${msg.id}-them`} className="cursor-pointer"><Reply className="h-4 w-4"/></Label></div>
+                                    <div className="flex items-center space-x-2"><RadioGroupItem value="me" id={`sms-${msg.id}-me`} /><Label htmlFor={`sms-${msg.id}-me`} className="cursor-pointer"><MessageSquare className="h-4 w-4"/></Label></div>
                                 </RadioGroup>
                                 <Textarea value={msg.content} onChange={(e) => updateSmsMessage(index, 'content', e.target.value)} rows={2} className="flex-1"/>
                                 <Button variant="ghost" size="icon" onClick={() => removeSmsMessage(index)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
@@ -157,8 +157,8 @@ export function FakeMessageGenerator() {
                              <div key={msg.id} className="grid grid-cols-1 gap-2 rounded-lg border p-2">
                                 <div className="flex items-start gap-2">
                                     <RadioGroup value={msg.sender} onValueChange={(v) => updateWaMessage(index, 'sender', v)} className="mt-2">
-                                        <div className="flex items-center space-x-2"><RadioGroupItem value="them" id={`wa-${msg.id}-them`}/><Label htmlFor={`wa-${msg.id}-them`}><Reply className="h-4 w-4"/></Label></div>
-                                        <div className="flex items-center space-x-2"><RadioGroupItem value="me" id={`wa-${msg.id}-me`} /><Label htmlFor={`wa-${msg.id}-me`}><MessageSquare className="h-4 w-4"/></Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="them" id={`wa-${msg.id}-them`}/><Label htmlFor={`wa-${msg.id}-them`} className="cursor-pointer"><Reply className="h-4 w-4"/></Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="me" id={`wa-${msg.id}-me`} /><Label htmlFor={`wa-${msg.id}-me`} className="cursor-pointer"><MessageSquare className="h-4 w-4"/></Label></div>
                                     </RadioGroup>
                                     <Textarea value={msg.content} onChange={(e) => updateWaMessage(index, 'content', e.target.value)} rows={2} className="flex-1"/>
                                     <Button variant="ghost" size="icon" onClick={() => removeWaMessage(index)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
