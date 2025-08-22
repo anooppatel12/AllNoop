@@ -96,7 +96,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.8 }}
-          className="relative mt-12 w-full max-w-2xl"
+          className="relative mt-12 w-full max-w-2xl z-20"
         >
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
@@ -107,7 +107,7 @@ export default function LandingPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <Card className="absolute top-full mt-2 w-full max-h-80 overflow-y-auto z-20 text-left shadow-2xl">
+              <Card className="absolute top-full mt-2 w-full max-h-80 overflow-y-auto text-left shadow-2xl">
                 {filteredFeatures.length > 0 ? (
                   filteredFeatures.map(feature => (
                     <Link href={feature.href} key={feature.name} className="block hover:bg-muted" onClick={() => setSearchQuery('')}>
