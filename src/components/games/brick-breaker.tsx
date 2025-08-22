@@ -56,6 +56,7 @@ export function BrickBreakerGame() {
   const bricks = useRef<Brick[]>([]);
   const rightPressed = useRef(false);
   const leftPressed = useRef(false);
+  const animationFrameId = useRef<number>();
   
   const createBricks = useCallback(() => {
     const newBricks: Brick[] = [];
@@ -74,20 +75,6 @@ export function BrickBreakerGame() {
     bricks.current = newBricks;
   }, []);
 
-  const resetGame = useCallback(() => {
-    createBricks();
-    setScore(0);
-    setLives(3);
-    paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
-    ball.current = {
-        x: BOARD_WIDTH / 2,
-        y: PADDLE_Y - BALL_RADIUS,
-        dx: 4,
-        dy: -4
-    };
-    setGameState('playing');
-  }, [createBricks]);
-
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -103,7 +90,7 @@ export function BrickBreakerGame() {
     // Draw Ball
     ctx.beginPath();
     ctx.arc(ball.current.x, ball.current.y, BALL_RADIUS, 0, Math.PI * 2);
-    ctx.fillStyle = 'hsl(var(--primary-foreground))';
+    ctx.fillStyle = 'hsl(var(--card-foreground))';
     ctx.fill();
     ctx.closePath();
     
@@ -116,6 +103,21 @@ export function BrickBreakerGame() {
     });
 
   }, []);
+
+  const resetGame = useCallback(() => {
+    if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+    createBricks();
+    setScore(0);
+    setLives(3);
+    paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
+    ball.current = {
+        x: BOARD_WIDTH / 2,
+        y: PADDLE_Y - BALL_RADIUS,
+        dx: 4,
+        dy: -4
+    };
+    setGameState('playing');
+  }, [createBricks]);
 
   const gameLoop = useCallback(() => {
     if (gameState !== 'playing') return;
@@ -179,12 +181,15 @@ export function BrickBreakerGame() {
     }
 
     draw();
-    requestAnimationFrame(gameLoop);
+    animationFrameId.current = requestAnimationFrame(gameLoop);
   }, [gameState, draw, lives]);
   
   useEffect(() => {
     if (gameState === 'playing') {
-       requestAnimationFrame(gameLoop);
+       animationFrameId.current = requestAnimationFrame(gameLoop);
+    }
+    return () => {
+        if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     }
   }, [gameState, gameLoop]);
 
@@ -206,6 +211,7 @@ export function BrickBreakerGame() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
+       if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     };
   }, [resetGame]);
 
