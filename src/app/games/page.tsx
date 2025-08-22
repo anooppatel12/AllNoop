@@ -51,6 +51,12 @@ const games = [
         description: 'Break all the bricks to win the game.',
         icon: BrickBreakerIcon,
         href: '/games/brick-breaker',
+    },
+    {
+        name: 'Memory Card Game',
+        description: 'Test your memory by finding all the matching pairs.',
+        icon: BrainCircuit,
+        href: '/games/memory',
     }
 ];
 
