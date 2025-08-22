@@ -2,23 +2,36 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '../ui/button';
-import { RefreshCw, Battery, Wifi, Signal, Check, CheckCheck } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { RefreshCw, Battery, Wifi, Signal, Check, CheckCheck, Trash2, Plus, MessageSquare, Reply } from 'lucide-react';
+import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { cn } from '@/lib/utils';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+
+type Message = {
+    id: number;
+    sender: 'me' | 'them';
+    content: string;
+    status?: 'sent' | 'delivered' | 'read';
+    time?: string;
+};
 
 export function FakeMessageGenerator() {
   const [mode, setMode] = useState<'sms' | 'email' | 'whatsapp'>('sms');
 
   // SMS State
-  const [smsSender, setSmsSender] = useState('Mom');
-  const [smsMessage, setSmsMessage] = useState('Did you remember to take the chicken out of the freezer?');
-  
+  const [smsOtherSender, setSmsOtherSender] = useState('Mom');
+  const [smsMessages, setSmsMessages] = useState<Message[]>([
+    { id: 1, sender: 'them', content: 'Did you remember to take the chicken out of the freezer?' },
+    { id: 2, sender: 'me', content: 'Yes, I did!' },
+  ]);
+
   // Email State
   const [emailFrom, setEmailFrom] = useState('boss@example.com');
   const [emailTo, setEmailTo] = useState('you@example.com');
@@ -26,14 +39,38 @@ export function FakeMessageGenerator() {
   const [emailBody, setEmailBody] = useState('Hi team,\n\nPlease find the attached documents for the quarterly review. We need to have this finalized by EOD.\n\nThanks,\nYour Boss');
   
   // WhatsApp State
-  const [waSender, setWaSender] = useState('Best Friend');
-  const [waMessage, setWaMessage] = useState('Hey, are we still on for tonight?');
-  const [waTime, setWaTime] = useState('10:45 PM');
-  const [waStatus, setWaStatus] = useState<'sent' | 'delivered' | 'read'>('read');
+  const [waOtherSender, setWaOtherSender] = useState('Best Friend');
+   const [waMessages, setWaMessages] = useState<Message[]>([
+    { id: 1, sender: 'them', content: 'Hey, are we still on for tonight?', time: '10:45 PM', status: 'read' },
+    { id: 2, sender: 'me', content: 'Absolutely! See you at 8.', time: '10:46 PM', status: 'read' },
+  ]);
+
+  const addSmsMessage = () => {
+    setSmsMessages([...smsMessages, { id: Date.now(), sender: 'me', content: '' }]);
+  };
+
+  const updateSmsMessage = (index: number, field: keyof Message, value: string) => {
+    const newMessages = [...smsMessages];
+    (newMessages[index] as any)[field] = value;
+    setSmsMessages(newMessages);
+  };
   
-  const resetSms = () => {
-    setSmsSender('Mom');
-    setSmsMessage('Did you remember to take the chicken out of the freezer?');
+  const removeSmsMessage = (index: number) => {
+    setSmsMessages(smsMessages.filter((_, i) => i !== index));
+  }
+
+  const addWaMessage = () => {
+    setWaMessages([...waMessages, { id: Date.now(), sender: 'me', content: '', time: '10:47 PM', status: 'read' }]);
+  };
+  
+   const updateWaMessage = (index: number, field: keyof Message, value: string) => {
+    const newMessages = [...waMessages];
+    (newMessages[index] as any)[field] = value;
+    setWaMessages(newMessages);
+  };
+  
+  const removeWaMessage = (index: number) => {
+    setWaMessages(waMessages.filter((_, i) => i !== index));
   }
   
   const resetEmail = () => {
@@ -42,21 +79,10 @@ export function FakeMessageGenerator() {
     setEmailSubject('Urgent: Project Update');
     setEmailBody('Hi team,\n\nPlease find the attached documents for the quarterly review. We need to have this finalized by EOD.\n\nThanks,\nYour Boss');
   }
-  
-  const resetWhatsApp = () => {
-    setWaSender('Best Friend');
-    setWaMessage('Hey, are we still on for tonight?');
-    setWaTime('10:45 PM');
-    setWaStatus('read');
-  }
 
-  const ReadReceipt = () => {
-      if (waStatus === 'read') {
-          return <CheckCheck className="h-4 w-4 text-blue-500"/>;
-      }
-      if (waStatus === 'delivered') {
-          return <CheckCheck className="h-4 w-4 text-gray-500"/>;
-      }
+  const ReadReceipt = ({ status }: { status?: 'sent' | 'delivered' | 'read' }) => {
+      if (status === 'read') return <CheckCheck className="h-4 w-4 text-blue-500"/>;
+      if (status === 'delivered') return <CheckCheck className="h-4 w-4 text-gray-500"/>;
       return <Check className="h-4 w-4 text-gray-500"/>;
   }
 
@@ -71,81 +97,95 @@ export function FakeMessageGenerator() {
             </TabsList>
           </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <TabsContent value="sms" className="m-0 space-y-4">
-                <CardTitle>SMS Generator</CardTitle>
-                <div className="space-y-2">
-                    <Label htmlFor="sms-sender">Sender Name</Label>
-                    <Input id="sms-sender" value={smsSender} onChange={(e) => setSmsSender(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="sms-message">Message</Label>
-                    <Textarea id="sms-message" value={smsMessage} onChange={(e) => setSmsMessage(e.target.value)} rows={5} />
-                </div>
-                 <Button onClick={resetSms} variant="outline" className="w-full">
-                    <RefreshCw className="mr-2 h-4 w-4"/>
-                    Reset SMS
-                </Button>
-            </TabsContent>
-            <TabsContent value="email" className="m-0 space-y-4">
-                 <CardTitle>Email Generator</CardTitle>
-                 <div className="space-y-2">
-                    <Label htmlFor="email-from">From</Label>
-                    <Input id="email-from" value={emailFrom} onChange={(e) => setEmailFrom(e.target.value)} />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="email-to">To</Label>
-                    <Input id="email-to" value={emailTo} onChange={(e) => setEmailTo(e.target.value)} />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="email-subject">Subject</Label>
-                    <Input id="email-subject" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="email-body">Body</Label>
-                    <Textarea id="email-body" value={emailBody} onChange={(e) => setEmailBody(e.target.value)} rows={8} />
-                </div>
-                 <Button onClick={resetEmail} variant="outline" className="w-full">
-                    <RefreshCw className="mr-2 h-4 w-4"/>
-                    Reset Email
-                </Button>
-            </TabsContent>
-             <TabsContent value="whatsapp" className="m-0 space-y-4">
-                 <CardTitle>WhatsApp Generator</CardTitle>
-                 <div className="space-y-2">
-                    <Label htmlFor="wa-sender">Sender Name</Label>
-                    <Input id="wa-sender" value={waSender} onChange={(e) => setWaSender(e.target.value)} />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="wa-message">Message</Label>
-                    <Textarea id="wa-message" value={waMessage} onChange={(e) => setWaMessage(e.target.value)} rows={5} />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+            {/* CONTROLS */}
+            <div className="space-y-4">
+                <TabsContent value="sms" className="m-0 space-y-4">
+                    <CardTitle>SMS Controls</CardTitle>
                     <div className="space-y-2">
-                        <Label htmlFor="wa-time">Time</Label>
-                        <Input id="wa-time" value={waTime} onChange={(e) => setWaTime(e.target.value)} />
+                        <Label htmlFor="sms-sender">Other Person's Name</Label>
+                        <Input id="sms-sender" value={smsOtherSender} onChange={(e) => setSmsOtherSender(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Messages</Label>
+                        {smsMessages.map((msg, index) => (
+                             <div key={msg.id} className="flex items-start gap-2 rounded-lg border p-2">
+                                <RadioGroup value={msg.sender} onValueChange={(v) => updateSmsMessage(index, 'sender', v)} className="mt-2">
+                                    <div className="flex items-center space-x-2"><RadioGroupItem value="them" id={`sms-${msg.id}-them`}/><Label htmlFor={`sms-${msg.id}-them`}><Reply className="h-4 w-4"/></Label></div>
+                                    <div className="flex items-center space-x-2"><RadioGroupItem value="me" id={`sms-${msg.id}-me`} /><Label htmlFor={`sms-${msg.id}-me`}><MessageSquare className="h-4 w-4"/></Label></div>
+                                </RadioGroup>
+                                <Textarea value={msg.content} onChange={(e) => updateSmsMessage(index, 'content', e.target.value)} rows={2} className="flex-1"/>
+                                <Button variant="ghost" size="icon" onClick={() => removeSmsMessage(index)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
+                            </div>
+                        ))}
+                    </div>
+                    <Button onClick={addSmsMessage} variant="outline" className="w-full"><Plus className="mr-2 h-4 w-4"/>Add Message</Button>
+                </TabsContent>
+
+                <TabsContent value="email" className="m-0 space-y-4">
+                    <CardTitle>Email Generator</CardTitle>
+                    <div className="space-y-2">
+                        <Label htmlFor="email-from">From</Label>
+                        <Input id="email-from" value={emailFrom} onChange={(e) => setEmailFrom(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="email-to">To</Label>
+                        <Input id="email-to" value={emailTo} onChange={(e) => setEmailTo(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="email-subject">Subject</Label>
+                        <Input id="email-subject" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="email-body">Body</Label>
+                        <Textarea id="email-body" value={emailBody} onChange={(e) => setEmailBody(e.target.value)} rows={8} />
+                    </div>
+                    <Button onClick={resetEmail} variant="outline" className="w-full">
+                        <RefreshCw className="mr-2 h-4 w-4"/>
+                        Reset Email
+                    </Button>
+                </TabsContent>
+
+                <TabsContent value="whatsapp" className="m-0 space-y-4">
+                    <CardTitle>WhatsApp Controls</CardTitle>
+                    <div className="space-y-2">
+                        <Label htmlFor="wa-sender">Other Person's Name</Label>
+                        <Input id="wa-sender" value={waOtherSender} onChange={(e) => setWaOtherSender(e.target.value)} />
                     </div>
                      <div className="space-y-2">
-                        <Label>Read Status</Label>
-                        <Select value={waStatus} onValueChange={(v) => setWaStatus(v as 'sent' | 'delivered' | 'read')}>
-                            <SelectTrigger><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="sent">Sent</SelectItem>
-                                <SelectItem value="delivered">Delivered</SelectItem>
-                                <SelectItem value="read">Read</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <Label>Messages</Label>
+                        {waMessages.map((msg, index) => (
+                             <div key={msg.id} className="grid grid-cols-1 gap-2 rounded-lg border p-2">
+                                <div className="flex items-start gap-2">
+                                    <RadioGroup value={msg.sender} onValueChange={(v) => updateWaMessage(index, 'sender', v)} className="mt-2">
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="them" id={`wa-${msg.id}-them`}/><Label htmlFor={`wa-${msg.id}-them`}><Reply className="h-4 w-4"/></Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="me" id={`wa-${msg.id}-me`} /><Label htmlFor={`wa-${msg.id}-me`}><MessageSquare className="h-4 w-4"/></Label></div>
+                                    </RadioGroup>
+                                    <Textarea value={msg.content} onChange={(e) => updateWaMessage(index, 'content', e.target.value)} rows={2} className="flex-1"/>
+                                    <Button variant="ghost" size="icon" onClick={() => removeWaMessage(index)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
+                                </div>
+                                 <div className="flex items-center gap-2">
+                                    <Input placeholder="Time" value={msg.time} onChange={(e) => updateWaMessage(index, 'time', e.target.value)} className="text-xs h-8"/>
+                                    <Select value={msg.status} onValueChange={(v) => updateWaMessage(index, 'status', v)}>
+                                        <SelectTrigger className="text-xs h-8"><SelectValue/></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="sent">Sent</SelectItem>
+                                            <SelectItem value="delivered">Delivered</SelectItem>
+                                            <SelectItem value="read">Read</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                </div>
-                 <Button onClick={resetWhatsApp} variant="outline" className="w-full">
-                    <RefreshCw className="mr-2 h-4 w-4"/>
-                    Reset WhatsApp
-                </Button>
-            </TabsContent>
+                     <Button onClick={addWaMessage} variant="outline" className="w-full"><Plus className="mr-2 h-4 w-4"/>Add Message</Button>
+                </TabsContent>
+            </div>
 
+            {/* PREVIEW */}
           <div className="rounded-xl border bg-muted p-4 flex items-center justify-center">
              {mode === 'sms' && (
-                <div className="w-full max-w-[300px] rounded-2xl bg-gray-900 text-white shadow-lg p-2">
-                    <div className="flex justify-between items-center text-xs px-2 mb-2">
+                <div className="w-full max-w-[320px] rounded-2xl bg-gray-100 dark:bg-gray-900 text-black dark:text-white shadow-lg flex flex-col h-[550px]">
+                    <div className="flex justify-between items-center text-xs px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-t-2xl">
                         <span>10:30 AM</span>
                         <div className="flex items-center gap-1">
                             <Signal size={14} />
@@ -153,17 +193,19 @@ export function FakeMessageGenerator() {
                             <Battery size={14} />
                         </div>
                     </div>
-                    <div className="bg-gray-800 rounded-lg p-4">
-                        <div className="flex items-center mb-4">
-                             <Avatar className="h-8 w-8 mr-2">
-                                <AvatarFallback>{smsSender.charAt(0).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <h3 className="font-semibold">{smsSender}</h3>
-                        </div>
-                        <div className="bg-blue-600 rounded-xl p-3 text-sm max-w-max">
-                           {smsMessage}
-                        </div>
-                    </div>
+                    <header className="p-3 border-b border-gray-300 dark:border-gray-700 flex items-center">
+                        <Avatar className="h-8 w-8 mr-2"><AvatarFallback>{smsOtherSender.charAt(0).toUpperCase()}</AvatarFallback></Avatar>
+                        <h3 className="font-semibold">{smsOtherSender}</h3>
+                    </header>
+                    <main className="flex-1 p-3 overflow-y-auto space-y-3">
+                        {smsMessages.map(msg => (
+                            <div key={msg.id} className={cn("flex", msg.sender === 'me' ? 'justify-end' : 'justify-start')}>
+                                <div className={cn("rounded-xl p-2.5 text-sm max-w-[80%]", msg.sender === 'me' ? 'bg-blue-500 text-white' : 'bg-gray-300 dark:bg-gray-700')}>
+                                    {msg.content}
+                                </div>
+                            </div>
+                        ))}
+                    </main>
                 </div>
              )}
              {mode === 'email' && (
@@ -185,23 +227,25 @@ export function FakeMessageGenerator() {
                 </div>
              )}
              {mode === 'whatsapp' && (
-                <div className="w-full max-w-[320px] bg-[#E5DDD5] dark:bg-[#0D1418] shadow-lg flex flex-col h-[550px]">
+                <div className="w-full max-w-[320px] bg-[url('https://i.ibb.co/7z0H5V6/whatsapp-bg.png')] bg-cover bg-center shadow-lg flex flex-col h-[550px] border">
                     <header className="bg-[#005E54] dark:bg-[#2A2F32] text-white p-2.5 flex items-center gap-3">
                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>{waSender.charAt(0).toUpperCase()}</AvatarFallback>
+                            <AvatarFallback>{waOtherSender.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
-                        <h3 className="font-semibold text-sm">{waSender}</h3>
+                        <h3 className="font-semibold text-sm">{waOtherSender}</h3>
                     </header>
-                    <main className="flex-1 p-3 overflow-y-auto space-y-2">
-                         <div className="flex justify-end">
-                            <div className="bg-[#DCF8C6] dark:bg-[#056162] text-black dark:text-white rounded-lg p-2 max-w-[80%] relative">
-                                <p className="text-sm">{waMessage}</p>
-                                <div className="text-xs text-gray-500 dark:text-gray-400 text-right mt-1 flex items-center justify-end gap-1">
-                                    <span>{waTime}</span>
-                                    <ReadReceipt/>
+                    <main className="flex-1 p-3 overflow-y-auto space-y-1.5 flex flex-col">
+                        {waMessages.map(msg => (
+                             <div key={msg.id} className={cn("flex w-full", msg.sender === 'me' ? 'justify-end' : 'justify-start')}>
+                                <div className={cn("rounded-lg p-1.5 px-2.5 max-w-[80%] relative shadow", msg.sender === 'me' ? 'bg-[#DCF8C6] dark:bg-[#056162]' : 'bg-white dark:bg-[#2A2F32]')}>
+                                    <p className="text-sm text-black dark:text-white pr-4">{msg.content}</p>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 text-right -mt-1 -mr-1 flex items-center justify-end gap-1">
+                                        <span>{msg.time}</span>
+                                        {msg.sender === 'me' && <ReadReceipt status={msg.status}/>}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        ))}
                     </main>
                 </div>
              )}
