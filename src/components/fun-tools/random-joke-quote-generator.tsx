@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+import { generateQuoteAction } from '@/app/actions';
 
 type Joke = {
   setup: string;
@@ -47,14 +48,12 @@ export function RandomJokeQuoteGenerator() {
     setError(null);
     setQuote(null);
     try {
-      const response = await fetch('https://api.quotable.io/random');
-       if (!response.ok) throw new Error('Failed to fetch quote. Please try again.');
-      const apiResponse = await response.json();
-      
-      if(apiResponse.content && apiResponse.author) {
-        setQuote({ content: apiResponse.content, author: apiResponse.author });
+      const result = await generateQuoteAction();
+      if(result.error) throw new Error(result.error);
+      if(result.quote) {
+        setQuote(result.quote);
       } else {
-        throw new Error('Failed to parse quote data from the API.');
+        throw new Error('Failed to generate a quote.');
       }
     } catch (e: any) {
       setError(e.message);

@@ -14,6 +14,7 @@ import {
   replaceImageBackground,
   type ReplaceImageBackgroundInput,
 } from '@/ai/flows/replace-image-background';
+import { generateQuote } from '@/ai/flows/generate-quote';
 
 
 export async function generateHashtags(topic: string) {
@@ -34,6 +35,16 @@ export async function generateCaptions(topic: string) {
     console.error(error);
     return { error: 'Failed to generate captions. Please try again.' };
   }
+}
+
+export async function generateQuoteAction() {
+    try {
+        const result = await generateQuote();
+        return { quote: result };
+    } catch (error) {
+        console.error(error);
+        return { error: 'Failed to generate a quote. Please try again.' };
+    }
 }
 
 export async function removeImageBackgroundAction(image: string) {
