@@ -44,7 +44,6 @@ export function PongGame() {
   };
 
   const resetGame = useCallback(() => {
-    setGameState('waiting');
     setScore({ player1: 0, player2: 0 });
     setWinner(null);
     paddle1Y.current = BOARD_HEIGHT / 2 - PADDLE_HEIGHT / 2;
@@ -165,7 +164,11 @@ export function PongGame() {
       animationFrameId.current = requestAnimationFrame(render);
     }
     const id = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(id);
+    return () => {
+        if(animationFrameId.current) {
+            cancelAnimationFrame(animationFrameId.current);
+        }
+    };
   }, [draw]);
   
   useEffect(() => {
