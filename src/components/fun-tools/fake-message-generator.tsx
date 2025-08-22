@@ -1,18 +1,20 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
+import { toPng } from 'html-to-image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '../ui/button';
-import { RefreshCw, Battery, Wifi, Signal, Check, CheckCheck, Trash2, Plus, MessageSquare, Reply } from 'lucide-react';
+import { RefreshCw, Battery, Wifi, Signal, Check, CheckCheck, Trash2, Plus, MessageSquare, Reply, Download } from 'lucide-react';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { useToast } from '@/hooks/use-toast';
 
 type Message = {
     id: number;
@@ -23,7 +25,13 @@ type Message = {
 };
 
 export function FakeMessageGenerator() {
+  const { toast } = useToast();
   const [mode, setMode] = useState<'sms' | 'email' | 'whatsapp'>('sms');
+
+  // Refs for download
+  const smsPreviewRef = useRef<HTMLDivElement>(null);
+  const emailPreviewRef = useRef<HTMLDivElement>(null);
+  const waPreviewRef = useRef<HTMLDivElement>(null);
 
   // SMS State
   const [smsOtherSender, setSmsOtherSender] = useState('Mom');
@@ -83,6 +91,40 @@ export function FakeMessageGenerator() {
     setEmailSubject('Urgent: Project Update');
     setEmailBody('Hi team,\n\nPlease find the attached documents for the quarterly review. We need to have this finalized by EOD.\n\nThanks,\nYour Boss');
   }
+
+  const handleDownload = useCallback(() => {
+    let elementToCapture: HTMLDivElement | null = null;
+    let fileName = 'fake-message.png';
+
+    if (mode === 'sms' && smsPreviewRef.current) {
+      elementToCapture = smsPreviewRef.current;
+      fileName = 'fake-sms.png';
+    } else if (mode === 'email' && emailPreviewRef.current) {
+      elementToCapture = emailPreviewRef.current;
+      fileName = 'fake-email.png';
+    } else if (mode === 'whatsapp' && waPreviewRef.current) {
+      elementToCapture = waPreviewRef.current;
+      fileName = 'fake-whatsapp-chat.png';
+    }
+
+    if (elementToCapture === null) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not find the element to download.' });
+      return;
+    }
+
+    toPng(elementToCapture, { cacheBust: true, pixelRatio: 2 })
+      .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not generate the image.' });
+      });
+  }, [mode, toast]);
+
 
   const ReadReceipt = ({ status }: { status?: 'sent' | 'delivered' | 'read' }) => {
       if (status === 'read') return <CheckCheck className="h-4 w-4 text-blue-500"/>;
@@ -183,11 +225,14 @@ export function FakeMessageGenerator() {
                     </div>
                      <Button onClick={addWaMessage} variant="outline" className="w-full"><Plus className="mr-2 h-4 w-4"/>Add Message</Button>
                 </TabsContent>
+                <Button onClick={handleDownload} variant="default" className="w-full">
+                    <Download className="mr-2 h-4 w-4"/>Download as Image
+                </Button>
             </div>
 
             {/* PREVIEW */}
           <div className="rounded-xl border bg-muted p-4 flex items-center justify-center">
-             {mode === 'sms' && (
+             <div ref={smsPreviewRef} className={cn("contents", mode !== 'sms' && "hidden")}>
                 <div className="w-full max-w-[320px] rounded-2xl bg-gray-100 dark:bg-gray-900 text-black dark:text-white shadow-lg flex flex-col h-[550px]">
                     <div className="flex justify-between items-center text-xs px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-t-2xl">
                         <span>10:30 AM</span>
@@ -211,8 +256,8 @@ export function FakeMessageGenerator() {
                         ))}
                     </main>
                 </div>
-             )}
-             {mode === 'email' && (
+             </div>
+             <div ref={emailPreviewRef} className={cn("contents", mode !== 'email' && "hidden")}>
                 <div className="w-full rounded-lg bg-white dark:bg-gray-800 shadow-md p-4 text-sm">
                     <div className="flex items-center mb-4">
                         <Avatar className="h-10 w-10 mr-3">
@@ -229,8 +274,8 @@ export function FakeMessageGenerator() {
                         {emailBody}
                     </div>
                 </div>
-             )}
-             {mode === 'whatsapp' && (
+             </div>
+             <div ref={waPreviewRef} className={cn("contents", mode !== 'whatsapp' && "hidden")}>
                 <div className="w-full max-w-[320px] bg-stone-200 dark:bg-stone-800 shadow-lg flex flex-col h-[550px] border">
                     <header className="bg-[#005E54] dark:bg-[#2A2F32] text-white p-2.5 flex items-center gap-3">
                          <Avatar className="h-8 w-8">
@@ -238,7 +283,7 @@ export function FakeMessageGenerator() {
                         </Avatar>
                         <h3 className="font-semibold text-sm">{waOtherSender}</h3>
                     </header>
-                    <main className="flex-1 p-3 overflow-y-auto space-y-1.5 flex flex-col">
+                    <main className="flex-1 p-3 overflow-y-auto space-y-1.5 flex flex-col bg-stone-100 dark:bg-stone-900">
                         {waMessages.map(msg => (
                              <div key={msg.id} className={cn("flex w-full", msg.sender === 'me' ? 'justify-end' : 'justify-start')}>
                                 <div className={cn("rounded-lg p-1.5 px-2.5 max-w-[80%] relative shadow", msg.sender === 'me' ? 'bg-[#DCF8C6] dark:bg-[#056162]' : 'bg-white dark:bg-[#2A2F32]')}>
@@ -252,7 +297,7 @@ export function FakeMessageGenerator() {
                         ))}
                     </main>
                 </div>
-             )}
+             </div>
           </div>
         </CardContent>
       </Tabs>
