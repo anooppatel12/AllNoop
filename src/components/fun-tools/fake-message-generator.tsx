@@ -46,7 +46,9 @@ export function FakeMessageGenerator() {
   ]);
 
   const addSmsMessage = () => {
-    setSmsMessages([...smsMessages, { id: Date.now(), sender: 'me', content: '' }]);
+    const lastSender = smsMessages.length > 0 ? smsMessages[smsMessages.length - 1].sender : 'them';
+    const newSender = lastSender === 'me' ? 'them' : 'me';
+    setSmsMessages([...smsMessages, { id: Date.now(), sender: newSender, content: '' }]);
   };
 
   const updateSmsMessage = (index: number, field: keyof Message, value: string) => {
@@ -60,7 +62,9 @@ export function FakeMessageGenerator() {
   }
 
   const addWaMessage = () => {
-    setWaMessages([...waMessages, { id: Date.now(), sender: 'me', content: '', time: '10:47 PM', status: 'read' }]);
+    const lastSender = waMessages.length > 0 ? waMessages[waMessages.length - 1].sender : 'them';
+    const newSender = lastSender === 'me' ? 'them' : 'me';
+    setWaMessages([...waMessages, { id: Date.now(), sender: newSender, content: '', time: '10:47 PM', status: 'read' }]);
   };
   
    const updateWaMessage = (index: number, field: keyof Message, value: string) => {
