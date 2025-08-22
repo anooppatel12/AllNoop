@@ -12,6 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Terminal } from 'lucide-react';
 
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -21,6 +24,9 @@ const contactFormSchema = z.object({
 
 export default function ContactPage() {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const form = useForm<z.infer<typeof contactFormSchema>>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -30,15 +36,34 @@ export default function ContactPage() {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof contactFormSchema>) => {
-    // In a real application, you would handle the form submission here,
-    // e.g., send the data to your backend or an email service.
-    console.log(data);
-    toast({
-      title: 'Message Sent!',
-      description: "Thanks for reaching out. We'll get back to you soon.",
-    });
-    form.reset();
+  const onSubmit = async (data: z.infer<typeof contactFormSchema>) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+        const response = await fetch('/api/contact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Something went wrong.');
+        }
+
+        toast({
+            title: 'Message Sent!',
+            description: "Thanks for reaching out. We'll get back to you soon.",
+        });
+        form.reset();
+
+    } catch (e: any) {
+        setError(e.message);
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
@@ -98,7 +123,15 @@ export default function ContactPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
+               {error && (
+                <Alert variant="destructive">
+                    <Terminal className="h-4 w-4" />
+                    <AlertTitle>Submission Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Send Message
               </Button>
             </form>
