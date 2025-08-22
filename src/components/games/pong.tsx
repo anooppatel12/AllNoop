@@ -65,7 +65,9 @@ export function PongGame() {
     ctx.moveTo(BOARD_WIDTH / 2, 0);
     ctx.lineTo(BOARD_WIDTH / 2, BOARD_HEIGHT);
     ctx.strokeStyle = 'hsl(var(--border))';
+    ctx.lineWidth = 2;
     ctx.stroke();
+    ctx.setLineDash([]);
 
   }, []);
   
@@ -85,8 +87,7 @@ export function PongGame() {
     paddle1Y.current = BOARD_HEIGHT / 2 - PADDLE_HEIGHT / 2;
     paddle2Y.current = BOARD_HEIGHT / 2 - PADDLE_HEIGHT / 2;
     resetBall(1);
-    draw();
-  }, [draw]);
+  }, []);
   
   const startGame = () => {
     if(gameState !== 'playing') {
@@ -124,11 +125,11 @@ export function PongGame() {
 
     // Paddle collision
     // Player 1
-    if (b.dx < 0 && b.x < 20 + PADDLE_WIDTH && b.y > paddle1Y.current && b.y < paddle1Y.current + PADDLE_HEIGHT) {
+    if (b.dx < 0 && b.x - BALL_SIZE < 10 + PADDLE_WIDTH && b.y > paddle1Y.current && b.y < paddle1Y.current + PADDLE_HEIGHT) {
         b.dx = -b.dx;
     }
     // Player 2
-    if (b.dx > 0 && b.x > BOARD_WIDTH - 20 - PADDLE_WIDTH - BALL_SIZE && b.y > paddle2Y.current && b.y < paddle2Y.current + PADDLE_HEIGHT) {
+    if (b.dx > 0 && b.x + BALL_SIZE > BOARD_WIDTH - 10 - PADDLE_WIDTH && b.y > paddle2Y.current && b.y < paddle2Y.current + PADDLE_HEIGHT) {
         b.dx = -b.dx;
     }
 
@@ -142,7 +143,8 @@ export function PongGame() {
       resetBall(1);
     }
     
-  }, [gameState]);
+    draw();
+  }, [gameState, draw]);
 
   useEffect(() => {
     // Check for winner
@@ -157,8 +159,9 @@ export function PongGame() {
   }, [score]);
 
   useEffect(() => {
-    draw();
-  }, [draw, gameState]);
+    resetGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   useInterval(gameLoop, gameState === 'playing' ? 1000/60 : null);
 
@@ -169,13 +172,18 @@ export function PongGame() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     
-    draw();
+    // Initial draw
+    const canvas = canvasRef.current;
+    if(canvas){
+        draw();
+    }
+    
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [draw]);
+  }, [draw, gameLoop]);
 
   return (
     <Card className="mt-8 mx-auto max-w-2xl w-full">
@@ -187,7 +195,7 @@ export function PongGame() {
         <div className="relative w-full aspect-[600/400] bg-secondary border-4 border-primary rounded-md overflow-hidden">
            <canvas ref={canvasRef} width={BOARD_WIDTH} height={BOARD_HEIGHT} />
             {(gameState === 'gameover' || gameState === 'waiting') && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white z-10">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white z-10 p-4">
                    {gameState === 'gameover' && winner && <p className="text-4xl font-bold">{winner} Wins!</p>}
                    {gameState === 'waiting' && <p className="text-2xl font-bold">Press Start to Play</p>}
                      <Button onClick={startGame} className="mt-4">
