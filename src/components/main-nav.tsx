@@ -15,7 +15,8 @@ import {
   VenetianMask,
   Keyboard,
   Quote,
-  Gamepad2
+  Gamepad2,
+  QrCode
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -30,6 +31,7 @@ const links = [
   { href: '/calculators', label: 'Calculators', icon: Calculator },
   { href: '/pdf-tools', label: 'PDF Tools', icon: FileText },
   { href: '/image-editor', label: 'Image Editor', icon: ImageIcon },
+  { href: '/tools/qrcode', label: 'QR Code Tools', icon: QrCode },
   { href: '/fun-tools/meme-generator', label: 'Meme Generator', icon: VenetianMask },
   { href: '/fun-tools/typing-speed-test', label: 'Typing Speed Test', icon: Keyboard },
   { href: '/fun-tools/random-joke-quote-generator', label: 'Joke/Quote Generator', icon: Quote },
