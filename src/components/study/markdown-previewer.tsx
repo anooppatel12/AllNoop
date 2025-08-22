@@ -7,49 +7,43 @@ import { Textarea } from '@/components/ui/textarea';
 import { marked } from 'marked';
 
 const defaultMarkdown = `
-# Welcome to the Markdown Previewer!
+# Welcome to the OmniTool Markdown Previewer!
 
-## This is a sub-heading...
-### And here's some other cool stuff:
+## Your All-in-One Digital Toolkit
 
-Heres some code, \`<div></div>\`, between 2 backticks.
+This previewer helps you write and visualize your Markdown content in real-time.
 
-\`\`\`javascript
-// this is multi-line code:
+### Key Features of OmniTool:
 
-function anotherExample(firstLine, lastLine) {
-  if (firstLine == '\`\`\`' && lastLine == '\`\`\`') {
-    return multiLineCode;
-  }
+- **Calculators**: A wide range of calculators for every need.
+- **PDF Tools**: Merge, split, compress, and edit PDFs.
+- **Image Editor**: Edit images with ease.
+- **AI Content Generation**: Get creative with AI-powered tools.
+
+Here's an example of a code block:
+
+\`\`\`jsx
+function OmniToolComponent() {
+  return (
+    <div>
+      <h1>Welcome to OmniTool!</h1>
+    </div>
+  );
 }
 \`\`\`
 
-You can also make text **bold**... whoa!
-Or _italic_.
-Or... wait for it... **_both!_**
-And feel free to go crazy ~~crossing stuff out~~.
+You can make text **bold**, _italic_, or **_both_**.
 
-There's also [links](https://www.freecodecamp.org), and
-> Block Quotes!
+> OmniTool is designed to be your go-to resource for a variety of digital tasks.
 
-And if you want to get really crazy, even tables:
+Check out our features:
+1.  Hashtag Generator
+2.  Calculators
+3.  PDF & Image Tools
 
-Wild Header | Crazy Header | Another Header?
------------- | ------------- | -------------
-Your content can | be here, and it | can be here....
-And here. | Okay. | I think we get it.
+[Visit OmniTool's Homepage](/)
 
-- And of course there are lists.
-  - Some are bulleted.
-     - With different indentation levels.
-        - That look like this.
-
-
-1. And there are numbered lists too.
-1. Use just 1s if you want!
-1. And last but not least, let's not forget embedded images:
-
-![freeCodeCamp Logo](https://cdn.freecodecamp.org/testable-projects-fcc/images/fcc_secondary.svg)
+![OmniTool Logo](https://placehold.co/150x50.png?text=OmniTool)
 `;
 
 
