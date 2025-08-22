@@ -133,7 +133,7 @@ export default function LandingPage() {
 
       </div>
 
-      <div className={cn("relative z-10 mx-auto max-w-7xl px-4 pb-16 transition-all duration-300", searchQuery && "pointer-events-none opacity-30 blur-sm")}>
+      <div className={cn("relative z-10 mx-auto max-w-7xl px-4 pb-16 transition-opacity duration-300", searchQuery && "pointer-events-none opacity-30 blur-sm")}>
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
