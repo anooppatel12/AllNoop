@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -44,18 +43,18 @@ export function PongGame() {
     if (!ctx) return;
     
     // Clear board
-    ctx.fillStyle = 'hsl(var(--secondary))';
+    ctx.fillStyle = getComputedStyle(canvas).getPropertyValue('--secondary');
     ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
     
     // Draw paddles
-    ctx.fillStyle = 'hsl(var(--primary))';
+    ctx.fillStyle = getComputedStyle(canvas).getPropertyValue('--primary');
     ctx.fillRect(10, paddle1Y.current, PADDLE_WIDTH, PADDLE_HEIGHT);
     ctx.fillRect(BOARD_WIDTH - PADDLE_WIDTH - 10, paddle2Y.current, PADDLE_WIDTH, PADDLE_HEIGHT);
 
     // Draw ball
     ctx.beginPath();
     ctx.arc(ball.current.x, ball.current.y, BALL_SIZE, 0, Math.PI * 2);
-    ctx.fillStyle = 'hsl(var(--card-foreground))';
+    ctx.fillStyle = getComputedStyle(canvas).getPropertyValue('--card-foreground');
     ctx.fill();
     ctx.closePath();
     
@@ -64,7 +63,7 @@ export function PongGame() {
     ctx.setLineDash([5, 15]);
     ctx.moveTo(BOARD_WIDTH / 2, 0);
     ctx.lineTo(BOARD_WIDTH / 2, BOARD_HEIGHT);
-    ctx.strokeStyle = 'hsl(var(--border))';
+    ctx.strokeStyle = getComputedStyle(canvas).getPropertyValue('--border');
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.setLineDash([]);
@@ -175,15 +174,15 @@ export function PongGame() {
     // Initial draw
     const canvas = canvasRef.current;
     if(canvas){
-        draw();
+        // A short delay to allow theme variables to be available
+        setTimeout(() => draw(), 100);
     }
-    
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [draw, gameLoop]);
+  }, [draw]);
 
   return (
     <Card className="mt-8 mx-auto max-w-2xl w-full">
