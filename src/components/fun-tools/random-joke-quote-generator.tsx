@@ -47,16 +47,14 @@ export function RandomJokeQuoteGenerator() {
     setError(null);
     setQuote(null);
     try {
-      // Using a different, more stable API for quotes
-      const response = await fetch('https://api.freeapi.app/api/v1/public/quotes/random');
+      const response = await fetch('https://api.realinspire.live/v1/quotes/random');
        if (!response.ok) throw new Error('Failed to fetch quote. Please try again.');
       const apiResponse = await response.json();
-
-      if(apiResponse.success && apiResponse.data) {
-        const data: Quote = apiResponse.data;
-        setQuote(data);
+      
+      if(apiResponse.quote && apiResponse.author) {
+        setQuote({ content: apiResponse.quote, author: apiResponse.author });
       } else {
-        throw new Error(apiResponse.message || 'Failed to parse quote data.');
+        throw new Error('Failed to parse quote data from the new API.');
       }
     } catch (e: any) {
       setError(e.message);
