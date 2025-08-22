@@ -1,7 +1,7 @@
 
 'use client';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle } from 'lucide-react';
+import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit } from 'lucide-react';
 import Link from 'next/link';
 import { FloatingElements } from '@/components/floating-elements';
 
@@ -22,6 +22,7 @@ const features = [
   { name: 'Contact', icon: MessageSquare, href: '/contact' },
   { name: 'Sudoku', icon: Puzzle, href: '/games/sudoku' },
   { name: 'Snake', icon: SnakeIcon, href: '/games/snake' },
+  { name: 'Quiz Game', icon: BrainCircuit, href: '/games/quiz'},
 ];
 
 export default function LandingPage() {
