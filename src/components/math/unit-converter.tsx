@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -58,37 +57,39 @@ export function UnitConverter() {
     setToUnit(units[1] || units[0]);
   }, [conversionType]);
 
-  useEffect(() => {
-    convert();
-  }, [fromValue, fromUnit, toUnit, conversionType]);
-  
-  const convert = (valueStr = fromValue, currentFromUnit = fromUnit, currentToUnit = toUnit, type = conversionType) => {
-    const value = parseFloat(valueStr);
+  const convert = () => {
+    const value = parseFloat(fromValue);
     if (isNaN(value)) {
         setToValue('');
         return;
     }
     
-    if (type === 'temperature') {
+    if (conversionType === 'temperature') {
       let tempInCelsius: number;
-      if (currentFromUnit === 'celsius') tempInCelsius = value;
-      else if (currentFromUnit === 'fahrenheit') tempInCelsius = (value - 32) * 5/9;
+      if (fromUnit === 'celsius') tempInCelsius = value;
+      else if (fromUnit === 'fahrenheit') tempInCelsius = (value - 32) * 5/9;
       else tempInCelsius = value - 273.15; // Kelvin
 
       let result: number;
-      if (currentToUnit === 'celsius') result = tempInCelsius;
-      else if (currentToUnit === 'fahrenheit') result = (tempInCelsius * 9/5) + 32;
+      if (toUnit === 'celsius') result = tempInCelsius;
+      else if (toUnit === 'fahrenheit') result = (tempInCelsius * 9/5) + 32;
       else result = tempInCelsius + 273.15; // Kelvin
 
       setToValue(result.toFixed(4));
     } else {
-      const fromRate = conversionOptions[type].units[currentFromUnit as Unit<typeof type>].toBase;
-      const toRate = conversionOptions[type].units[currentToUnit as Unit<typeof type>].toBase;
+      const type = conversionType as 'length' | 'mass';
+      const fromRate = conversionOptions[type].units[fromUnit as Unit<typeof type>].toBase;
+      const toRate = conversionOptions[type].units[toUnit as Unit<typeof type>].toBase;
       const baseValue = value * fromRate;
       const result = baseValue / toRate;
       setToValue(result.toFixed(4));
     }
   };
+
+  useEffect(() => {
+    convert();
+  }, [fromValue, fromUnit, toUnit, conversionType]);
+  
 
   const handleFromValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFromValue(e.target.value);
@@ -122,8 +123,8 @@ export function UnitConverter() {
             <Select value={fromUnit} onValueChange={setFromUnit}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {Object.entries(conversionOptions[conversionType].units).map(([key, { name }]) => (
-                  <SelectItem key={key} value={key}>{name}</SelectItem>
+                {Object.entries(conversionOptions[conversionType].units).map(([key, unitData]) => (
+                  <SelectItem key={key} value={key}>{(unitData as any).name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -139,8 +140,8 @@ export function UnitConverter() {
             <Select value={toUnit} onValueChange={setToUnit}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {Object.entries(conversionOptions[conversionType].units).map(([key, { name }]) => (
-                  <SelectItem key={key} value={key}>{name}</SelectItem>
+                {Object.entries(conversionOptions[conversionType].units).map(([key, unitData]) => (
+                   <SelectItem key={key} value={key}>{(unitData as any).name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
