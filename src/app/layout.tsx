@@ -49,7 +49,15 @@ export const metadata: Metadata = {
     template: '%s | AllNoop',
   },
   description: 'Your all-in-one toolkit with free online calculators, PDF and image editors, password generators, AI content tools, and much more. AllNoop makes your digital life easier.',
-  keywords: ['online tools', 'free tools', 'calculator', 'pdf editor', 'image editor', 'password generator', 'qr code generator', 'Allnoop', 'allnoop.com'],
+  keywords: [
+    'online tools', 'free tools', 'calculator', 'pdf editor', 'image editor', 
+    'password generator', 'qr code generator', 'hashtag generator', 'caption generator', 
+    'finance calculator', 'currency converter', 'health calculator', 'fitness calculator', 
+    'bmi calculator', 'emi calculator', 'secure chat', 'p2p chat', 'online games', 
+    'quiz generator', 'text formatter', 'fake chat generator', 'typing speed test', 
+    'joke generator', 'quote generator', 'keyword analyzer', 'seo tools', 'study tools',
+    'Allnoop', 'allnoop.com'
+  ],
   openGraph: {
     title: 'AllNoop: Free Online Tools for Every Need',
     description: 'The ultimate suite of free online utilities. Calculators, PDF tools, image editing, AI generators, and more, all in one place.',
