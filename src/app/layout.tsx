@@ -84,6 +84,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 const jsonLd = {
@@ -110,7 +113,6 @@ export default function RootLayout({
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className={cn("font-body antialiased", inter.variable, spaceGrotesk.variable, homemadeApple.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
