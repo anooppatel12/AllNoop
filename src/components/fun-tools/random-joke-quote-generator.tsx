@@ -33,7 +33,7 @@ export function RandomJokeQuoteGenerator() {
     try {
       const response = await fetch('https://official-joke-api.appspot.com/random_joke');
       if (!response.ok) throw new Error('Failed to fetch joke. Please try again.');
-      const data: Joke = await response.json();
+      const data = await response.json();
       setJoke(data);
     } catch (e: any) {
       setError(e.message);
@@ -103,13 +103,13 @@ export function RandomJokeQuoteGenerator() {
                 <AlertDescription>{error}</AlertDescription>
             </Alert>
         )}
-        {mode === 'joke' && joke && (
+        {!isLoading && !error && mode === 'joke' && joke && (
             <div className="text-center space-y-4">
                 <p className="text-lg">{joke.setup}</p>
                 <p className="text-xl font-bold text-primary">{joke.punchline}</p>
             </div>
         )}
-        {mode === 'quote' && quote && (
+        {!isLoading && !error && mode === 'quote' && quote && (
             <div className="text-center space-y-4">
                 <blockquote className="text-xl italic">"{quote.content}"</blockquote>
                 <p className="text-md font-semibold text-muted-foreground">- {quote.author}</p>
