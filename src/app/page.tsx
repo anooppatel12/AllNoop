@@ -113,7 +113,7 @@ export default function LandingPage() {
               <Card className="absolute top-full mt-2 w-full max-h-80 overflow-y-auto text-left shadow-2xl z-50">
                 {filteredFeatures.length > 0 ? (
                   filteredFeatures.map(feature => (
-                    <Link href={feature.href} key={feature.name} className="block hover:bg-muted" onClick={() => { setLoadingTool(feature.href); }}>
+                    <Link href={feature.href} key={feature.name} className="block hover:bg-muted" onClick={() => { setLoadingTool(feature.href); setSearchQuery(''); }}>
                        <div className="flex items-center gap-4 p-4">
                         <div className="rounded-lg bg-primary/10 p-2 text-primary">
                           <feature.icon className="h-6 w-6" />
@@ -151,7 +151,7 @@ export default function LandingPage() {
             >
               <Link href={feature.href} className="group block h-full" onClick={() => setLoadingTool(feature.href)}>
                 <div className={cn(
-                    "h-full rounded-xl border border-border bg-card/50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-2xl hover:shadow-primary/20",
+                    "h-full rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-2xl hover:shadow-primary/20",
                     loadingTool === feature.href && "animate-glow"
                   )}>
                   <div className="flex items-center gap-4">
