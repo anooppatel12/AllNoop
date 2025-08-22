@@ -5,6 +5,10 @@ import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users
 import Link from 'next/link';
 import { FloatingElements } from '@/components/floating-elements';
 
+const SnakeIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-snake"><path d="M9.5 12a2.5 2.5 0 0 1 0-5h0A2.5 2.5 0 0 1 12 9.5v0a2.5 2.5 0 0 1-5 0h0a2.5 2.5 0 0 1 2.5-2.5v0a2.5 2.5 0 0 1 0 5h0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 1 5 0h0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 1 0-5" /><path d="M7 17a2 2 0 1 0-4 0" /></svg>
+);
+
 const features = [
   { name: 'AI Hashtag Generator', icon: Hash, href: '/hashtag-generator' },
   { name: 'Calculators', icon: Calculator, href: '/calculators' },
@@ -17,6 +21,7 @@ const features = [
   { name: 'P2P Chat', icon: Users, href: '/chat' },
   { name: 'Contact', icon: MessageSquare, href: '/contact' },
   { name: 'Sudoku', icon: Puzzle, href: '/games/sudoku' },
+  { name: 'Snake', icon: SnakeIcon, href: '/games/snake' },
 ];
 
 export default function LandingPage() {
