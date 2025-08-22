@@ -57,6 +57,12 @@ const games = [
         description: 'Test your memory by finding all the matching pairs.',
         icon: BrainCircuit,
         href: '/games/memory',
+    },
+    {
+        name: 'Pong',
+        description: 'The classic two-player paddle game.',
+        icon: Gamepad2,
+        href: '/games/pong',
     }
 ];
 

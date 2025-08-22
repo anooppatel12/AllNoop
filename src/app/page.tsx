@@ -34,6 +34,7 @@ const features = [
   { name: 'Space Invaders', icon: SpaceInvadersIcon, href: '/games/space-invaders'},
   { name: 'Brick Breaker', icon: BrickBreakerIcon, href: '/games/brick-breaker' },
   { name: 'Memory Game', icon: BrainCircuit, href: '/games/memory'},
+  { name: 'Pong', icon: Gamepad2, href: '/games/pong' },
 ];
 
 export default function LandingPage() {
