@@ -18,6 +18,7 @@ import {
   Gamepad2,
   QrCode,
   MessageCircle,
+  Lock,
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -33,6 +34,7 @@ const links = [
   { href: '/pdf-tools', label: 'PDF Tools', icon: FileText },
   { href: '/image-editor', label: 'Image Editor', icon: ImageIcon },
   { href: '/tools/qrcode', label: 'QR Code Tools', icon: QrCode },
+  { href: '/tools/password-generator', label: 'Password Generator', icon: Lock },
   { href: '/fun-tools/meme-generator', label: 'Meme Generator', icon: VenetianMask },
   { href: '/fun-tools/fake-message-generator', label: 'Fake Message Generator', icon: MessageCircle },
   { href: '/fun-tools/typing-speed-test', label: 'Typing Speed Test', icon: Keyboard },
