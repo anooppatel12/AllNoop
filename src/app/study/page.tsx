@@ -11,6 +11,12 @@ const studyTools = [
         href: '/study/markdown-previewer',
     },
     {
+        name: 'Quiz & Flashcard Creator',
+        description: 'Create and share study sets with quizzes.',
+        icon: BookOpenCheck,
+        href: '/study/quiz-creator',
+    },
+    {
         name: 'Resume/CV Builder',
         description: 'Create a professional resume. (Coming Soon)',
         icon: GraduationCap,
@@ -22,12 +28,6 @@ const studyTools = [
         icon: Code,
         href: '#',
     },
-    {
-        name: 'Quiz & Flashcard Creator',
-        description: 'Create and share study sets. (Coming Soon)',
-        icon: BookOpenCheck,
-        href: '#',
-    }
 ];
 
 export default function StudyWorkPage() {
