@@ -78,14 +78,15 @@ export function BrickBreakerGame() {
 
   /**
    * Resets the ball and paddle to their starting positions.
-   * @param {boolean} fullReset - If true, resets the ball's speed to the level's default.
+   * Adjusts ball speed based on the level.
    */
-  const resetBallAndPaddle = useCallback((fullReset = false) => {
+  const resetBallAndPaddle = useCallback(() => {
+    const speedMultiplier = Math.pow(1.1, level - 1);
      ball.current = {
         x: BOARD_WIDTH / 2,
-        y: BOARD_HEIGHT - PADDLE_Y_OFFSET - BALL_RADIUS,
-        dx: (Math.random() > 0.5 ? 4 : -4) * (fullReset ? 1 : Math.pow(1.1, level - 1)),
-        dy: -4 * (fullReset ? 1 : Math.pow(1.1, level - 1)),
+        y: BOARD_HEIGHT - PADDLE_Y_OFFSET - PADDLE_HEIGHT - BALL_RADIUS,
+        dx: (Math.random() > 0.5 ? 4 : -4) * speedMultiplier,
+        dy: -4 * speedMultiplier,
     };
     paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
   }, [level]);
@@ -94,12 +95,12 @@ export function BrickBreakerGame() {
    * Resets the entire game to its initial state for a new game.
    */
   const resetGame = useCallback(() => {
-    setGameState('waiting');
     setScore(0);
     setLives(INITIAL_LIVES);
     setLevel(1);
     createBricks();
-    resetBallAndPaddle(true);
+    resetBallAndPaddle();
+    setGameState('waiting');
   }, [createBricks, resetBallAndPaddle]);
 
   /**
@@ -109,6 +110,7 @@ export function BrickBreakerGame() {
       setLevel(prev => prev + 1);
       createBricks();
       resetBallAndPaddle();
+      setGameState('waiting');
   }, [createBricks, resetBallAndPaddle]);
 
   /**
@@ -120,8 +122,9 @@ export function BrickBreakerGame() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Clear canvas
-    ctx.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+    // Clear canvas with a background color
+    ctx.fillStyle = 'hsl(var(--background))';
+    ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
     
     // Draw Paddle
     ctx.fillStyle = 'hsl(var(--primary))';
@@ -151,71 +154,73 @@ export function BrickBreakerGame() {
    * The main game loop that updates game logic and calls the draw function.
    */
   const update = useCallback(() => {
-    if (gameState !== 'playing') {
-        draw(); 
-        animationFrameId.current = requestAnimationFrame(update);
-        return;
-    };
-
-    // Paddle movement
-    if (keysPressed.current['ArrowRight']) {
-      paddleX.current = Math.min(paddleX.current + 7, BOARD_WIDTH - PADDLE_WIDTH);
-    } else if (keysPressed.current['ArrowLeft']) {
-      paddleX.current = Math.max(paddleX.current - 7, 0);
-    }
-    
-    const b = ball.current;
-    b.x += b.dx;
-    b.y += b.dy;
-
-    // Wall collision (left/right)
-    if (b.x + b.dx > BOARD_WIDTH - BALL_RADIUS || b.x + b.dx < BALL_RADIUS) {
-      b.dx = -b.dx;
-    }
-
-    // Wall collision (top)
-    if (b.y + b.dy < BALL_RADIUS) {
-      b.dy = -b.dy;
-    } 
-    
-    // Paddle collision
-    if (b.y > BOARD_HEIGHT - PADDLE_Y_OFFSET - BALL_RADIUS && b.y < BOARD_HEIGHT - PADDLE_Y_OFFSET + PADDLE_HEIGHT) {
-        if(b.x > paddleX.current && b.x < paddleX.current + PADDLE_WIDTH){
-             b.dy = -b.dy;
-        }
-    }
-
-    // Bottom wall collision (lose life)
-    if (b.y + b.dy > BOARD_HEIGHT) {
-        setLives(prevLives => {
-            const newLives = prevLives - 1;
-            if (newLives <= 0) {
-              setGameState('gameover');
-            } else {
-              setGameState('waiting');
-              resetBallAndPaddle();
-            }
-            return newLives;
-        });
-    }
-    
-    // Brick collision
-    bricks.current.forEach(brick => {
-        if (brick.status === 'active') {
-            if (b.x > brick.x && b.x < brick.x + brick.width && b.y > brick.y && b.y < brick.y + brick.height) {
-                b.dy = -b.dy;
-                brick.status = 'broken';
-                setScore(prev => prev + 10);
-            }
-        }
-    });
-    
-    // Check for win condition (all bricks broken)
-    if (bricks.current.every(brick => brick.status === 'broken')) {
-        nextLevel();
-    }
-
+    // Always draw the current state
     draw();
+
+    // Only run game logic if the game is in 'playing' state
+    if (gameState === 'playing') {
+      // Paddle movement
+      if (keysPressed.current['ArrowRight']) {
+        paddleX.current = Math.min(paddleX.current + 7, BOARD_WIDTH - PADDLE_WIDTH);
+      } else if (keysPressed.current['ArrowLeft']) {
+        paddleX.current = Math.max(paddleX.current - 7, 0);
+      }
+      
+      const b = ball.current;
+      b.x += b.dx;
+      b.y += b.dy;
+
+      // Wall collision (left/right)
+      if (b.x + b.dx > BOARD_WIDTH - BALL_RADIUS || b.x + b.dx < BALL_RADIUS) {
+        b.dx = -b.dx;
+      }
+
+      // Wall collision (top)
+      if (b.y + b.dy < BALL_RADIUS) {
+        b.dy = -b.dy;
+      } 
+      
+      // Paddle collision
+      if (
+        b.y > BOARD_HEIGHT - PADDLE_Y_OFFSET - PADDLE_HEIGHT - BALL_RADIUS &&
+        b.y < BOARD_HEIGHT - PADDLE_Y_OFFSET &&
+        b.x > paddleX.current &&
+        b.x < paddleX.current + PADDLE_WIDTH
+      ) {
+        b.dy = -b.dy;
+      }
+
+      // Bottom wall collision (lose life)
+      if (b.y + BALL_RADIUS > BOARD_HEIGHT) {
+          setLives(prevLives => {
+              const newLives = prevLives - 1;
+              if (newLives <= 0) {
+                setGameState('gameover');
+              } else {
+                setGameState('waiting');
+                resetBallAndPaddle();
+              }
+              return newLives;
+          });
+      }
+      
+      // Brick collision
+      bricks.current.forEach(brick => {
+          if (brick.status === 'active') {
+              if (b.x > brick.x && b.x < brick.x + brick.width && b.y > brick.y && b.y < brick.y + brick.height) {
+                  b.dy = -b.dy;
+                  brick.status = 'broken';
+                  setScore(prev => prev + 10);
+              }
+          }
+      });
+      
+      // Check for win condition (all bricks broken)
+      if (bricks.current.every(brick => brick.status === 'broken')) {
+          nextLevel();
+      }
+    }
+
     animationFrameId.current = requestAnimationFrame(update);
   }, [gameState, draw, resetBallAndPaddle, nextLevel]);
 
@@ -250,10 +255,12 @@ export function BrickBreakerGame() {
     const handleTouchMove = (e: TouchEvent) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const touch = e.touches[0];
-        const relativeX = touch.clientX - canvas.getBoundingClientRect().left;
-        if (relativeX > 0 && relativeX < BOARD_WIDTH) {
-            paddleX.current = Math.max(0, Math.min(relativeX - PADDLE_WIDTH / 2, BOARD_WIDTH - PADDLE_WIDTH));
+        if (e.touches.length > 0) {
+            const touch = e.touches[0];
+            const relativeX = touch.clientX - canvas.getBoundingClientRect().left;
+            if (relativeX > 0 && relativeX < BOARD_WIDTH) {
+                paddleX.current = Math.max(0, Math.min(relativeX - PADDLE_WIDTH / 2, BOARD_WIDTH - PADDLE_WIDTH));
+            }
         }
     };
 
@@ -309,7 +316,7 @@ export function BrickBreakerGame() {
            <canvas ref={canvasRef} width={BOARD_WIDTH} height={BOARD_HEIGHT} />
             {gameState === 'win' && <GameOverlay title="You Win!" buttonText="Play Again" />}
             {gameState === 'gameover' && <GameOverlay title="Game Over" buttonText="Restart Game" />}
-            {gameState === 'waiting' && <GameOverlay title="Brick Breaker" buttonText="Start Game" />}
+            {gameState === 'waiting' && <GameOverlay title={`Level ${level}`} buttonText="Start Game" />}
         </div>
       </CardContent>
        <CardFooter>
