@@ -116,10 +116,8 @@ export function FakeMessageGenerator() {
         const dataUrl = await toPng(elementToCapture, { 
             cacheBust: true, 
             pixelRatio: 2,
-            // Use fetch to avoid CORS issues with Google Fonts
             fetchRequestInit: {
-                mode: 'cors',
-                credentials: 'omit'
+                mode: 'no-cors'
             }
         });
         const link = document.createElement('a');
