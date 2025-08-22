@@ -1,10 +1,12 @@
-
 'use client';
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { marked } from 'marked';
+import { Button } from '../ui/button';
+import { Copy } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const defaultMarkdown = `
 # Welcome to the OmniTool Markdown Previewer!
@@ -49,13 +51,25 @@ Check out our features:
 
 export function MarkdownPreviewer() {
   const [markdown, setMarkdown] = useState(defaultMarkdown);
+  const { toast } = useToast();
+
+  const rawHtml = marked(markdown, { 
+    gfm: true,
+    breaks: true,
+  });
 
   const getHtml = () => {
-    const rawMarkup = marked(markdown, { 
-      gfm: true,
-      breaks: true,
-    });
-    return { __html: rawMarkup };
+    return { __html: rawHtml };
+  };
+
+  const handleCopyHtml = () => {
+      navigator.clipboard.writeText(rawHtml)
+        .then(() => {
+            toast({ title: 'HTML copied to clipboard!' });
+        })
+        .catch(err => {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to copy HTML to clipboard.' });
+        });
   };
 
   return (
@@ -74,9 +88,15 @@ export function MarkdownPreviewer() {
             />
         </div>
         <div className="p-4 border-t md:border-l md:border-t-0">
-             <CardHeader className="p-2">
-                <CardTitle>Preview</CardTitle>
-                <CardDescription>See the rendered HTML output.</CardDescription>
+             <CardHeader className="flex flex-row items-center justify-between p-2">
+                <div>
+                  <CardTitle>Preview</CardTitle>
+                  <CardDescription>See the rendered HTML output.</CardDescription>
+                </div>
+                <Button variant="ghost" size="icon" onClick={handleCopyHtml}>
+                    <Copy className="h-5 w-5" />
+                    <span className="sr-only">Copy HTML</span>
+                </Button>
             </CardHeader>
             <div
                 id="preview"
@@ -88,21 +108,3 @@ export function MarkdownPreviewer() {
     </Card>
   );
 }
-
-// Add this to your globals.css or a relevant stylesheet
-/*
-.prose {
-  max-width: none;
-}
-.prose img {
-  max-width: 100%;
-}
-.prose pre {
-  background-color: #f5f5f5;
-  padding: 1rem;
-  border-radius: 0.5rem;
-}
-.dark .prose pre {
-  background-color: #2d2d2d;
-}
-*/
