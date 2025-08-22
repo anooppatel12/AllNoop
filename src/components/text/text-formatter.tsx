@@ -173,7 +173,7 @@ export function TextFormatter() {
         <Tabs defaultValue="formatting" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="formatting">Formatting</TabsTrigger>
-                <TabsTrigger value="fancy-text">Fancy Text</TabsTrigger>
+                <TabsTrigger value="fancy-text">ASCII Art / Stylish Text</TabsTrigger>
             </TabsList>
             <TabsContent value="formatting" className="mt-4 space-y-4">
                 <div className="flex flex-wrap gap-2">
