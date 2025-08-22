@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
+import { useInterval } from '@/hooks/use-interval';
 
 const BOARD_WIDTH = 480;
 const BOARD_HEIGHT = 600;
@@ -130,7 +131,9 @@ export function BrickBreakerGame() {
 
   const startGame = () => {
     if (gameState === 'playing') return;
-    resetGame();
+     if (gameState === 'gameover' || gameState === 'win') {
+        resetGame();
+    }
     setGameState('playing');
   }
 
@@ -163,20 +166,22 @@ export function BrickBreakerGame() {
              b.dy = -b.dy;
         } else {
             // Ball missed paddle
-            const newLives = lives - 1;
-            setLives(newLives);
-            if(newLives <= 0) {
-                 setGameState('gameover');
-            } else {
-                 ball.current = {
-                    x: BOARD_WIDTH / 2,
-                    y: PADDLE_Y - BALL_RADIUS,
-                    dx: 4,
-                    dy: -4
-                };
-                paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
-                setGameState('waiting'); // Wait for user to restart round
-            }
+            setLives(prevLives => {
+                 const newLives = prevLives - 1;
+                 if(newLives <= 0) {
+                    setGameState('gameover');
+                } else {
+                    ball.current = {
+                        x: BOARD_WIDTH / 2,
+                        y: PADDLE_Y - BALL_RADIUS,
+                        dx: 4,
+                        dy: -4
+                    };
+                    paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
+                    setGameState('waiting'); // Wait for user to restart round
+                }
+                return newLives;
+            });
         }
     }
     
@@ -199,19 +204,20 @@ export function BrickBreakerGame() {
 
     draw();
     animationFrameId.current = requestAnimationFrame(gameLoop);
-  }, [gameState, draw, lives]);
+  }, [gameState, draw]);
   
   useEffect(() => {
     if (gameState === 'playing') {
        animationFrameId.current = requestAnimationFrame(gameLoop);
     }
-    if (gameState === 'waiting') {
+    // Initial draw for waiting state
+    if (gameState === 'waiting' && lives > 0) {
       draw();
     }
     return () => {
         if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     }
-  }, [gameState, gameLoop, draw]);
+  }, [gameState, gameLoop, draw, lives]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -249,16 +255,16 @@ export function BrickBreakerGame() {
         <CardTitle className="w-1/2 text-destructive">Lives: {lives}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="relative w-full aspect-[480/600] bg-black border-4 border-primary rounded-md overflow-hidden">
+        <div className="relative w-full aspect-[480/600] bg-secondary border-4 border-primary rounded-md overflow-hidden">
            <canvas ref={canvasRef} width={BOARD_WIDTH} height={BOARD_HEIGHT} />
-            {(gameState === 'gameover' || gameState === 'win' || (gameState === 'waiting' && lives < 3)) && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white z-10">
-                   {gameState === 'win' && <p className="text-4xl font-bold">You Win!</p>}
-                   {gameState === 'gameover' && <p className="text-4xl font-bold">Game Over</p>}
+            {(gameState === 'gameover' || gameState === 'win' || (gameState === 'waiting' && lives === 3)) && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white z-10 p-4">
+                   {gameState === 'win' && <h2 className="text-4xl font-bold">You Win!</h2>}
+                   {gameState === 'gameover' && <h2 className="text-4xl font-bold">Game Over</h2>}
                    {gameState === 'win' || gameState === 'gameover' ? (
-                       <p>Final Score: {score}</p>
+                       <p className="text-lg">Final Score: {score}</p>
                    ) : (
-                       <p className="text-2xl font-bold">Press Enter to Start</p>
+                       <h2 className="text-2xl font-bold">Press Enter to Start</h2>
                    )}
                      <Button onClick={startGame} className="mt-4">
                         <RefreshCw className="mr-2 h-4 w-4" />
@@ -268,11 +274,10 @@ export function BrickBreakerGame() {
             )}
         </div>
       </CardContent>
-      <CardFooter>
-        <Button onClick={startGame} className="w-full">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          {gameState === 'win' || gameState === 'gameover' ? 'Play Again' : 'Restart Game'}
-        </Button>
+       <CardFooter>
+        <p className="text-sm text-muted-foreground text-center w-full">
+            Use arrow keys to move the paddle. Press Enter to start.
+        </p>
       </CardFooter>
     </Card>
   );
