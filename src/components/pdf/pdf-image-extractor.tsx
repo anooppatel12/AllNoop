@@ -13,8 +13,18 @@ import { Terminal } from 'lucide-react';
 
 interface ExtractedImage {
   url: string;
-  type: 'jpeg' | 'png';
+  type: 'jpeg' | 'png' | 'unknown';
   index: number;
+}
+
+// Helper to convert Uint8Array to base64
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+    let binary = '';
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
 }
 
 export function PdfImageExtractor() {
@@ -51,8 +61,6 @@ export function PdfImageExtractor() {
 
       const pages = pdfDoc.getPages();
       for (const page of pages) {
-          const imageXObjects = new Map<string, PDFImage>();
-
           const resources = page.node.Resources();
           if (!resources) continue;
 
@@ -60,38 +68,28 @@ export function PdfImageExtractor() {
           if (!xobjects || !('entries' in xobjects)) continue;
 
           for (const [key, value] of xobjects.entries()) {
-              // The value can be a reference, so we need to look it up.
               const stream = pdfDoc.context.lookup(value) as PDFRawStream;
               
               if (stream?.dict?.get(PDFName.of('Subtype')) === PDFName.of('Image')) {
-                  try {
-                        const pdfImage = await pdfDoc.embedJpg(stream.contents);
-                        imageXObjects.set(key.toString(), pdfImage);
-                  } catch (e) {
-                      try {
-                        const pdfImage = await pdfDoc.embedPng(stream.contents);
-                        imageXObjects.set(key.toString(), pdfImage);
-                      } catch (e2) {
-                        // Could not embed as JPG or PNG, skip this object
-                      }
+                  const imageBytes = stream.contents;
+                  const base64 = uint8ArrayToBase64(imageBytes);
+                  
+                  // Attempt to determine image type
+                  let imageType: 'jpeg' | 'png' | 'unknown' = 'unknown';
+                  const filter = stream.dict.get(PDFName.of('Filter'));
+                  if (filter === PDFName.of('DCTDecode')) {
+                      imageType = 'jpeg';
+                  } else if (filter === PDFName.of('FlateDecode')) {
+                      // This could be PNG or other formats. PNG is a good guess.
+                      imageType = 'png';
                   }
+
+                  images.push({
+                      url: `data:image/${imageType === 'unknown' ? 'octet-stream' : imageType};base64,${base64}`,
+                      type: imageType,
+                      index: imageIndex++,
+                  });
               }
-          }
-          
-          for (const [key, image] of imageXObjects.entries()) {
-              let imageUrl: string;
-              let imageType: 'jpeg' | 'png' = 'png';
-               if (image.embedder.fileType === 'jpg') {
-                imageUrl = `data:image/jpeg;base64,${await image.toBase64()}`;
-                imageType = 'jpeg';
-              } else {
-                imageUrl = `data:image/png;base64,${await image.toBase64()}`;
-              }
-              images.push({
-                url: imageUrl,
-                type: imageType,
-                index: imageIndex++,
-              });
           }
       }
       
@@ -163,7 +161,7 @@ export function PdfImageExtractor() {
                 <img src={image.url} alt={`Extracted image ${image.index + 1}`} className="aspect-square w-full rounded-md object-contain"/>
                 <a
                   href={image.url}
-                  download={`image_${image.index + 1}.${image.type}`}
+                  download={`image_${image.index + 1}.${image.type === 'unknown' ? 'bin' : image.type}`}
                   className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100"
                 >
                   <Download className="h-8 w-8 text-white" />
