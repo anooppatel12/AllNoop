@@ -1,7 +1,7 @@
 
 'use client';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode, MessageCircle, Lock } from 'lucide-react';
+import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode, MessageCircle, Lock, Baseline } from 'lucide-react';
 import Link from 'next/link';
 import { FloatingElements } from '@/components/floating-elements';
 
@@ -22,6 +22,7 @@ const features = [
   { name: 'Calculators', icon: Calculator, href: '/calculators' },
   { name: 'PDF Tools', icon: FileText, href: '/pdf-tools' },
   { name: 'Image Editor', icon: ImageIcon, href: '/image-editor' },
+  { name: 'Text Formatter', icon: Baseline, href: '/tools/text-formatter' },
   { name: 'QR Code Tools', icon: QrCode, href: '/tools/qrcode' },
   { name: 'Password Generator', icon: Lock, href: '/tools/password-generator' },
   { name: 'Meme Generator', icon: VenetianMask, href: '/fun-tools/meme-generator' },
