@@ -147,7 +147,7 @@ export default function RootLayout({
                       </SidebarMenuButton>
                    </SidebarMenuItem>
                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild tooltip="Terms &amp; Conditions">
+                      <SidebarMenuButton asChild tooltip="Terms & Conditions">
                         <Link href="/terms-and-conditions">
                             <FileText />
                             <span className="group-data-[collapsible=icon]:hidden">Terms &amp; Conditions</span>
