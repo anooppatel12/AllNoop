@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { UploadCloud, FileText, Loader2, Download, Image as ImageIcon, AlertCircle } from 'lucide-react';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFImage, PDFName, PDFRawStream } from 'pdf-lib';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 
@@ -43,29 +43,58 @@ export function PdfImageExtractor() {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const pdfDoc = await PDFDocument.load(arrayBuffer, { 
+        // Ignore errors for slightly corrupt PDFs
+        ignoreEncryption: true,
+      });
       const images: ExtractedImage[] = [];
       let imageIndex = 0;
 
-      for (let i = 0; i < pdfDoc.getPageCount(); i++) {
-        const page = pdfDoc.getPage(i);
-        const imageObjects = await page.extractImages();
-        for (const imageObject of imageObjects) {
-          let imageUrl: string;
-          let imageType: 'jpeg' | 'png' = 'png';
-          if (imageObject.image.fileType === 'jpg') {
-            imageUrl = `data:image/jpeg;base64,${await imageObject.image.toBase64()}`;
-            imageType = 'jpeg';
-          } else {
-            imageUrl = `data:image/png;base64,${await imageObject.image.toBase64()}`;
+      const pages = pdfDoc.getPages();
+      for (const page of pages) {
+          const imageXObjects = new Map<string, PDFImage>();
+
+          // Get page resources
+          const resources = page.node.Resources();
+          if (!resources) continue;
+
+          // Get XObject resources
+          const xobjects = resources.lookup(PDFName.of('XObject'));
+          if (!xobjects || !('entries' in xobjects)) continue;
+
+          // Iterate over XObjects
+          for (const [key, value] of xobjects.entries()) {
+              const stream = value as PDFRawStream;
+              if (stream.dict.get(PDFName.of('Subtype')) === PDFName.of('Image')) {
+                  try {
+                        const pdfImage = await pdfDoc.embedJpg(stream.contents);
+                        imageXObjects.set(key.toString(), pdfImage);
+                  } catch (e) {
+                      try {
+                        const pdfImage = await pdfDoc.embedPng(stream.contents);
+                        imageXObjects.set(key.toString(), pdfImage);
+                      } catch (e2) {
+                        // Could not embed as JPG or PNG, skip this object
+                      }
+                  }
+              }
           }
           
-          images.push({
-            url: imageUrl,
-            type: imageType,
-            index: imageIndex++,
-          });
-        }
+          for (const [key, image] of imageXObjects.entries()) {
+              let imageUrl: string;
+              let imageType: 'jpeg' | 'png' = 'png';
+               if (image.embedder.fileType === 'jpg') {
+                imageUrl = `data:image/jpeg;base64,${await image.toBase64()}`;
+                imageType = 'jpeg';
+              } else {
+                imageUrl = `data:image/png;base64,${await image.toBase64()}`;
+              }
+              images.push({
+                url: imageUrl,
+                type: imageType,
+                index: imageIndex++,
+              });
+          }
       }
       
       if (images.length === 0) {
@@ -73,9 +102,9 @@ export function PdfImageExtractor() {
       }
 
       setExtractedImages(images);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error extracting images from PDF:', err);
-      setError('An error occurred while extracting images. The file might be corrupted or password-protected.');
+      setError(err.message || 'An error occurred while extracting images. The file might be corrupted or password-protected.');
     } finally {
       setIsExtracting(false);
     }
