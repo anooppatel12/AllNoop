@@ -9,6 +9,10 @@ const SnakeIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-snake"><path d="M9.5 12a2.5 2.5 0 0 1 0-5h0A2.5 2.5 0 0 1 12 9.5v0a2.5 2.5 0 0 1-5 0h0a2.5 2.5 0 0 1 2.5-2.5v0a2.5 2.5 0 0 1 0 5h0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 1 5 0h0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 1 0-5" /><path d="M7 17a2 2 0 1 0-4 0" /></svg>
 );
 
+const SpaceInvadersIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0" strokeLinecap="round" strokeLinejoin="round"><path d="M5 2h2v2H5V2zm4 0h2v2H9V2zm4 0h2v2h-2V2zm4 0h2v2h-2V2zM3 4h2v2H3V4zm2 2h2v2H5V6zm-2 2h2v2H3V8zm2 2h2v2H5v-2zM3 12h2v2H3v-2zm14 0h2v2h-2v-2zm-2-2h2v2h-2v-2zm4 0h2v2h-2v-2zm-2-2h2v2h-2V6zm2-2h2v2h-2V4zM7 6h2v2H7V6zm8 0h2v2h-2V6zm-4 4h2v2h-2v-2zm-2-2h2v2H9V8zm4 0h2v2h-2V8zm-2 2h2v2h-2v-2zm2 2h2v2h-2v-2zm-4 0h2v2H9v-2zm-2-4h2v2H7V8zm8 2h2v2h-2v-2zM7 14h2v2H7v-2zm8 0h2v2h-2v-2zm-4 2h2v2h-2v-2zM9 18h6v2H9v-2z"/></svg>
+);
+
 const features = [
   { name: 'AI Hashtag Generator', icon: Hash, href: '/hashtag-generator' },
   { name: 'Calculators', icon: Calculator, href: '/calculators' },
@@ -23,6 +27,7 @@ const features = [
   { name: 'Sudoku', icon: Puzzle, href: '/games/sudoku' },
   { name: 'Snake', icon: SnakeIcon, href: '/games/snake' },
   { name: 'Quiz Game', icon: BrainCircuit, href: '/games/quiz'},
+  { name: 'Space Invaders', icon: SpaceInvadersIcon, href: '/games/space-invaders'},
 ];
 
 export default function LandingPage() {
