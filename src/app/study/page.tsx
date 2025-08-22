@@ -22,12 +22,6 @@ const studyTools = [
         icon: GraduationCap,
         href: '#',
     },
-    {
-        name: 'Online Compiler',
-        description: 'Run C, C++, and Python code online. (Coming Soon)',
-        icon: Code,
-        href: '#',
-    },
 ];
 
 export default function StudyWorkPage() {
