@@ -54,7 +54,7 @@ export function FakeMessageGenerator() {
   ]);
 
   const addSmsMessage = () => {
-    const lastSender = smsMessages.length > 0 ? smsMessages[smsMessages.length - 1].sender : 'them';
+    const lastSender = smsMessages.length > 0 ? smsMessages[smsMessages.length - 1].sender : 'me';
     const newSender = lastSender === 'me' ? 'them' : 'me';
     setSmsMessages([...smsMessages, { id: Date.now(), sender: newSender, content: '' }]);
   };
@@ -70,7 +70,7 @@ export function FakeMessageGenerator() {
   }
 
   const addWaMessage = () => {
-    const lastSender = waMessages.length > 0 ? waMessages[waMessages.length - 1].sender : 'them';
+    const lastSender = waMessages.length > 0 ? waMessages[waMessages.length - 1].sender : 'me';
     const newSender = lastSender === 'me' ? 'them' : 'me';
     setWaMessages([...waMessages, { id: Date.now(), sender: newSender, content: '', time: '10:47 PM', status: 'read' }]);
   };
@@ -92,7 +92,7 @@ export function FakeMessageGenerator() {
     setEmailBody('Hi team,\n\nPlease find the attached documents for the quarterly review. We need to have this finalized by EOD.\n\nThanks,\nYour Boss');
   }
 
-  const handleDownload = useCallback(() => {
+  const handleDownload = useCallback(async () => {
     let elementToCapture: HTMLDivElement | null = null;
     let fileName = 'fake-message.png';
 
@@ -112,17 +112,24 @@ export function FakeMessageGenerator() {
       return;
     }
 
-    toPng(elementToCapture, { cacheBust: true, pixelRatio: 2 })
-      .then((dataUrl) => {
+    try {
+        const dataUrl = await toPng(elementToCapture, { 
+            cacheBust: true, 
+            pixelRatio: 2,
+            // Use fetch to avoid CORS issues with Google Fonts
+            fetchRequestInit: {
+                mode: 'cors',
+                credentials: 'omit'
+            }
+        });
         const link = document.createElement('a');
         link.download = fileName;
         link.href = dataUrl;
         link.click();
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error(err);
         toast({ variant: 'destructive', title: 'Error', description: 'Could not generate the image.' });
-      });
+      }
   }, [mode, toast]);
 
 
