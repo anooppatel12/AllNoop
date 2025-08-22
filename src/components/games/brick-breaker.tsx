@@ -124,7 +124,7 @@ export function BrickBreakerGame() {
 
   const update = useCallback(() => {
     if (gameState !== 'playing') {
-        draw(); // Keep drawing even when not playing to show initial state
+        draw(); 
         animationFrameId.current = requestAnimationFrame(update);
         return;
     };
@@ -152,22 +152,24 @@ export function BrickBreakerGame() {
     } 
     
     // Paddle collision
-    if (b.y + b.dy > PADDLE_Y - BALL_RADIUS) {
+    if (b.y + b.dy > PADDLE_Y - BALL_RADIUS && b.y < PADDLE_Y) {
         if(b.x > paddleX.current && b.x < paddleX.current + PADDLE_WIDTH){
              b.dy = -b.dy;
-        } else {
-             // Ball missed paddle and hit the bottom
-             setLives(prevLives => {
-                 const newLives = prevLives - 1;
-                 if(newLives <= 0) {
-                    setGameState('gameover');
-                } else {
-                    setGameState('waiting');
-                    resetBallAndPaddle();
-                }
-                return newLives;
-            });
         }
+    }
+
+    // Ball missed paddle and hit the bottom
+    if (b.y + b.dy > BOARD_HEIGHT) {
+        setLives(prevLives => {
+            const newLives = prevLives - 1;
+            if(newLives <= 0) {
+            setGameState('gameover');
+            } else {
+            setGameState('waiting');
+            resetBallAndPaddle();
+            }
+            return newLives;
+        });
     }
     
     // Brick collision
@@ -265,3 +267,5 @@ export function BrickBreakerGame() {
     </Card>
   );
 }
+
+    
