@@ -66,11 +66,12 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
     }, { onlyOnce: false });
 
     const signalingListener = onValue(signalingRef, async (snapshot) => {
-      if (!pcRef.current || pcRef.current.signalingState === 'closed') return;
+       if (!pcRef.current || pcRef.current.signalingState === 'closed') return;
       const signalingData = snapshot.val();
       
       if (!signalingData) { 
         isCallerRef.current = true;
+         if (pcRef.current.signalingState === 'closed') return;
         const channel = pc.createDataChannel('chat');
         channel.onmessage = (e) => onMessage(e.data);
         dataChannelRef.current = channel;
