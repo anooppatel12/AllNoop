@@ -116,6 +116,7 @@ export function FakeMessageGenerator() {
         const dataUrl = await toPng(elementToCapture, { 
             cacheBust: true, 
             pixelRatio: 2,
+            allowTaint: true,
             fetchRequestInit: {
                 mode: 'cors',
                 credentials: 'omit'
