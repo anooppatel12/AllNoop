@@ -1,9 +1,13 @@
 
 'use client';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode, MessageCircle, Lock, Baseline, BookOpenCheck } from 'lucide-react';
+import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode, MessageCircle, Lock, Baseline, BookOpenCheck, Search } from 'lucide-react';
 import Link from 'next/link';
 import { FloatingElements } from '@/components/floating-elements';
+import { useState, useMemo } from 'react';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+
 
 const SnakeIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-snake"><path d="M9.5 12a2.5 2.5 0 0 1 0-5h0A2.5 2.5 0 0 1 12 9.5v0a2.5 2.5 0 0 1-5 0h0a2.5 2.5 0 0 1 2.5-2.5v0a2.5 2.5 0 0 1 0 5h0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 1 5 0h0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 1 0-5" /><path d="M7 17a2 2 0 1 0-4 0" /></svg>
@@ -43,6 +47,17 @@ const features = [
 ];
 
 export default function LandingPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredFeatures = useMemo(() => {
+    if (!searchQuery) {
+      return [];
+    }
+    return features.filter(feature =>
+      feature.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
   return (
     <div className="relative overflow-hidden bg-background">
       <div className="absolute inset-0 bg-[url(/grid.svg)] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
@@ -76,6 +91,43 @@ export default function LandingPage() {
             </button>
           </Link>
         </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          className="relative mt-12 w-full max-w-2xl"
+        >
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search for a tool... (e.g., 'PDF', 'BMI', 'Password')"
+              className="w-full h-14 pl-12 pr-4 text-lg rounded-full shadow-lg"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <Card className="absolute top-full mt-2 w-full max-h-80 overflow-y-auto z-20 text-left shadow-2xl">
+                {filteredFeatures.length > 0 ? (
+                  filteredFeatures.map(feature => (
+                    <Link href={feature.href} key={feature.name} className="block hover:bg-muted" onClick={() => setSearchQuery('')}>
+                       <div className="flex items-center gap-4 p-4">
+                        <div className="rounded-lg bg-primary/10 p-2 text-primary">
+                          <feature.icon className="h-6 w-6" />
+                        </div>
+                        <h3 className="font-semibold text-foreground">{feature.name}</h3>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground">
+                    No tools found for "{searchQuery}"
+                  </div>
+                )}
+              </Card>
+            )}
+        </motion.div>
+
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16">
