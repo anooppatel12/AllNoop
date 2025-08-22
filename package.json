@@ -39,6 +39,7 @@
     "@radix-ui/react-tabs": "^1.1.3",
     "@radix-ui/react-toast": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.1.8",
+    "@tailwindcss/typography": "^0.5.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
@@ -65,8 +66,7 @@
     "uuid": "^9.0.1",
     "ytdl-core": "^4.11.5",
     "zod": "^3.24.2",
-    "marked": "^12.0.2",
-    "@tailwindcss/typography": "^0.5.13"
+    "marked": "^12.0.2"
   },
   "devDependencies": {
     "@types/diff-match-patch": "^1.0.36",
