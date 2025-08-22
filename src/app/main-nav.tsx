@@ -75,6 +75,7 @@ export function MainNav() {
        {isDownloaderEnabled && (
          <SidebarMenuItem>
             <SidebarMenuButton
+              asChild
               isActive={pathname === '/tools/downloader'}
               tooltip="Video Downloader"
             >
