@@ -5,7 +5,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
-import { useInterval } from '@/hooks/use-interval';
 
 const BOARD_WIDTH = 480;
 const BOARD_HEIGHT = 600;
@@ -14,7 +13,7 @@ const BOARD_HEIGHT = 600;
 const PADDLE_WIDTH = 100;
 const PADDLE_HEIGHT = 10;
 const PADDLE_Y = BOARD_HEIGHT - 30;
-const PADDLE_SPEED = 10;
+const PADDLE_SPEED = 8;
 
 // Ball
 const BALL_RADIUS = 8;
@@ -50,7 +49,7 @@ export function BrickBreakerGame() {
   const paddleX = useRef(BOARD_WIDTH / 2 - PADDLE_WIDTH / 2);
   const ball = useRef({
     x: BOARD_WIDTH / 2,
-    y: PADDLE_Y - BALL_RADIUS - 5,
+    y: PADDLE_Y - BALL_RADIUS,
     dx: 4,
     dy: -4,
   });
@@ -58,11 +57,11 @@ export function BrickBreakerGame() {
   const rightPressed = useRef(false);
   const leftPressed = useRef(false);
   const animationFrameId = useRef<number>();
-  
+
   const createBricks = useCallback(() => {
     const newBricks: Brick[] = [];
-    for (let c = 0; c < BRICK_COLS; c++) {
-      for (let r = 0; r < BRICK_ROWS; r++) {
+    for (let r = 0; r < BRICK_ROWS; r++) {
+      for (let c = 0; c < BRICK_COLS; c++) {
         newBricks.push({
           x: c * (BRICK_WIDTH + BRICK_GAP) + BRICK_OFFSET_LEFT,
           y: r * (BRICK_HEIGHT + BRICK_GAP) + BRICK_OFFSET_TOP,
@@ -104,47 +103,40 @@ export function BrickBreakerGame() {
     });
 
   }, []);
-  
-  const resetRound = useCallback(() => {
+
+  const resetBallAndPaddle = useCallback(() => {
      ball.current = {
         x: BOARD_WIDTH / 2,
-        y: PADDLE_Y - BALL_RADIUS - 5,
+        y: PADDLE_Y - BALL_RADIUS,
         dx: Math.random() > 0.5 ? 4 : -4,
         dy: -4
     };
     paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
-    draw();
-  }, [draw]);
-
+  }, []);
+  
   const resetGame = useCallback(() => {
     setGameState('waiting');
     setScore(0);
     setLives(3);
     createBricks();
-    resetRound();
-    if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
-    draw();
-  }, [createBricks, draw, resetRound]);
+    resetBallAndPaddle();
+  }, [createBricks, resetBallAndPaddle]);
 
-  const startGame = () => {
-    if (gameState === 'playing') return;
-     if (gameState === 'gameover' || gameState === 'win') {
-        resetGame();
-    }
-    setGameState('playing');
-  }
-
-  const gameLoop = useCallback(() => {
-    if (gameState !== 'playing') return;
+  const update = useCallback(() => {
+    if (gameState !== 'playing') {
+        draw(); // Keep drawing even when not playing to show initial state
+        animationFrameId.current = requestAnimationFrame(update);
+        return;
+    };
 
     // Paddle movement
-    if (rightPressed.current && paddleX.current < BOARD_WIDTH - PADDLE_WIDTH) {
-      paddleX.current += PADDLE_SPEED;
-    } else if (leftPressed.current && paddleX.current > 0) {
-      paddleX.current -= PADDLE_SPEED;
+    if (rightPressed.current) {
+      paddleX.current = Math.min(paddleX.current + PADDLE_SPEED, BOARD_WIDTH - PADDLE_WIDTH);
+    } else if (leftPressed.current) {
+      paddleX.current = Math.max(paddleX.current - PADDLE_SPEED, 0);
     }
     
-    // Ball movement and collision
+    // Ball movement
     const b = ball.current;
     b.x += b.dx;
     b.y += b.dy;
@@ -157,19 +149,21 @@ export function BrickBreakerGame() {
     // Wall collision (top)
     if (b.y + b.dy < BALL_RADIUS) {
       b.dy = -b.dy;
-    } else if (b.y > PADDLE_Y - BALL_RADIUS) {
-        // Check for paddle collision
+    } 
+    
+    // Paddle collision
+    if (b.y + b.dy > PADDLE_Y - BALL_RADIUS) {
         if(b.x > paddleX.current && b.x < paddleX.current + PADDLE_WIDTH){
              b.dy = -b.dy;
-        } else if (b.y > BOARD_HEIGHT - BALL_RADIUS) {
-            // Ball missed paddle and hit the bottom
-            setLives(prevLives => {
+        } else {
+             // Ball missed paddle and hit the bottom
+             setLives(prevLives => {
                  const newLives = prevLives - 1;
                  if(newLives <= 0) {
                     setGameState('gameover');
                 } else {
-                    setGameState('waiting'); // Wait for user to restart round
-                    resetRound();
+                    setGameState('waiting');
+                    resetBallAndPaddle();
                 }
                 return newLives;
             });
@@ -194,17 +188,8 @@ export function BrickBreakerGame() {
     }
 
     draw();
-    animationFrameId.current = requestAnimationFrame(gameLoop);
-  }, [gameState, draw, resetRound]);
-  
-  useEffect(() => {
-    if (gameState === 'playing') {
-       animationFrameId.current = requestAnimationFrame(gameLoop);
-    }
-    return () => {
-        if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
-    }
-  }, [gameState, gameLoop]);
+    animationFrameId.current = requestAnimationFrame(update);
+  }, [gameState, draw, resetBallAndPaddle]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -212,8 +197,10 @@ export function BrickBreakerGame() {
       else if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed.current = true;
       else if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
-          if (gameState === 'waiting' || gameState === 'gameover' || gameState === 'win') {
-            startGame();
+          if (gameState === 'waiting') {
+            setGameState('playing');
+          } else if (gameState === 'gameover' || gameState === 'win') {
+            resetGame();
           }
       }
     };
@@ -226,6 +213,7 @@ export function BrickBreakerGame() {
     document.addEventListener('keyup', handleKeyUp);
     
     resetGame();
+    animationFrameId.current = requestAnimationFrame(update);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
@@ -234,6 +222,14 @@ export function BrickBreakerGame() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleStartButtonClick = () => {
+    if (gameState === 'waiting') {
+        setGameState('playing');
+    } else if (gameState === 'gameover' || gameState === 'win') {
+        resetGame();
+    }
+  }
 
   return (
     <Card className="mt-8 mx-auto max-w-md w-full">
@@ -245,15 +241,15 @@ export function BrickBreakerGame() {
         <div className="relative w-full aspect-[480/600] bg-secondary border-4 border-primary rounded-md overflow-hidden">
            <canvas ref={canvasRef} width={BOARD_WIDTH} height={BOARD_HEIGHT} />
             {(gameState === 'gameover' || gameState === 'win' || (gameState === 'waiting' && lives === 3)) && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white z-10 p-4">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white z-10 p-4 text-center">
                    {gameState === 'win' && <h2 className="text-4xl font-bold">You Win!</h2>}
                    {gameState === 'gameover' && <h2 className="text-4xl font-bold">Game Over</h2>}
                    {gameState === 'win' || gameState === 'gameover' ? (
                        <p className="text-lg">Final Score: {score}</p>
                    ) : (
-                       <h2 className="text-2xl font-bold">Press Enter to Start</h2>
+                       <h2 className="text-2xl font-bold">Press Enter or Click to Start</h2>
                    )}
-                     <Button onClick={startGame} className="mt-4">
+                     <Button onClick={handleStartButtonClick} className="mt-4">
                         <RefreshCw className="mr-2 h-4 w-4" />
                         {gameState === 'win' || gameState === 'gameover' ? 'Play Again' : 'Start Game'}
                     </Button>
