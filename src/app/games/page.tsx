@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Gamepad2, Puzzle, BrainCircuit } from 'lucide-react';
+import { Gamepad2, Puzzle, BrainCircuit, Hand } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +21,12 @@ const BrickBreakerIcon = () => (
 );
 
 const games = [
+    {
+        name: 'Rock-Paper-Scissors',
+        description: 'Play a quick game against the computer.',
+        icon: Hand,
+        href: '/games/rock-paper-scissors',
+    },
     {
         name: 'Tic-Tac-Toe',
         description: 'Play a classic game of Tic-Tac-Toe against a friend.',
