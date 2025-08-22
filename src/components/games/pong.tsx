@@ -1,21 +1,18 @@
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
-import { useInterval } from '@/hooks/use-interval';
 
 const BOARD_WIDTH = 600;
 const BOARD_HEIGHT = 400;
-
-// Paddles
 const PADDLE_WIDTH = 10;
 const PADDLE_HEIGHT = 80;
 const PADDLE_SPEED = 6;
-
-// Ball
 const BALL_SIZE = 10;
+const WINNING_SCORE = 11;
 
 type GameState = 'waiting' | 'playing' | 'gameover';
 type Score = { player1: number; player2: number };
@@ -35,48 +32,8 @@ export function PongGame() {
     dy: 5,
   });
   const keysPressed = useRef<{ [key: string]: boolean }>({});
-  
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Use theme colors with fallbacks for guaranteed visibility
-    const style = getComputedStyle(canvas.parentElement!);
-    const secondaryColor = style.getPropertyValue('--secondary').trim() || '#f1f5f9';
-    const primaryColor = style.getPropertyValue('--primary').trim() || '#3b82f6';
-    const foregroundColor = style.getPropertyValue('--card-foreground').trim() || '#0f172a';
-    const borderColor = style.getPropertyValue('--border').trim() || '#cbd5e1';
+  const animationFrameId = useRef<number>();
 
-    // Clear board with a visible background color
-    ctx.fillStyle = secondaryColor;
-    ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
-    
-    // Draw paddles
-    ctx.fillStyle = primaryColor;
-    ctx.fillRect(10, paddle1Y.current, PADDLE_WIDTH, PADDLE_HEIGHT);
-    ctx.fillRect(BOARD_WIDTH - PADDLE_WIDTH - 10, paddle2Y.current, PADDLE_WIDTH, PADDLE_HEIGHT);
-
-    // Draw ball
-    ctx.beginPath();
-    ctx.arc(ball.current.x, ball.current.y, BALL_SIZE, 0, Math.PI * 2);
-    ctx.fillStyle = foregroundColor;
-    ctx.fill();
-    ctx.closePath();
-    
-    // Draw net
-    ctx.beginPath();
-    ctx.setLineDash([5, 15]);
-    ctx.moveTo(BOARD_WIDTH / 2, 0);
-    ctx.lineTo(BOARD_WIDTH / 2, BOARD_HEIGHT);
-    ctx.strokeStyle = borderColor;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-  }, []);
-  
   const resetBall = (direction: 1 | -1) => {
     ball.current = {
         x: BOARD_WIDTH / 2,
@@ -84,7 +41,7 @@ export function PongGame() {
         dx: 5 * direction,
         dy: Math.random() > 0.5 ? 5 : -5,
     };
-  }
+  };
 
   const resetGame = useCallback(() => {
     setGameState('waiting');
@@ -92,20 +49,21 @@ export function PongGame() {
     setWinner(null);
     paddle1Y.current = BOARD_HEIGHT / 2 - PADDLE_HEIGHT / 2;
     paddle2Y.current = BOARD_HEIGHT / 2 - PADDLE_HEIGHT / 2;
-    resetBall(1);
-    // Ensure the board is drawn on reset
-    setTimeout(() => draw(), 0);
-  }, [draw]);
+    resetBall(Math.random() > 0.5 ? 1 : -1);
+  }, []);
   
   const startGame = () => {
     if(gameState !== 'playing') {
        resetGame();
        setGameState('playing');
     }
-  }
+  };
 
   const gameLoop = useCallback(() => {
-    if (gameState !== 'playing') return;
+    if (gameState !== 'playing') {
+        animationFrameId.current = requestAnimationFrame(gameLoop);
+        return;
+    };
 
     // Paddle movement
     if (keysPressed.current['w'] && paddle1Y.current > 0) {
@@ -133,41 +91,83 @@ export function PongGame() {
 
     // Paddle collision
     // Player 1
-    if (b.dx < 0 && b.x - BALL_SIZE < 10 + PADDLE_WIDTH && b.y > paddle1Y.current && b.y < paddle1Y.current + PADDLE_HEIGHT) {
+    if (b.dx < 0 && b.x - BALL_SIZE < 10 + PADDLE_WIDTH && b.x > 10 && b.y > paddle1Y.current && b.y < paddle1Y.current + PADDLE_HEIGHT) {
         b.dx = -b.dx;
     }
     // Player 2
-    if (b.dx > 0 && b.x + BALL_SIZE > BOARD_WIDTH - 10 - PADDLE_WIDTH && b.y > paddle2Y.current && b.y < paddle2Y.current + PADDLE_HEIGHT) {
+    if (b.dx > 0 && b.x + BALL_SIZE > BOARD_WIDTH - 10 - PADDLE_WIDTH && b.x < BOARD_WIDTH - 10 && b.y > paddle2Y.current && b.y < paddle2Y.current + PADDLE_HEIGHT) {
         b.dx = -b.dx;
     }
 
     // Score
     if (b.x < 0) { // Player 2 scores
-      setScore(s => ({...s, player2: s.player2 + 1}));
+      setScore(s => {
+          const newScore = s.player2 + 1;
+          if (newScore >= WINNING_SCORE) {
+              setWinner('Player 2');
+              setGameState('gameover');
+          }
+          return {...s, player2: newScore};
+      });
       resetBall(-1);
     }
     if (b.x > BOARD_WIDTH) { // Player 1 scores
-      setScore(s => ({...s, player1: s.player1 + 1}));
+      setScore(s => {
+        const newScore = s.player1 + 1;
+        if (newScore >= WINNING_SCORE) {
+            setWinner('Player 1');
+            setGameState('gameover');
+        }
+        return {...s, player1: newScore};
+      });
       resetBall(1);
     }
     
-    draw();
-  }, [gameState, draw]);
+    animationFrameId.current = requestAnimationFrame(gameLoop);
+  }, [gameState]);
+
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Clear board to black
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+    
+    // Draw paddles
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(10, paddle1Y.current, PADDLE_WIDTH, PADDLE_HEIGHT);
+    ctx.fillRect(BOARD_WIDTH - PADDLE_WIDTH - 10, paddle2Y.current, PADDLE_WIDTH, PADDLE_HEIGHT);
+
+    // Draw ball
+    ctx.beginPath();
+    ctx.arc(ball.current.x, ball.current.y, BALL_SIZE, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFF';
+    ctx.fill();
+    ctx.closePath();
+    
+    // Draw net
+    ctx.beginPath();
+    ctx.setLineDash([5, 15]);
+    ctx.moveTo(BOARD_WIDTH / 2, 0);
+    ctx.lineTo(BOARD_WIDTH / 2, BOARD_HEIGHT);
+    ctx.strokeStyle = '#FFF';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }, []);
 
   useEffect(() => {
-    // Check for winner
-    if (score.player1 >= 11) {
-        setWinner('Player 1');
-        setGameState('gameover');
+    const render = () => {
+      draw();
+      animationFrameId.current = requestAnimationFrame(render);
     }
-    if (score.player2 >= 11) {
-        setWinner('Player 2');
-        setGameState('gameover');
-    }
-  }, [score]);
+    const id = requestAnimationFrame(render);
+    return () => cancelAnimationFrame(id);
+  }, [draw]);
   
-  useInterval(gameLoop, gameState === 'playing' ? 1000/60 : null);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => keysPressed.current[e.key] = true;
     const handleKeyUp = (e: KeyboardEvent) => keysPressed.current[e.key] = false;
@@ -175,14 +175,18 @@ export function PongGame() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     
-    // Initial draw
-    setTimeout(() => resetGame(), 100);
+    resetGame();
+    animationFrameId.current = requestAnimationFrame(gameLoop);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      if(animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
     };
-  }, [resetGame]);
+  }, [resetGame, gameLoop]);
+
 
   return (
     <Card className="mt-8 mx-auto max-w-2xl w-full">
@@ -191,7 +195,7 @@ export function PongGame() {
         <CardTitle className="w-1/2">Player 2: {score.player2}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="relative w-full aspect-[600/400] bg-secondary border-4 border-primary rounded-md overflow-hidden">
+        <div className="relative w-full aspect-[600/400] bg-black border-4 border-primary rounded-md overflow-hidden">
            <canvas ref={canvasRef} width={BOARD_WIDTH} height={BOARD_HEIGHT} />
             {(gameState === 'gameover' || gameState === 'waiting') && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white z-10 p-4 text-center">
