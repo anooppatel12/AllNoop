@@ -90,3 +90,28 @@ body {
 .dark .text-primary-foreground {
   color: hsl(var(--primary-foreground)) !important;
 }
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--primary) / 0.5);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--primary));
+}
+
+.dark ::-webkit-scrollbar-thumb {
+   background-color: hsl(var(--primary) / 0.7);
+   box-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+}
