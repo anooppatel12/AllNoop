@@ -30,8 +30,8 @@ export function PongGame() {
   const paddle1Y = useRef(BOARD_HEIGHT / 2 - PADDLE_HEIGHT / 2);
   const paddle2Y = useRef(BOARD_HEIGHT / 2 - PADDLE_HEIGHT / 2);
   const ball = useRef({
-    x: BOARD_WIDTH / 2 - BALL_SIZE / 2,
-    y: BOARD_HEIGHT / 2 - BALL_SIZE / 2,
+    x: BOARD_WIDTH / 2,
+    y: BOARD_HEIGHT / 2,
     dx: 5,
     dy: 5,
   });
@@ -55,7 +55,7 @@ export function PongGame() {
     // Draw ball
     ctx.beginPath();
     ctx.arc(ball.current.x, ball.current.y, BALL_SIZE, 0, Math.PI * 2);
-    ctx.fillStyle = 'hsl(var(--primary-foreground))';
+    ctx.fillStyle = 'hsl(var(--card-foreground))';
     ctx.fill();
     ctx.closePath();
     
@@ -71,14 +71,14 @@ export function PongGame() {
   
   const resetBall = (direction: 1 | -1) => {
     ball.current = {
-        x: BOARD_WIDTH / 2 - BALL_SIZE / 2,
-        y: BOARD_HEIGHT / 2 - BALL_SIZE / 2,
+        x: BOARD_WIDTH / 2,
+        y: BOARD_HEIGHT / 2,
         dx: 5 * direction,
         dy: Math.random() > 0.5 ? 5 : -5,
     };
   }
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setGameState('waiting');
     setScore({ player1: 0, player2: 0 });
     setWinner(null);
@@ -86,7 +86,7 @@ export function PongGame() {
     paddle2Y.current = BOARD_HEIGHT / 2 - PADDLE_HEIGHT / 2;
     resetBall(1);
     draw();
-  };
+  }, [draw]);
   
   const startGame = () => {
     if(gameState !== 'playing') {
@@ -124,11 +124,11 @@ export function PongGame() {
 
     // Paddle collision
     // Player 1
-    if (b.x < 20 + PADDLE_WIDTH && b.y > paddle1Y.current && b.y < paddle1Y.current + PADDLE_HEIGHT) {
+    if (b.dx < 0 && b.x < 20 + PADDLE_WIDTH && b.y > paddle1Y.current && b.y < paddle1Y.current + PADDLE_HEIGHT) {
         b.dx = -b.dx;
     }
     // Player 2
-    if (b.x > BOARD_WIDTH - 20 - PADDLE_WIDTH - BALL_SIZE && b.y > paddle2Y.current && b.y < paddle2Y.current + PADDLE_HEIGHT) {
+    if (b.dx > 0 && b.x > BOARD_WIDTH - 20 - PADDLE_WIDTH - BALL_SIZE && b.y > paddle2Y.current && b.y < paddle2Y.current + PADDLE_HEIGHT) {
         b.dx = -b.dx;
     }
 
@@ -142,6 +142,9 @@ export function PongGame() {
       resetBall(1);
     }
     
+  }, [gameState]);
+
+  useEffect(() => {
     // Check for winner
     if (score.player1 >= 11) {
         setWinner('Player 1');
@@ -151,11 +154,13 @@ export function PongGame() {
         setWinner('Player 2');
         setGameState('gameover');
     }
+  }, [score]);
 
+  useEffect(() => {
     draw();
-  }, [gameState, draw, score.player1, score.player2]);
+  }, [draw, gameState]);
   
-  useInterval(gameLoop, 1000/60);
+  useInterval(gameLoop, gameState === 'playing' ? 1000/60 : null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => keysPressed.current[e.key] = true;
