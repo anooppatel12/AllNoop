@@ -208,19 +208,19 @@ export function SpaceInvadersGame() {
       <CardContent>
         <div className="relative w-full aspect-square bg-black border-4 border-primary rounded-md overflow-hidden">
             {/* Player */}
-            <div style={{ position: 'absolute', left: player.x, top: player.y, width: player.width, height: player.height, backgroundColor: '#34d399' }} />
+            <div style={{ position: 'absolute', left: player.x, top: player.y, width: player.width, height: player.height, backgroundColor: 'hsl(var(--primary-foreground))' }} />
 
             {/* Aliens */}
             {aliens.map((alien, i) => (
-                <div key={i} style={{ position: 'absolute', left: alien.x, top: alien.y, width: alien.width, height: alien.height, backgroundColor: '#f87171' }} />
+                <div key={i} style={{ position: 'absolute', left: alien.x, top: alien.y, width: alien.width, height: alien.height, backgroundColor: 'hsl(var(--destructive))' }} />
             ))}
             
             {/* Projectiles */}
             {projectiles.map((p, i) => (
-                 <div key={`p-${i}`} style={{ position: 'absolute', left: p.x, top: p.y, width: p.width, height: p.height, backgroundColor: '#60a5fa' }} />
+                 <div key={`p-${i}`} style={{ position: 'absolute', left: p.x, top: p.y, width: p.width, height: p.height, backgroundColor: 'hsl(var(--primary))' }} />
             ))}
             {alienProjectiles.map((p, i) => (
-                 <div key={`ap-${i}`} style={{ position: 'absolute', left: p.x, top: p.y, width: p.width, height: p.height, backgroundColor: '#facc15' }} />
+                 <div key={`ap-${i}`} style={{ position: 'absolute', left: p.x, top: p.y, width: p.width, height: p.height, backgroundColor: 'hsl(var(--accent))' }} />
             ))}
             
             {isGameOver && (

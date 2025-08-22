@@ -103,10 +103,9 @@ export function BrickBreakerGame() {
     });
 
   }, []);
-
+  
   const resetGame = useCallback(() => {
-    if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
-    createBricks();
+    setGameState('waiting');
     setScore(0);
     setLives(3);
     paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
@@ -116,8 +115,24 @@ export function BrickBreakerGame() {
         dx: 4,
         dy: -4
     };
+    createBricks();
+    if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+    // Draw initial state
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        // A short delay to ensure canvas is ready in the DOM
+        setTimeout(() => draw(), 0);
+      }
+    }
+  }, [createBricks, draw]);
+
+  const startGame = () => {
+    if (gameState === 'playing') return;
+    resetGame();
     setGameState('playing');
-  }, [createBricks]);
+  }
 
   const gameLoop = useCallback(() => {
     if (gameState !== 'playing') return;
@@ -144,12 +159,13 @@ export function BrickBreakerGame() {
       b.dy = -b.dy;
     } else if (b.y + b.dy > BOARD_HEIGHT - BALL_RADIUS) {
         // Paddle collision
-        if(b.x > paddleX.current && b.x < paddleX.current + PADDLE_WIDTH){
+        if(b.x > paddleX.current && b.x < paddleX.current + PADDLE_WIDTH && b.y < PADDLE_Y){
              b.dy = -b.dy;
         } else {
             // Ball missed paddle
-            setLives(prev => prev - 1);
-            if(lives - 1 <= 0) {
+            const newLives = lives - 1;
+            setLives(newLives);
+            if(newLives <= 0) {
                  setGameState('gameover');
             } else {
                  ball.current = {
@@ -159,6 +175,7 @@ export function BrickBreakerGame() {
                     dy: -4
                 };
                 paddleX.current = (BOARD_WIDTH - PADDLE_WIDTH) / 2;
+                setGameState('waiting'); // Wait for user to restart round
             }
         }
     }
@@ -176,7 +193,7 @@ export function BrickBreakerGame() {
         }
     });
     
-    if(allBricksBroken){
+    if(allBricksBroken && bricks.current.length > 0){
         setGameState('win');
     }
 
@@ -188,15 +205,24 @@ export function BrickBreakerGame() {
     if (gameState === 'playing') {
        animationFrameId.current = requestAnimationFrame(gameLoop);
     }
+    if (gameState === 'waiting') {
+      draw();
+    }
     return () => {
         if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     }
-  }, [gameState, gameLoop]);
+  }, [gameState, gameLoop, draw]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed.current = true;
       else if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed.current = true;
+      else if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          if (gameState === 'waiting' || gameState === 'gameover' || gameState === 'win') {
+            startGame();
+          }
+      }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed.current = false;
@@ -213,7 +239,8 @@ export function BrickBreakerGame() {
       document.removeEventListener('keyup', handleKeyUp);
        if(animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     };
-  }, [resetGame]);
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Card className="mt-8 mx-auto max-w-md w-full">
@@ -224,22 +251,27 @@ export function BrickBreakerGame() {
       <CardContent>
         <div className="relative w-full aspect-[480/600] bg-black border-4 border-primary rounded-md overflow-hidden">
            <canvas ref={canvasRef} width={BOARD_WIDTH} height={BOARD_HEIGHT} />
-            {(gameState === 'gameover' || gameState === 'win') && (
+            {(gameState === 'gameover' || gameState === 'win' || (gameState === 'waiting' && lives < 3)) && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white z-10">
-                    <p className="text-4xl font-bold">{gameState === 'win' ? 'You Win!' : 'Game Over'}</p>
-                    <p>Final Score: {score}</p>
-                     <Button onClick={resetGame} className="mt-4">
+                   {gameState === 'win' && <p className="text-4xl font-bold">You Win!</p>}
+                   {gameState === 'gameover' && <p className="text-4xl font-bold">Game Over</p>}
+                   {gameState === 'win' || gameState === 'gameover' ? (
+                       <p>Final Score: {score}</p>
+                   ) : (
+                       <p className="text-2xl font-bold">Press Enter to Start</p>
+                   )}
+                     <Button onClick={startGame} className="mt-4">
                         <RefreshCw className="mr-2 h-4 w-4" />
-                        Play Again
+                        {gameState === 'win' || gameState === 'gameover' ? 'Play Again' : 'Start Game'}
                     </Button>
                 </div>
             )}
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={resetGame} className="w-full">
+        <Button onClick={startGame} className="w-full">
           <RefreshCw className="mr-2 h-4 w-4" />
-          Restart Game
+          {gameState === 'win' || gameState === 'gameover' ? 'Play Again' : 'Restart Game'}
         </Button>
       </CardFooter>
     </Card>
