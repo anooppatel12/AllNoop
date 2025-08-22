@@ -14,7 +14,8 @@ import {
   Video,
   VenetianMask,
   Keyboard,
-  Quote
+  Quote,
+  Gamepad2
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -32,6 +33,7 @@ const links = [
   { href: '/fun-tools/meme-generator', label: 'Meme Generator', icon: VenetianMask },
   { href: '/fun-tools/typing-speed-test', label: 'Typing Speed Test', icon: Keyboard },
   { href: '/fun-tools/random-joke-quote-generator', label: 'Joke/Quote Generator', icon: Quote },
+  { href: '/fun-tools/tic-tac-toe', label: 'Tic-Tac-Toe', icon: Gamepad2 },
   { href: '/chat', label: 'P2P Chat', icon: Users },
   { href: '/contact', label: 'Contact', icon: MessageSquare },
 ];
