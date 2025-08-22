@@ -21,7 +21,7 @@ import { CustomCursor } from '@/components/ui/custom-cursor';
 import { Logo } from '@/components/ui/logo';
 
 export const metadata: Metadata = {
-  title: 'OmniTool',
+  title: 'AllNoop',
   description: 'An all-in-one toolkit with calculators, PDF and image tools, downloaders, and AI content generators.',
 };
 
@@ -51,7 +51,7 @@ export default function RootLayout({
                   <Button variant="ghost" asChild className="flex w-full items-center justify-center gap-2 px-2 text-lg font-semibold group-data-[collapsible=icon]:justify-center">
                     <Link href="/">
                       <Logo className="h-6 w-6 shrink-0 text-primary" />
-                      <span className="font-headline group-data-[collapsible=icon]:hidden">OmniTool</span>
+                      <span className="font-headline group-data-[collapsible=icon]:hidden">AllNoop</span>
                     </Link>
                   </Button>
                 </SidebarHeader>

@@ -50,8 +50,8 @@ export function PdfProtector() {
       const pdfBytes = await file.arrayBuffer();
       const pdfDoc = await PDFDocument.load(pdfBytes);
 
-      pdfDoc.setProducer('OmniTool PDF Protector');
-      pdfDoc.setCreator('OmniTool');
+      pdfDoc.setProducer('AllNoop PDF Protector');
+      pdfDoc.setCreator('AllNoop');
       
       const newPdfBytes = await pdfDoc.save({
           useObjectStreams: false, // Required for encryption

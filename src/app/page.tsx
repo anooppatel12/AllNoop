@@ -80,7 +80,7 @@ export default function LandingPage() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl"
         >
-          From complex calculations to creative content generation, OmniTool provides the solutions you need in one unified platform.
+          From complex calculations to creative content generation, AllNoop provides the solutions you need in one unified platform.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}

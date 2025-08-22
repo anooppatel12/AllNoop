@@ -7,7 +7,7 @@ export default function AboutPage() {
     <div className="container mx-auto max-w-4xl p-4 md:p-8">
       <div className="flex flex-col items-center justify-center space-y-4 text-center">
         <h1 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-          About OmniTool
+          About AllNoop
         </h1>
         <p className="max-w-[700px] text-muted-foreground md:text-xl">
           Your All-in-One Digital Toolkit for everyday productivity and creativity.
@@ -20,10 +20,10 @@ export default function AboutPage() {
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
-            At OmniTool, our mission is to provide a comprehensive and user-friendly suite of tools that empower users to tackle a wide range of digital tasks with ease and efficiency. We believe that powerful tools should be accessible to everyone, which is why we've brought together a diverse collection of calculators, PDF utilities, image editors, and content generators into one seamless platform.
+            At AllNoop, our mission is to provide a comprehensive and user-friendly suite of tools that empower users to tackle a wide range of digital tasks with ease and efficiency. We believe that powerful tools should be accessible to everyone, which is why we've brought together a diverse collection of calculators, PDF utilities, image editors, and content generators into one seamless platform.
           </p>
           <p>
-            Whether you're a student managing your coursework, a professional handling documents, a content creator looking for inspiration, or just someone who needs to make a quick calculation, OmniTool is designed to be your go-to resource.
+            Whether you're a student managing your coursework, a professional handling documents, a content creator looking for inspiration, or just someone who needs to make a quick calculation, AllNoop is designed to be your go-to resource.
           </p>
         </CardContent>
       </Card>

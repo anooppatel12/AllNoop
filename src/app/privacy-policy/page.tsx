@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
-            Welcome to OmniTool. We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.
+            Welcome to AllNoop. We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.
           </p>
         </CardContent>
       </Card>

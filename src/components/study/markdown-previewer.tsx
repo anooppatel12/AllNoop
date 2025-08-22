@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -9,13 +10,13 @@ import { Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const defaultMarkdown = `
-# Welcome to the OmniTool Markdown Previewer!
+# Welcome to the AllNoop Markdown Previewer!
 
 ## Your All-in-One Digital Toolkit
 
 This previewer helps you write and visualize your Markdown content in real-time.
 
-### Key Features of OmniTool:
+### Key Features of AllNoop:
 
 - **Calculators**: A wide range of calculators for every need.
 - **PDF Tools**: Merge, split, compress, and edit PDFs.
@@ -25,10 +26,10 @@ This previewer helps you write and visualize your Markdown content in real-time.
 Here's an example of a code block:
 
 \`\`\`jsx
-function OmniToolComponent() {
+function AllNoopComponent() {
   return (
     <div>
-      <h1>Welcome to OmniTool!</h1>
+      <h1>Welcome to AllNoop!</h1>
     </div>
   );
 }
@@ -36,16 +37,16 @@ function OmniToolComponent() {
 
 You can make text **bold**, _italic_, or **_both_**.
 
-> OmniTool is designed to be your go-to resource for a variety of digital tasks.
+> AllNoop is designed to be your go-to resource for a variety of digital tasks.
 
 Check out our features:
 1.  Hashtag Generator
 2.  Calculators
 3.  PDF & Image Tools
 
-[Visit OmniTool's Homepage](/)
+[Visit AllNoop's Homepage](/)
 
-![OmniTool Logo](https://placehold.co/150x50.png?text=OmniTool)
+![AllNoop Logo](https://placehold.co/150x50.png?text=AllNoop)
 `;
 
 
