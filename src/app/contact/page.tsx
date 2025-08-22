@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import emailjs from '@emailjs/browser';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -39,30 +40,31 @@ export default function ContactPage() {
   const onSubmit = async (data: z.infer<typeof contactFormSchema>) => {
     setIsLoading(true);
     setError(null);
+
+    const serviceId = 'service_iqhnvcm';
+    const templateId = 'template_3h987vp';
+    const publicKey = 'pazNR17JBxIKeckmf';
+
+    const templateParams = {
+      from_name: data.name,
+      from_email: data.email,
+      message: data.message,
+    };
+
     try {
-        const response = await fetch('/api/contact', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Something went wrong.');
-        }
-
-        toast({
-            title: 'Message Sent!',
-            description: "Thanks for reaching out. We'll get back to you soon.",
-        });
-        form.reset();
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      
+      toast({
+        title: 'Message Sent!',
+        description: "Thanks for reaching out. We'll get back to you soon.",
+      });
+      form.reset();
 
     } catch (e: any) {
-        setError(e.message);
+      console.error('EmailJS error:', e);
+      setError('Failed to send message. Please try again later.');
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
