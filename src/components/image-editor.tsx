@@ -504,18 +504,21 @@ export function ImageEditor() {
 
   return (
     <div className="flex h-full w-full flex-col md:flex-row">
-      <div className="w-full md:w-80 border-b md:border-r p-4 space-y-6 overflow-y-auto">
+      <div className="md:sticky md:top-0 w-full md:w-80 border-b md:border-r p-4 space-y-6 md:overflow-y-auto">
         <h2 className="text-xl font-bold">Image Editor</h2>
+        
+        {image && (
+          <div className="p-4 border rounded-lg space-y-2">
+              <div className="flex justify-center gap-2">
+                <Button onClick={undo} disabled={historyIndex <= 0} variant="outline" size="icon"><Undo2 /></Button>
+                <Button onClick={redo} disabled={historyIndex >= history.length - 1} variant="outline" size="icon"><Redo2 /></Button>
+                <Button onClick={resetAll} variant="destructive" size="icon"><RefreshCw /></Button>
+              </div>
+          </div>
+        )}
         
         {image ? (
             <div className="space-y-6">
-                 <div className="p-4 border rounded-lg space-y-2">
-                    <div className="flex justify-center gap-2">
-                      <Button onClick={undo} disabled={historyIndex <= 0} variant="outline" size="icon"><Undo2 /></Button>
-                      <Button onClick={redo} disabled={historyIndex >= history.length - 1} variant="outline" size="icon"><Redo2 /></Button>
-                      <Button onClick={resetAll} variant="destructive" size="icon"><RefreshCw /></Button>
-                    </div>
-                </div>
                 <Tabs value={currentTool} onValueChange={(v) => setCurrentTool(v as Tool)} className="w-full">
                   <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="ai"><Wand2/></TabsTrigger>
