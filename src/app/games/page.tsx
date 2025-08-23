@@ -60,6 +60,12 @@ const games = [
         href: '/games/main-character-quiz',
     },
     {
+        name: 'Meme Personality Quiz',
+        description: 'Find out which iconic meme you are!',
+        icon: HelpCircle,
+        href: '/games/meme-personality-quiz',
+    },
+    {
         name: 'Sudoku',
         description: 'Challenge your mind with a classic game of Sudoku.',
         icon: Puzzle,

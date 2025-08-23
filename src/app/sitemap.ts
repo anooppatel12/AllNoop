@@ -114,6 +114,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/games/desi-nickname-generator',
     '/games/bollywood-personality-quiz',
     '/games/main-character-quiz',
+    '/games/meme-personality-quiz',
   ];
 
   const funToolPages = [
