@@ -59,8 +59,6 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: '4mb', // To allow for larger image uploads
-      // Extend the timeout for AI operations
-      executionTimeout: 120, 
     },
   },
   env: {
