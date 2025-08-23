@@ -117,6 +117,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/games/meme-personality-quiz',
     '/games/toxic-partner-quiz',
     '/games/luck-predictor',
+    '/games/truth-or-dare',
   ];
 
   const funToolPages = [
