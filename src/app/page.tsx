@@ -1,7 +1,7 @@
 
 'use client';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode, MessageCircle, Lock, Baseline, BookOpenCheck, Search } from 'lucide-react';
+import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode, MessageCircle, Lock, Baseline, BookOpenCheck, Search, VideoIcon } from 'lucide-react';
 import Link from 'next/link';
 import { FloatingElements } from '@/components/floating-elements';
 import { useState, useMemo } from 'react';
@@ -38,6 +38,7 @@ const features = [
   { name: 'Joke &amp; Quote Generator', icon: Quote, href: '/fun-tools/random-joke-quote-generator' },
   { name: 'Games', icon: Gamepad2, href: '/games' },
   { name: 'P2P Chat', icon: Users, href: '/chat' },
+  { name: 'Video Room', icon: VideoIcon, href: '/video-room' },
   { name: 'Contact', icon: MessageSquare, href: '/contact' },
   { name: 'Sudoku', icon: Puzzle, href: '/games/sudoku' },
   { name: 'Snake', icon: SnakeIcon, href: '/games/snake' },
