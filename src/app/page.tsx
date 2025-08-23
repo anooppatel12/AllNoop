@@ -168,25 +168,6 @@ export default function LandingPage() {
         </motion.div>
       </div>
       
-      <Link href="/video-room" passHref>
-        <motion.button
-          initial={{ scale: 0 }}
-          animate={{ 
-            scale: 1,
-            y: ["0%", "-8%", "0%"]
-          }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ 
-            scale: { type: 'spring', stiffness: 300, damping: 20, delay: 1 },
-            y: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-          }}
-          className="fixed bottom-8 left-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
-          aria-label="Go to Video Room"
-        >
-          <VideoIcon className="h-7 w-7" />
-        </motion.button>
-      </Link>
     </div>
   );
 }
