@@ -18,8 +18,11 @@ import { cn } from '@/lib/utils';
 import { Slider } from './ui/slider';
 import { Checkbox } from './ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Pen, Smile, Text, Highlighter, Underline, Strikethrough, Square, Circle, Minus, ArrowRight, Image as ImageIcon } from 'lucide-react';
 
-type Tool = 'ai' | 'crop' | 'filters' | 'adjust' | 'export';
+
+type Tool = 'ai' | 'crop' | 'filters' | 'adjust';
 type AdjustTool = 'erase' | 'restore';
 type Filter = 'none' | 'grayscale' | 'sepia' | 'invert' | 'noisy' | 'stripe';
 type ExportFormat = 'png' | 'jpeg';
@@ -27,6 +30,12 @@ type ExportFormat = 'png' | 'jpeg';
 type EditHistory = {
     image: HTMLImageElement;
     filter: Filter;
+};
+
+// Sample Emojis as base64
+const emojis = {
+  '😊': 'data:image/png;base64,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',
+  '😂': 'data:image/png;base64,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',
 };
 
 export function ImageEditor() {
@@ -80,7 +89,7 @@ export function ImageEditor() {
   
   const redo = () => {
       if (historyIndex < history.length - 1) {
-          setHistoryIndex(prev => prev + 1);
+          setHistoryIndex(prev => prev - 1);
       }
   };
   
@@ -508,12 +517,11 @@ export function ImageEditor() {
                     </div>
                 </div>
                 <Tabs value={currentTool} onValueChange={(v) => setCurrentTool(v as Tool)} className="w-full">
-                  <TabsList className="grid w-full grid-cols-5">
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="ai"><Wand2/></TabsTrigger>
                     <TabsTrigger value="crop"><Crop/></TabsTrigger>
                     <TabsTrigger value="filters"><Wand/></TabsTrigger>
                     <TabsTrigger value="adjust"><Brush/></TabsTrigger>
-                    <TabsTrigger value="export"><Download/></TabsTrigger>
                   </TabsList>
                   <TabsContent value="ai" className="mt-4 p-4 border rounded-lg space-y-4">
                      <Button onClick={() => handleAiAction('remove')} className="w-full" disabled={isProcessing}>
@@ -569,7 +577,10 @@ export function ImageEditor() {
                         </div>
                         <p className="text-xs text-muted-foreground">Draw on the image to erase or restore parts. Note: This tool works best on images with transparent backgrounds.</p>
                   </TabsContent>
-                  <TabsContent value="export" className="mt-4 p-4 border rounded-lg space-y-4">
+                </Tabs>
+                
+                <div className="p-4 border rounded-lg space-y-4">
+                    <h3 className="font-semibold text-lg border-b pb-2">Export</h3>
                       <div className="space-y-2">
                           <Label>Resize</Label>
                           <div className="flex items-center gap-2">
@@ -598,8 +609,7 @@ export function ImageEditor() {
                           <Download className="mr-2 h-4 w-4" />
                           Download Image
                         </Button>
-                  </TabsContent>
-                </Tabs>
+                  </div>
 
                  {error && (
                     <Alert variant="destructive">
@@ -648,4 +658,201 @@ export function ImageEditor() {
       </div>
     </div>
   );
+}
+
+
+function SignatureDialog({ setSignature, setCurrentTool, currentTool }: { setSignature: (sig: string | null) => void, setCurrentTool: (tool: EditorTool) => void, currentTool: EditorTool }) {
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [typedSignature, setTypedSignature] = useState('');
+    const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+
+    const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+        const canvas = signatureCanvasRef.current;
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if(!ctx) return;
+        
+        setIsDrawing(true);
+        const pos = getPos(e, canvas);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    };
+
+    const draw = (e: React.MouseEvent | React.TouchEvent) => {
+        if (!isDrawing) return;
+        const canvas = signatureCanvasRef.current;
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if(!ctx) return;
+
+        const pos = getPos(e, canvas);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+    };
+    
+     const getPos = (e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
+        const rect = canvas.getBoundingClientRect();
+        const touch = "touches" in e ? e.touches[0] : null;
+        return {
+            x: (touch ? touch.clientX : (e as React.MouseEvent).clientX) - rect.left,
+            y: (touch ? touch.clientY : (e as React.MouseEvent).clientY) - rect.top
+        };
+    };
+
+    const stopDrawing = () => setIsDrawing(false);
+
+    const clearSignature = () => {
+        const canvas = signatureCanvasRef.current;
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if(!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
+
+    const handleSaveSignature = (type: 'draw' | 'type' | 'upload', data?: string) => {
+        if (type === 'draw') {
+            const canvas = signatureCanvasRef.current;
+            if(!canvas) return;
+            const dataUrl = canvas.toDataURL('image/png');
+            setSignature(dataUrl);
+        } else if (type === 'type') {
+            // Create a canvas to draw the typed signature
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 150;
+            const ctx = canvas.getContext('2d');
+            if(!ctx) return;
+            ctx.font = '50px "Homemade Apple", cursive';
+            ctx.fillText(typedSignature, 20, 80);
+            setSignature(canvas.toDataURL('image/png'));
+        } else if(type === 'upload' && data){
+            setSignature(data);
+        }
+        
+        setCurrentTool('signature');
+        setDialogOpen(false);
+    };
+    
+    const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if(e.target.files && e.target.files[0]){
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                if(event.target && typeof event.target.result === 'string'){
+                    handleSaveSignature('upload', event.target.result);
+                }
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    }
+
+    return (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+                <Button variant={currentTool === 'signature' ? 'default' : 'outline'} size="icon" aria-label="Signature">
+                    <Pen/>
+                </Button>
+            </DialogTrigger>
+            <DialogContent onOpenAutoFocus={(e) => {
+                const canvas = signatureCanvasRef.current;
+                if(canvas) {
+                    const ctx = canvas.getContext('2d');
+                    if(ctx) {
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 2;
+                    }
+                }
+            }}>
+                <DialogHeader>
+                    <DialogTitle>Add Signature</DialogTitle>
+                </DialogHeader>
+                <Tabs defaultValue="draw" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="draw">Draw</TabsTrigger>
+                        <TabsTrigger value="type">Type</TabsTrigger>
+                        <TabsTrigger value="upload">Upload</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="draw" className="mt-4">
+                        <canvas 
+                            ref={signatureCanvasRef} 
+                            width="400" 
+                            height="150" 
+                            className="border rounded-md bg-white"
+                            onMouseDown={startDrawing}
+                            onMouseMove={draw}
+                            onMouseUp={stopDrawing}
+                            onMouseOut={stopDrawing}
+                            onTouchStart={startDrawing}
+                            onTouchMove={draw}
+                            onTouchEnd={stopDrawing}
+                        />
+                        <div className="mt-4 flex justify-end gap-2">
+                            <Button variant="ghost" onClick={clearSignature}>Clear</Button>
+                            <Button onClick={() => handleSaveSignature('draw')}>Save Signature</Button>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="type" className="mt-4 space-y-4">
+                        <Input 
+                            placeholder="Type your name" 
+                            value={typedSignature} 
+                            onChange={(e) => setTypedSignature(e.target.value)} 
+                            className="font-[Homemade_Apple] text-2xl h-12"
+                            style={{fontFamily: "'Homemade Apple', cursive"}}
+                        />
+                        <div className="mt-4 flex justify-end">
+                            <Button onClick={() => handleSaveSignature('type')} disabled={!typedSignature}>Save Signature</Button>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="upload" className="mt-4">
+                        <div className="rounded-lg border-2 border-dashed border-muted-foreground/50 p-8 text-center">
+                            <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                            <p className="mt-4 text-sm text-muted-foreground">Upload an image of your signature.</p>
+                            <Input id="sig-upload" type="file" className="sr-only" onChange={handleSignatureUpload} accept="image/png, image/jpeg" />
+                            <Label htmlFor="sig-upload" className="mt-4 inline-flex h-10 cursor-pointer items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+                                Browse Image
+                            </Label>
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+
+function StickerDialog({ setSticker, setCurrentTool, currentTool }: { setSticker: (sticker: string | null) => void, setCurrentTool: (tool: EditorTool) => void, currentTool: EditorTool }) {
+    const [dialogOpen, setDialogOpen] = useState(false);
+    
+    const selectSticker = (emoji: string) => {
+        setSticker(emoji);
+        setCurrentTool('sticker');
+        setDialogOpen(false);
+    };
+
+    return (
+         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+                <Button variant={currentTool === 'sticker' ? 'default' : 'outline'} size="icon" aria-label="Sticker">
+                    <Smile/>
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Choose a Sticker</DialogTitle>
+                </DialogHeader>
+                <div className="grid grid-cols-4 gap-4">
+                    {Object.entries(emojis).map(([text, dataUrl]) => (
+                        <Button
+                            key={text}
+                            variant="outline"
+                            className="h-20 w-20 text-4xl"
+                            onClick={() => selectSticker(dataUrl)}
+                        >
+                        <img src={dataUrl} alt={text} />
+                        </Button>
+                    ))}
+                </div>
+            </DialogContent>
+        </Dialog>
+    )
 }
