@@ -1,9 +1,8 @@
-
 'use client';
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle } from 'lucide-react';
+import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle, Flag } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -34,6 +33,12 @@ const games = [
         description: 'Guess the number between 1 and 100.',
         icon: HelpCircle,
         href: '/games/guess-the-number',
+    },
+    {
+        name: 'Green Flag or Red Flag',
+        description: 'Find out if your partner is a keeper with this fun quiz.',
+        icon: Flag,
+        href: '/games/green-flag-red-flag',
     },
     {
         name: 'Sudoku',
