@@ -1,3 +1,4 @@
+
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -109,6 +110,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/games/space-invaders',
     '/games/memory',
     '/games/pong',
+    '/games/green-flag-red-flag',
+    '/games/desi-nickname-generator',
+    '/games/bollywood-personality-quiz',
+    '/games/main-character-quiz',
   ];
 
   const funToolPages = [

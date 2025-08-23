@@ -1,8 +1,9 @@
+
 'use client';
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle, Flag, VenetianMask, User, Clapperboard } from 'lucide-react';
+import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle, Flag, VenetianMask, User, Clapperboard, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -51,6 +52,12 @@ const games = [
         description: 'Find out which iconic Bollywood character you are!',
         icon: Clapperboard,
         href: '/games/bollywood-personality-quiz',
+    },
+    {
+        name: 'Main Character Quiz',
+        description: 'Find out if you have main character energy.',
+        icon: Sparkles,
+        href: '/games/main-character-quiz',
     },
     {
         name: 'Sudoku',
