@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -54,6 +55,13 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '4mb', // To allow for larger image uploads
+      // Extend the timeout for AI operations
+      executionTimeout: 120, 
+    },
   },
   env: {
     NEXT_PUBLIC_ENABLE_VIDEO_DOWNLOADER: process.env.NEXT_PUBLIC_ENABLE_VIDEO_DOWNLOADER,
