@@ -89,11 +89,11 @@ export default function LandingPage() {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="mt-8"
         >
-          <a href="/calculators" target="_blank" rel="noopener noreferrer">
+          <Link href="/calculators">
             <button className="inline-flex items-center justify-center rounded-full bg-primary px-8 py-3 text-lg font-medium text-primary-foreground shadow-lg transition-transform duration-300 hover:scale-105">
               Explore Tools <ArrowRight className="ml-2 h-5 w-5" />
             </button>
-          </a>
+          </Link>
         </motion.div>
         
         <motion.div
