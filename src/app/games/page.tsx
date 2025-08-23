@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle, Flag, VenetianMask, User, Clapperboard, Sparkles, HeartCrack } from 'lucide-react';
+import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle, Flag, VenetianMask, User, Clapperboard, Sparkles, HeartCrack, Dices } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -34,6 +34,12 @@ const games = [
         description: 'Guess the number between 1 and 100.',
         icon: HelpCircle,
         href: '/games/guess-the-number',
+    },
+     {
+        name: 'Luck Predictor',
+        description: 'Find out your fortune for the day!',
+        icon: Dices,
+        href: '/games/luck-predictor',
     },
     {
         name: 'Green Flag or Red Flag',
