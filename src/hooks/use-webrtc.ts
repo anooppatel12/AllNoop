@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -67,12 +66,12 @@ export const useWebRTC = (roomId: string, onMessage: (message: string) => void) 
     }, { onlyOnce: false });
 
     const signalingListener = onValue(signalingRef, async (snapshot) => {
-       if (!pcRef.current || pcRef.current.signalingState === 'closed') return;
       const signalingData = snapshot.val();
       
+      if (!pc || pc.signalingState === 'closed') return;
+
       if (!signalingData) { 
         isCallerRef.current = true;
-         if (pcRef.current.signalingState === 'closed') return;
         const channel = pc.createDataChannel('chat');
         channel.onmessage = (e) => onMessage(e.data);
         dataChannelRef.current = channel;
