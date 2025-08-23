@@ -22,6 +22,7 @@ import {
   Baseline,
   BookOpenCheck,
   Search,
+  VideoIcon,
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -51,6 +52,7 @@ const links = [
   { href: '/fun-tools/random-joke-quote-generator', label: 'Joke/Quote Generator', icon: Quote },
   { href: '/games', label: 'Games', icon: Gamepad2 },
   { href: '/chat', label: 'P2P Chat', icon: Users },
+  { href: '/video-room', label: 'Video Room', icon: VideoIcon },
   { href: '/contact', label: 'Contact', icon: MessageSquare },
 ];
 

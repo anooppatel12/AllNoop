@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/hashtag-generator',
     '/image-editor',
     '/chat',
+    '/video-room',
     '/pdf-tools',
     '/calculators',
     '/games',
