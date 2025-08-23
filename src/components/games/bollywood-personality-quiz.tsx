@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clapperboard, RefreshCw, Share2 } from 'lucide-react';
+import { Clapperboard, RefreshCw, Share2, User, Users, VenetianMask } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -15,71 +15,72 @@ type Question = {
   answers: { text: string; points: { [key: string]: number } }[];
 };
 
-type Character = 'Kabir' | 'Bunny' | 'Poo' | 'Geet' | 'Raj';
+type Character = 'Kabir' | 'Bunny' | 'Poo' | 'Geet' | 'Raj' | 'Circuit' | 'Rani';
+type Gender = 'male' | 'female' | 'other';
+type GameState = 'start' | 'gender-select' | 'playing' | 'result';
 
-const questions: Question[] = [
-  {
-    text: "It's Friday night. Your ideal date is:",
-    answers: [
-      { text: 'A spontaneous road trip to nowhere.', points: { Bunny: 3 } },
-      { text: 'Getting dressed up for the fanciest party in town.', points: { Poo: 3 } },
-      { text: 'A quiet, intense evening with just the two of us.', points: { Kabir: 3 } },
-      { text: 'Singing songs in a mustard field.', points: { Raj: 3 } },
-      { text: 'Crashing a wedding, obviously.', points: { Geet: 3 } },
-    ],
-  },
-  {
-    text: 'How do you handle a major disagreement?',
-    answers: [
-      { text: 'Avoidance. I\'ll just book a flight and deal with it later.', points: { Bunny: 3 } },
-      { text: 'I don\'t do disagreements. I\'m always right.', points: { Poo: 3, Kabir: 1 } },
-      { text: 'Intense, passionate argument. Things might get broken.', points: { Kabir: 3 } },
-      { text: 'I talk... a lot. Until they agree with me.', points: { Geet: 3 } },
-      { text: 'Apologize, even if it wasn\'t my fault, just to make peace.', points: { Raj: 3 } },
-    ],
-  },
-  {
-    text: 'Your personal style is best described as:',
-    answers: [
-      { text: '"Whatever is clean and comfortable for my next adventure."', points: { Bunny: 3 } },
-      { text: 'P.H.A.T: Pretty, Hot, and Tempting.', points: { Poo: 3 } },
-      { text: 'Whatever. My brooding look is my main accessory.', points: { Kabir: 3 } },
-      { text: '"Main apni favourite hoon!" fashion.', points: { Geet: 3 } },
-      { text: 'Classic leather jacket and a winning smile.', points: { Raj: 3 } },
-    ],
-  },
-  {
-    text: 'What\'s your philosophy on love?',
-    answers: [
-      { text: 'Love is great, but my career and dreams come first.', points: { Bunny: 3 } },
-      { text: 'Love is about finding someone who worships me.', points: { Poo: 3 } },
-      { text: 'It\'s all-consuming, passionate, and a little bit dangerous.', points: { Kabir: 3 } },
-      { text: 'If it\'s meant to be, they\'ll catch the train.', points: { Geet: 3, Raj: 1 } },
-      { text: '"Bade bade deshon mein aisi choti choti baatein hoti rehti hai."', points: { Raj: 3 } },
-    ],
-  },
+const questionsMale: Question[] = [
+  { text: "Your ideal first date involves:", answers: [ { text: "A spontaneous road trip to a hidden gem.", points: { Bunny: 3 } }, { text: "A perfectly planned, romantic dinner.", points: { Raj: 3 } }, { text: "Something intense and competitive, like a sports match.", points: { Kabir: 3 } } ] },
+  { text: "When you're angry at your partner, you:", answers: [ { text: "Need some space to cool off and think.", points: { Bunny: 3, Raj: 1 } }, { text: "Confront the issue head-on, with passion.", points: { Kabir: 3 } }, { text: "Make a grand, dramatic gesture to show your displeasure.", points: { Raj: 3 } } ] },
+  { text: "Your love language is primarily:", answers: [ { text: "Grand gestures and surprises.", points: { Raj: 3 } }, { text: "Quality time and shared experiences.", points: { Bunny: 3 } }, { text: "Physical touch and fierce loyalty.", points: { Kabir: 3 } } ] },
+  { text: "The perfect proposal is:", answers: [ { text: "On a mountain top after a long trek.", points: { Bunny: 3 } }, { text: "In the middle of a European field with a mandolin.", points: { Raj: 3 } }, { text: "I don't do proposals, I do declarations.", points: { Kabir: 3 } } ] },
 ];
 
+const questionsFemale: Question[] = [
+  { text: "Your go-to flirting style is:", answers: [ { text: "Witty banter and a playful challenge.", points: { Geet: 3 } }, { text: "Making them know you're the prize.", points: { Poo: 3 } }, { text: "A mix of shyness and charm.", points: { Rani: 2 } } ] },
+  { text: "When you're angry, you're most likely to:", answers: [ { text: "Give them the silent treatment until they figure it out.", points: { Poo: 3 } }, { text: "Say exactly what's on your mind, loudly.", points: { Geet: 3 } }, { text: "Cry and go on a solo trip to Paris.", points: { Rani: 3 } } ] },
+  { text: "Your ideal partner is someone who:", answers: [ { text: "Loves you for your chaotic energy and joins your adventures.", points: { Geet: 3 } }, { text: "Adores you and isn't afraid to show it off.", points: { Poo: 3 } }, { text: "Helps you discover your own strength.", points: { Rani: 3 } } ] },
+];
+
+const questionsGeneral: Question[] = [
+  { text: "What's your role in your friend group?", answers: [ { text: "The ultra-loyal sidekick who's always there.", points: { Circuit: 3 } }, { text: "The one who needs a little push to find their confidence.", points: { Rani: 3 } }, { text: "The problem-solver, but in a weird way.", points: { Circuit: 2 } } ] },
+  { text: "A perfect day is:", answers: [ { text: "Discovering a new city all by yourself.", points: { Rani: 3 } }, { text: "Helping my best friend with their crazy scheme.", points: { Circuit: 3 } }, { text: "Trying every single street food stall.", points: { Rani: 2, Circuit: 1 } } ] },
+  { text: "Your life motto is:", answers: [ { text: "\"Tension lene ka nahi, sirf dene ka.\"", points: { Circuit: 3 } }, { text: "\"My lehenga is very expensive.\"", points: { Rani: 3 } }, { text: "\"Bhai ne bola karne ka, toh karne ka.\"", points: { Circuit: 3 } } ] },
+];
+
+
 const results: { [key in Character]: { title: string, emoji: string, advice: string, color: string } } = {
-  Kabir: { title: 'You are Kabir Singh', emoji: '😬', advice: 'Your love is passionate and intense, but maybe... just a little less breaking things? Just a thought.', color: 'text-red-500' },
-  Bunny: { title: 'You are Bunny from YJHD', emoji: '✈️', advice: 'You have a case of wanderlust and big dreams! Just don\'t forget to cherish the people waiting for you at home.', color: 'text-blue-500' },
-  Poo: { title: 'You are Poo from K3G', emoji: '💅', advice: 'You are iconic, fabulous, and you know it. Your confidence is everything, just remember to be nice to Rohan.', color: 'text-pink-500' },
-  Geet: { title: 'You are Geet from Jab We Met', emoji: '🚂', advice: 'You are a bundle of joy and self-love! Your energy is infectious, just make sure you don\'t miss your train.', color: 'text-orange-500' },
-  Raj: { title: 'You are Raj from DDLJ', emoji: '❤️', advice: 'You\'re a classic romantic with a heart of gold. You\'d cross oceans (or Europe) for love. Palat!', color: 'text-yellow-500' },
+  Kabir: { title: 'You = Kabir Singh', emoji: '😬', advice: 'Your love is passionate and intense, but maybe... just a little less breaking things? Just a thought.', color: 'text-red-500' },
+  Bunny: { title: 'You = Bunny from YJHD', emoji: '✈️', advice: 'You have a case of wanderlust and big dreams! Just don\'t forget to cherish the people waiting for you at home.', color: 'text-blue-500' },
+  Poo: { title: 'You = Poo from K3G', emoji: '💅', advice: 'You are iconic, fabulous, and you know it. Your confidence is everything, just remember to be nice to Rohan.', color: 'text-pink-500' },
+  Geet: { title: 'You = Geet from Jab We Met', emoji: '🚂', advice: 'You are a bundle of joy and self-love! Your energy is infectious, just make sure you don\'t miss your train.', color: 'text-orange-500' },
+  Raj: { title: 'You = Raj from DDLJ', emoji: '❤️', advice: 'You\'re a classic romantic with a heart of gold. You\'d cross oceans (or Europe) for love. Palat!', color: 'text-yellow-500' },
+  Circuit: { title: 'You = Circuit from Munnabhai', emoji: '😂', advice: 'You are the definition of a ride-or-die friend. Your loyalty is legendary, just like your fashion sense. Bhai ne bola, matlab final!', color: 'text-green-500' },
+  Rani: { title: 'You = Rani from Queen', emoji: '👑', advice: 'You are on a journey of self-discovery and finding your own strength. Your story is an inspiration to many!', color: 'text-purple-500' },
 };
 
 
 export function BollywoodPersonalityQuiz() {
   const { toast } = useToast();
-  const [gameState, setGameState] = useState<'start' | 'playing' | 'result'>('start');
-  const [scores, setScores] = useState<{ [key in Character]: number }>({ Kabir: 0, Bunny: 0, Poo: 0, Geet: 0, Raj: 0 });
+  const [gameState, setGameState] = useState<GameState>('start');
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [scores, setScores] = useState<{ [key: string]: number }>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [finalResult, setFinalResult] = useState<Character | null>(null);
+
+  const handleGenderSelect = (gender: Gender) => {
+    let selectedQuestions: Question[] = [];
+    if (gender === 'male') selectedQuestions = questionsMale;
+    else if (gender === 'female') selectedQuestions = questionsFemale;
+    else selectedQuestions = questionsGeneral;
+    
+    setQuestions(selectedQuestions);
+    const initialScores: { [key: string]: number } = {};
+    selectedQuestions.flatMap(q => q.answers).forEach(a => {
+        Object.keys(a.points).forEach(char => {
+            initialScores[char] = 0;
+        });
+    });
+    setScores(initialScores);
+    setGameState('playing');
+  }
 
   const handleAnswer = (points: { [key: string]: number }) => {
     const newScores = { ...scores };
     for (const char in points) {
-      newScores[char as Character] += points[char as Character];
+      if(newScores.hasOwnProperty(char)){
+        newScores[char] += points[char];
+      }
     }
     setScores(newScores);
 
@@ -87,10 +88,10 @@ export function BollywoodPersonalityQuiz() {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
       let maxScore = -1;
-      let resultChar: Character = 'Bunny';
+      let resultChar: Character = 'Bunny'; // default fallback
       for(const char in newScores){
-          if(newScores[char as Character] > maxScore){
-              maxScore = newScores[char as Character];
+          if(newScores[char] > maxScore){
+              maxScore = newScores[char];
               resultChar = char as Character;
           }
       }
@@ -100,7 +101,7 @@ export function BollywoodPersonalityQuiz() {
   };
   
   const restartGame = () => {
-    setScores({ Kabir: 0, Bunny: 0, Poo: 0, Geet: 0, Raj: 0 });
+    setScores({});
     setCurrentQuestionIndex(0);
     setFinalResult(null);
     setGameState('start');
@@ -129,7 +130,18 @@ export function BollywoodPersonalityQuiz() {
       <Clapperboard className="mx-auto h-16 w-16 text-primary animate-pulse" />
       <h2 className="text-2xl font-bold">Which Bollywood Character Are You in a Relationship?</h2>
       <p className="text-muted-foreground">Are you a hopeless romantic like Raj or a carefree spirit like Bunny? Let's find out!</p>
-      <Button onClick={() => setGameState('playing')} size="lg" className="text-lg">Start Quiz</Button>
+      <Button onClick={() => setGameState('gender-select')} size="lg" className="text-lg">Start Quiz</Button>
+    </motion.div>
+  );
+  
+  const GenderSelectScreen = () => (
+    <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
+        <h2 className="text-2xl font-bold">I'm interested in...</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button onClick={() => handleGenderSelect('female')} size="lg" variant="outline" className="h-24 flex-col text-lg"><User className="mb-2"/>Women</Button>
+            <Button onClick={() => handleGenderSelect('male')} size="lg" variant="outline" className="h-24 flex-col text-lg"><User className="mb-2"/>Men</Button>
+            <Button onClick={() => handleGenderSelect('other')} size="lg" variant="outline" className="h-24 flex-col text-lg"><Users className="mb-2"/>Everyone</Button>
+        </div>
     </motion.div>
   );
 
@@ -196,7 +208,8 @@ export function BollywoodPersonalityQuiz() {
     <Card className="mt-8 mx-auto max-w-2xl overflow-hidden">
       <CardContent className="p-8 min-h-[400px] flex items-center justify-center">
         {gameState === 'start' && <StartScreen />}
-        {gameState === 'playing' && <QuestionScreen />}
+        {gameState === 'gender-select' && <GenderSelectScreen />}
+        {gameState === 'playing' && questions.length > 0 && <QuestionScreen />}
         {gameState === 'result' && <ResultScreen />}
       </CardContent>
     </Card>
