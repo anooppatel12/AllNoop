@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle, Flag } from 'lucide-react';
+import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle, Flag, VenetianMask } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -39,6 +39,12 @@ const games = [
         description: 'Find out if your partner is a keeper with this fun quiz.',
         icon: Flag,
         href: '/games/green-flag-red-flag',
+    },
+    {
+        name: 'Desi Nickname Generator',
+        description: 'Generate a funny desi-style nickname for yourself.',
+        icon: VenetianMask,
+        href: '/games/desi-nickname-generator',
     },
     {
         name: 'Sudoku',
