@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle, Flag, VenetianMask, User, Clapperboard, Sparkles } from 'lucide-react';
+import { Gamepad2, Puzzle, BrainCircuit, Hand, HelpCircle, Flag, VenetianMask, User, Clapperboard, Sparkles, HeartCrack } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +40,12 @@ const games = [
         description: 'Find out if your partner is a keeper with this fun quiz.',
         icon: Flag,
         href: '/games/green-flag-red-flag',
+    },
+    {
+        name: 'Toxic Partner Check',
+        description: 'Is your partner a Pure Soul or a Toxic King/Queen?',
+        icon: HeartCrack,
+        href: '/games/toxic-partner-quiz',
     },
     {
         name: 'Desi Nickname Generator',

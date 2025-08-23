@@ -115,6 +115,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/games/bollywood-personality-quiz',
     '/games/main-character-quiz',
     '/games/meme-personality-quiz',
+    '/games/toxic-partner-quiz',
   ];
 
   const funToolPages = [
