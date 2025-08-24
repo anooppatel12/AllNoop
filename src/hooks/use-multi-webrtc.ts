@@ -75,6 +75,9 @@ export const useMultiWebRTC = (roomId: string) => {
   }, []);
 
   const createPeerConnection = useCallback((peerId: string, stream: MediaStream) => {
+    if (peerConnections.current.has(peerId)) {
+        return peerConnections.current.get(peerId)!;
+    }
     const pc = new RTCPeerConnection(configuration);
 
     stream.getTracks().forEach(track => pc.addTrack(track, stream));
@@ -181,7 +184,7 @@ export const useMultiWebRTC = (roomId: string) => {
             const allOffers = snapshot.val();
             if(allOffers){
                 for(const senderId in allOffers){
-                    if(allOffers[senderId][myPeerId] && allOffers[senderId][myPeerId].type === 'offer'){
+                    if(senderId !== myPeerId && allOffers[senderId][myPeerId] && allOffers[senderId][myPeerId].type === 'offer'){
                         const pc = createPeerConnection(senderId, stream!);
                         if(pc.signalingState === 'stable') {
                             await pc.setRemoteDescription(new RTCSessionDescription(allOffers[senderId][myPeerId]));
@@ -201,7 +204,7 @@ export const useMultiWebRTC = (roomId: string) => {
             const allCandidates = snapshot.val();
             if(allCandidates){
                 for(const senderId in allCandidates){
-                    if(allCandidates[senderId][myPeerId]){
+                    if(senderId !== myPeerId && allCandidates[senderId][myPeerId]){
                         const pc = peerConnections.current.get(senderId);
                         pc?.addIceCandidate(new RTCIceCandidate(allCandidates[senderId][myPeerId]));
                     }
