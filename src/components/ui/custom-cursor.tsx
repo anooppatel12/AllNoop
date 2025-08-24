@@ -13,7 +13,6 @@ export function CustomCursor() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if(!isVisible) setIsVisible(true);
       setPosition({ x: e.clientX, y: e.clientY });
 
       const target = e.target as HTMLElement;
@@ -25,19 +24,25 @@ export function CustomCursor() {
       setIsHoveringText(!!closestElement && !isInteractive);
     };
     
-    const handleMouseLeave = () => setIsVisible(false);
-    const handleMouseEnter = () => setIsVisible(true);
-
     window.addEventListener('mousemove', handleMouseMove);
-    document.documentElement.addEventListener("mouseleave", handleMouseLeave);
-    document.documentElement.addEventListener("mouseenter", handleMouseEnter);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
-      document.documentElement.removeEventListener("mouseenter", handleMouseEnter);
     };
   }, []);
+
+  useEffect(() => {
+    const handleMouseLeave = () => setIsVisible(false);
+    const handleMouseEnter = () => setIsVisible(true);
+
+    document.documentElement.addEventListener("mouseenter", handleMouseEnter);
+    document.documentElement.addEventListener("mouseleave", handleMouseLeave);
+    
+    return () => {
+      document.documentElement.removeEventListener("mouseenter", handleMouseEnter);
+      document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
+    }
+  }, [])
 
   const cursorVariants = {
     default: {
