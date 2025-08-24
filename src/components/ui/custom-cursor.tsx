@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -11,25 +10,24 @@ export function CustomCursor() {
   const [isHoveringText, setIsHoveringText] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    setPosition({ x: e.clientX, y: e.clientY });
 
-      const target = e.target as HTMLElement;
-      const computedStyle = window.getComputedStyle(target);
-      const isInteractive = computedStyle.getPropertyValue('cursor') === 'pointer';
-      setIsPointer(isInteractive);
-      
-      const closestElement = target.closest('p, h1, h2, h3, h4, h5, h6, span, label, button > span');
-      setIsHoveringText(!!closestElement && !isInteractive);
-    };
+    const target = e.target as HTMLElement;
+    const computedStyle = window.getComputedStyle(target);
+    const isInteractive = computedStyle.getPropertyValue('cursor') === 'pointer';
+    setIsPointer(isInteractive);
     
-    window.addEventListener('mousemove', handleMouseMove);
+    const closestElement = target.closest('p, h1, h2, h3, h4, h5, h6, span, label, button > span');
+    setIsHoveringText(!!closestElement && !isInteractive);
+  }, []);
 
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [handleMouseMove]);
 
   useEffect(() => {
     const handleMouseLeave = () => setIsVisible(false);
