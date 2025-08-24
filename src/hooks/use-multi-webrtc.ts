@@ -101,9 +101,9 @@ export const useMultiWebRTC = (roomId: string) => {
     
     pc.onconnectionstatechange = () => {
         if (pc.connectionState === 'disconnected' || pc.connectionState === 'closed' || pc.connectionState === 'failed') {
-            // setRemoteStreams(prev => prev.filter(s => s.id !== peerId));
-            // peerConnections.current.delete(peerId);
-            // dataChannels.current.delete(peerId);
+            setRemoteStreams(prev => prev.filter(s => s.id !== peerId));
+            peerConnections.current.delete(peerId);
+            dataChannels.current.delete(peerId);
         }
     }
 
@@ -167,7 +167,7 @@ export const useMultiWebRTC = (roomId: string) => {
                  for (const peerId in answers) {
                      if(answers[peerId].type === 'answer'){
                         const pc = peerConnections.current.get(peerId);
-                        if(pc && pc.signalingState !== 'stable') {
+                        if(pc && pc.signalingState === 'have-local-offer') {
                            await pc.setRemoteDescription(new RTCSessionDescription(answers[peerId]));
                         }
                      }
@@ -183,11 +183,13 @@ export const useMultiWebRTC = (roomId: string) => {
                 for(const senderId in allOffers){
                     if(allOffers[senderId][myPeerId] && allOffers[senderId][myPeerId].type === 'offer'){
                         const pc = createPeerConnection(senderId, stream!);
-                        await pc.setRemoteDescription(new RTCSessionDescription(allOffers[senderId][myPeerId]));
-                        const answer = await pc.createAnswer();
-                        await pc.setLocalDescription(answer);
-                        const answerRef = ref(database, `video-rooms/${roomId}/offers/${myPeerId}/${senderId}`);
-                        await set(answerRef, { type: 'answer', sdp: answer.sdp });
+                        if(pc.signalingState === 'stable') {
+                            await pc.setRemoteDescription(new RTCSessionDescription(allOffers[senderId][myPeerId]));
+                            const answer = await pc.createAnswer();
+                            await pc.setLocalDescription(answer);
+                            const answerRef = ref(database, `video-rooms/${roomId}/offers/${myPeerId}/${senderId}`);
+                            await set(answerRef, { type: 'answer', sdp: answer.sdp });
+                        }
                     }
                 }
             }
@@ -225,8 +227,7 @@ export const useMultiWebRTC = (roomId: string) => {
       }
       leaveRoom();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId]);
+  }, [roomId, createPeerConnection, handleDataChannelMessage, initializeLocalStream, leaveRoom]);
   
   const toggleMic = () => {
     if (localStream) {
