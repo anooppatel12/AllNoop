@@ -43,9 +43,21 @@ const SmartNotesPanel = ({ notes, isGenerating }: { notes: SmartNotes | null, is
         const canvasHeight = canvas.height;
         const ratio = canvasWidth / canvasHeight;
         const imgWidth = pdfWidth - 20; // with margin
-        const imgHeight = imgWidth / ratio;
+        let imgHeight = imgWidth / ratio;
+        let heightLeft = imgHeight;
+        let position = 10;
 
-        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while(heightLeft > 0) {
+            position = heightLeft - imgHeight + 10;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pdfHeight;
+        }
+
         pdf.save('smart-notes.pdf');
     };
 
@@ -55,7 +67,7 @@ const SmartNotesPanel = ({ notes, isGenerating }: { notes: SmartNotes | null, is
             <SheetTrigger asChild>
                 <Button variant="outline" size="sm">
                     <Bot className="mr-2 h-4 w-4"/>
-                    Smart Notes
+                    <span className="hidden sm:inline">Smart Notes</span>
                     {isGenerating && <Loader2 className="ml-2 h-4 w-4 animate-spin"/>}
                 </Button>
             </SheetTrigger>
@@ -66,9 +78,10 @@ const SmartNotesPanel = ({ notes, isGenerating }: { notes: SmartNotes | null, is
                     </SheetHeader>
                     <div className="flex-1 overflow-y-auto p-6" ref={notesRef}>
                         {!notes ? (
-                            <div className="text-center text-muted-foreground">
-                                <p>Notes will appear here as the meeting progresses.</p>
-                                <p>Start chatting to generate the first summary.</p>
+                            <div className="text-center text-muted-foreground h-full flex flex-col justify-center items-center">
+                                <Bot className="h-12 w-12 mb-4"/>
+                                <p className="font-semibold">Notes will appear here.</p>
+                                <p className="text-sm">Start chatting to generate the first summary.</p>
                             </div>
                         ) : (
                             <Accordion type="multiple" defaultValue={['summary', 'keyPoints', 'actionItems']} className="w-full">
@@ -101,7 +114,7 @@ const SmartNotesPanel = ({ notes, isGenerating }: { notes: SmartNotes | null, is
                             </Accordion>
                         )}
                     </div>
-                    <div className="p-6 border-t">
+                    <div className="p-4 border-t bg-background">
                         <Button onClick={handleDownload} disabled={!notes} className="w-full">
                             <FileDown className="mr-2 h-4 w-4"/>
                             Download as PDF
@@ -115,6 +128,12 @@ const SmartNotesPanel = ({ notes, isGenerating }: { notes: SmartNotes | null, is
 
 const ChatPanel = ({ sendMessage, messages }: { sendMessage: (msg: string) => void, messages: {sender: string, text: string}[] }) => {
     const [message, setMessage] = useState('');
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    
+     useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
 
     const handleSend = () => {
         if(message.trim()){
@@ -128,7 +147,7 @@ const ChatPanel = ({ sendMessage, messages }: { sendMessage: (msg: string) => vo
             <SheetTrigger asChild>
                 <Button variant="outline" size="sm">
                     <MessageSquare className="mr-2 h-4 w-4"/>
-                    Chat
+                    <span className="hidden sm:inline">Chat</span>
                 </Button>
             </SheetTrigger>
             <SheetContent className="w-full sm:w-[440px] p-0">
@@ -143,8 +162,9 @@ const ChatPanel = ({ sendMessage, messages }: { sendMessage: (msg: string) => vo
                                 <p className="rounded-lg bg-muted px-3 py-2">{msg.text}</p>
                             </div>
                         ))}
+                        <div ref={messagesEndRef} />
                     </div>
-                    <div className="p-4 border-t flex gap-2">
+                    <div className="p-4 border-t flex gap-2 bg-background">
                         <Input 
                             value={message} 
                             onChange={(e) => setMessage(e.target.value)} 
@@ -211,18 +231,18 @@ export function VideoRoom({ roomId }: { roomId: string }) {
 
   return (
     <div className="flex h-screen flex-col bg-muted/40 text-foreground">
-      <header className="p-4 flex justify-between items-center bg-background border-b">
-        <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold">Video Room</h1>
+      <header className="p-4 flex justify-between items-center bg-background border-b shrink-0">
+        <div className="flex items-center gap-2 overflow-hidden">
+            <h1 className="text-xl font-bold truncate">Video Room</h1>
             <Badge variant="secondary">{allStreams.length} participant(s)</Badge>
         </div>
         <Button onClick={handleCopyLink} variant="outline" size="sm">
             {hasCopied ? <Check className="mr-2 h-4 w-4 text-green-500"/> : <Copy className="mr-2 h-4 w-4"/>}
-            Copy Link
+            <span className="hidden sm:inline">Copy Link</span>
         </Button>
       </header>
       
-      <main className="flex-1 p-4 grid gap-4" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(300px, 1fr))` }}>
+      <main className="flex-1 p-2 sm:p-4 grid gap-2 sm:gap-4 grid-cols-2">
         {localStream && (
              <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-primary shadow-lg">
                 <VideoPlayer stream={localStream} isMuted={true} />
@@ -236,23 +256,23 @@ export function VideoRoom({ roomId }: { roomId: string }) {
         ))}
       </main>
 
-      <footer className="p-4 bg-background border-t">
+      <footer className="sticky bottom-0 left-0 right-0 p-2 sm:p-4 bg-background/80 border-t backdrop-blur-sm">
         <div className="flex justify-between items-center">
-            <div>
+            <div className="flex-1 flex justify-start">
                 <ChatPanel sendMessage={sendMessage} messages={messages} />
             </div>
-            <div className="flex justify-center gap-4">
-                <Button onClick={toggleMic} variant={isMicOn ? 'secondary' : 'destructive'} size="lg" className="rounded-full h-14 w-14">
+            <div className="flex justify-center gap-2 sm:gap-4">
+                <Button onClick={toggleMic} variant={isMicOn ? 'secondary' : 'destructive'} size="lg" className="rounded-full h-12 w-12 sm:h-14 sm:w-14">
                     {isMicOn ? <Mic /> : <MicOff />}
                 </Button>
-                <Button onClick={toggleCamera} variant={isCameraOn ? 'secondary' : 'destructive'} size="lg" className="rounded-full h-14 w-14">
+                <Button onClick={toggleCamera} variant={isCameraOn ? 'secondary' : 'destructive'} size="lg" className="rounded-full h-12 w-12 sm:h-14 sm:w-14">
                     {isCameraOn ? <Video /> : <VideoOff />}
                 </Button>
-                <Button onClick={handleLeave} variant="destructive" size="lg" className="rounded-full h-14 w-14">
+                <Button onClick={handleLeave} variant="destructive" size="lg" className="rounded-full h-12 w-12 sm:h-14 sm:w-14">
                     <PhoneOff />
                 </Button>
             </div>
-            <div>
+            <div className="flex-1 flex justify-end">
                  <SmartNotesPanel notes={smartNotes} isGenerating={isGeneratingNotes} />
             </div>
         </div>
