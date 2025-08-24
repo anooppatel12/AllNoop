@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../u
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Input } from '../ui/input';
 
 const VideoPlayer = ({ stream, isMuted }: { stream: MediaStream, isMuted: boolean }) => {
     const videoRef = useRef<HTMLVideoElement>(null);

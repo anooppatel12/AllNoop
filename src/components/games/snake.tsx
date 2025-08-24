@@ -87,6 +87,7 @@ export function SnakeGame() {
       for (let i = 1; i < newSnake.length; i++) {
         if (head.x === newSnake[i].x && head.y === newSnake[i].y) {
           setIsGameOver(true);
+          setIsGameOver(true);
           setIsRunning(false);
           return prevSnake;
         }
