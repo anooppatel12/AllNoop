@@ -16,6 +16,7 @@ import {
 } from '@/ai/flows/replace-image-background';
 import { generateQuote } from '@/ai/flows/generate-quote';
 import { analyzeKeyword, type AnalyzeKeywordInput } from '@/ai/flows/analyze-keyword';
+import { generateSmartNotes, GenerateSmartNotesInput } from '@/ai/flows/generate-smart-notes';
 
 
 export async function generateHashtags(topic: string) {
@@ -75,5 +76,15 @@ export async function analyzeKeywordAction(input: AnalyzeKeywordInput) {
     } catch (error) {
         console.error(error);
         return { error: 'Failed to analyze keyword. Please try again.' };
+    }
+}
+
+export async function generateSmartNotesAction(input: GenerateSmartNotesInput) {
+    try {
+        const result = await generateSmartNotes(input);
+        return { notes: result };
+    } catch (error) {
+        console.error(error);
+        return { error: 'Failed to generate smart notes. Please try again.' };
     }
 }

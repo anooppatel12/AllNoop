@@ -2,9 +2,13 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { getDatabase, ref, onValue, off, remove, set, push, onDisconnect } from 'firebase/database';
+import { getDatabase, ref, onValue, off, remove, set, onDisconnect } from 'firebase/database';
 import { getFirebaseApp } from '@/lib/firebase';
 import { useToast } from './use-toast';
+import { generateSmartNotesAction } from '@/app/actions';
+import { GenerateSmartNotesOutput } from '@/ai/flows/generate-smart-notes';
+import { useInterval } from './use-interval';
+
 
 const firebaseApp = getFirebaseApp();
 const database = getDatabase(firebaseApp);
@@ -17,6 +21,9 @@ const configuration = {
 };
 
 type RemoteStream = { id: string; stream: MediaStream };
+export type SmartNotes = GenerateSmartNotesOutput;
+type Message = { sender: string; text: string; timestamp: number };
+
 
 export const useMultiWebRTC = (roomId: string) => {
   const { toast } = useToast();
@@ -24,11 +31,19 @@ export const useMultiWebRTC = (roomId: string) => {
   const [remoteStreams, setRemoteStreams] = useState<RemoteStream[]>([]);
   const peerConnections = useRef<Map<string, RTCPeerConnection>>(new Map());
   const myPeerIdRef = useRef<string | null>(null);
+  const dataChannels = useRef<Map<string, RTCDataChannel>>(new Map());
   
   const [isMicOn, setIsMicOn] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(true);
+  
+  // Chat and Notes state
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [smartNotes, setSmartNotes] = useState<SmartNotes | null>(null);
+  const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
+  const transcriptRef = useRef<string>('');
 
   const roomRef = ref(database, `video-rooms/${roomId}`);
+  const peersRef = ref(database, `video-rooms/${roomId}/peers`);
 
   const initializeLocalStream = useCallback(async () => {
     try {
@@ -46,6 +61,13 @@ export const useMultiWebRTC = (roomId: string) => {
     }
   }, [toast]);
   
+  const handleDataChannelMessage = useCallback((event: MessageEvent) => {
+    const data = JSON.parse(event.data);
+    if(data.type === 'chat') {
+        setMessages(prev => [...prev, data.payload]);
+    }
+  }, []);
+
   const createPeerConnection = useCallback((peerId: string, stream: MediaStream) => {
     const pc = new RTCPeerConnection(configuration);
 
@@ -65,16 +87,23 @@ export const useMultiWebRTC = (roomId: string) => {
       });
     };
     
+    pc.ondatachannel = (event) => {
+      const channel = event.channel;
+      channel.onmessage = handleDataChannelMessage;
+      dataChannels.current.set(peerId, channel);
+    };
+    
     pc.onconnectionstatechange = () => {
         if (pc.connectionState === 'disconnected' || pc.connectionState === 'closed' || pc.connectionState === 'failed') {
             setRemoteStreams(prev => prev.filter(s => s.id !== peerId));
             peerConnections.current.delete(peerId);
+            dataChannels.current.delete(peerId);
         }
     }
 
     peerConnections.current.set(peerId, pc);
     return pc;
-  }, [roomId]);
+  }, [roomId, handleDataChannelMessage]);
 
   useEffect(() => {
     let stream: MediaStream | null;
@@ -88,15 +117,21 @@ export const useMultiWebRTC = (roomId: string) => {
         myPeerIdRef.current = myPeerId;
 
         const myRef = ref(database, `video-rooms/${roomId}/peers/${myPeerId}`);
-        onDisconnect(myRef).remove();
-        set(myRef, true);
+        const disconnectHandler = onDisconnect(myRef);
+        disconnectHandler.remove();
+        set(myRef, { name: `User-${myPeerId.substring(5, 9)}` }); // Set a display name
         
-        onValue(ref(database, `video-rooms/${roomId}/peers`), async (snapshot) => {
+        onValue(peersRef, async (snapshot) => {
             const peers = snapshot.val();
             if (peers) {
                 for (const peerId in peers) {
                     if (peerId !== myPeerId && !peerConnections.current.has(peerId)) {
                         const pc = createPeerConnection(peerId, stream!);
+                        // Create a data channel for the initiator
+                        const channel = pc.createDataChannel('chat');
+                        channel.onmessage = handleDataChannelMessage;
+                        dataChannels.current.set(peerId, channel);
+
                         const offer = await pc.createOffer();
                         await pc.setLocalDescription(offer);
                         const offerRef = ref(database, `video-rooms/${roomId}/offers/${myPeerId}/${peerId}`);
@@ -106,25 +141,29 @@ export const useMultiWebRTC = (roomId: string) => {
             }
         });
 
-        onValue(ref(database, `video-rooms/${roomId}/offers/${myPeerId}`), async (snapshot) => {
-            const offers = snapshot.val();
-            if(offers) {
-                 for (const peerId in offers) {
-                     const desc = new RTCSessionDescription(offers[peerId]);
-                     const pc = peerConnections.current.get(peerId);
-                     if(pc && pc.signalingState === 'have-local-offer') {
-                        await pc.setRemoteDescription(desc);
+        // Listen for answers
+        const myAnswerRef = ref(database, `video-rooms/${roomId}/offers/${myPeerId}`);
+        onValue(myAnswerRef, async (snapshot) => {
+            const answers = snapshot.val();
+            if(answers) {
+                 for (const peerId in answers) {
+                     if(answers[peerId].type === 'answer'){
+                        const pc = peerConnections.current.get(peerId);
+                        if(pc && pc.signalingState !== 'stable') {
+                           await pc.setRemoteDescription(new RTCSessionDescription(answers[peerId]));
+                        }
                      }
                  }
             }
         });
 
-        const myOffersRef = ref(database, `video-rooms/${roomId}/offers`);
-        onValue(myOffersRef, async (snapshot) => {
+        // Listen for offers from other peers
+        const allOffersRef = ref(database, `video-rooms/${roomId}/offers`);
+        onValue(allOffersRef, async (snapshot) => {
             const allOffers = snapshot.val();
             if(allOffers){
                 for(const senderId in allOffers){
-                    if(allOffers[senderId][myPeerId]){
+                    if(allOffers[senderId][myPeerId] && allOffers[senderId][myPeerId].type === 'offer'){
                         const pc = createPeerConnection(senderId, stream!);
                         await pc.setRemoteDescription(new RTCSessionDescription(allOffers[senderId][myPeerId]));
                         const answer = await pc.createAnswer();
@@ -136,6 +175,7 @@ export const useMultiWebRTC = (roomId: string) => {
             }
         });
 
+        // Listen for ICE candidates
         const myIceCandidatesRef = ref(database, `video-rooms/${roomId}/iceCandidates`);
         onValue(myIceCandidatesRef, (snapshot) => {
             const allCandidates = snapshot.val();
@@ -148,7 +188,12 @@ export const useMultiWebRTC = (roomId: string) => {
                 }
             }
         });
-
+        
+        // Listen for smart notes
+        const notesRef = ref(database, `video-rooms/${roomId}/smartNotes`);
+        onValue(notesRef, (snapshot) => {
+            setSmartNotes(snapshot.val());
+        })
     };
     setup();
     
@@ -157,7 +202,7 @@ export const useMultiWebRTC = (roomId: string) => {
         leaveRoom();
     };
 
-  }, [roomId, createPeerConnection, initializeLocalStream]);
+  }, [roomId, createPeerConnection, initializeLocalStream, handleDataChannelMessage, peersRef]);
   
   const leaveRoom = useCallback(() => {
     localStream?.getTracks().forEach(track => track.stop());
@@ -183,6 +228,42 @@ export const useMultiWebRTC = (roomId: string) => {
       setIsCameraOn(prev => !prev);
     }
   };
+  
+  const sendMessage = useCallback((text: string) => {
+    const message = {
+        type: 'chat',
+        payload: {
+            sender: `User-${myPeerIdRef.current?.substring(5, 9)}`,
+            text,
+            timestamp: Date.now()
+        }
+    };
+    dataChannels.current.forEach(channel => {
+      if(channel.readyState === 'open') {
+        channel.send(JSON.stringify(message));
+      }
+    });
+    // Also add to own messages
+    setMessages(prev => [...prev, message.payload]);
+  }, []);
+  
+  const generateNotesPeriodically = useCallback(async () => {
+    const fullTranscript = messages.map(m => `${m.sender}: ${m.text}`).join('\n');
+    
+    if(fullTranscript.length > transcriptRef.current.length + 50) { // Only generate if there's enough new text
+        setIsGeneratingNotes(true);
+        transcriptRef.current = fullTranscript;
+        const result = await generateSmartNotesAction({ transcript: fullTranscript });
+        if(!result.error && result.notes) {
+           const notesRefDb = ref(database, `video-rooms/${roomId}/smartNotes`);
+           set(notesRefDb, result.notes);
+        }
+        setIsGeneratingNotes(false);
+    }
 
-  return { localStream, remoteStreams, toggleMic, toggleCamera, leaveRoom, isMicOn, isCameraOn };
+  }, [messages, roomId]);
+
+  useInterval(generateNotesPeriodically, 15000); // every 15 seconds
+
+  return { localStream, remoteStreams, toggleMic, toggleCamera, leaveRoom, isMicOn, isCameraOn, sendMessage, messages, smartNotes, isGeneratingNotes };
 };

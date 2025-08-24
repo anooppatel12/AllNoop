@@ -15,3 +15,4 @@ import '@/ai/flows/remove-image-background.ts';
 import '@/ai/flows/replace-image-background.ts';
 import '@/ai/flows/generate-quote.ts';
 import '@/ai/flows/analyze-keyword.ts';
+import '@/ai/flows/generate-smart-notes.ts';
