@@ -139,58 +139,58 @@ export const useMultiWebRTC = (roomId: string) => {
         set(myRef, { name: `User-${myPeerId.substring(5, 9)}` }); // Set a display name
         
         onValue(peersRef, async (snapshot) => {
-            // const peers = snapshot.val();
-            // if (peers) {
-            //     // Create peer connections for new peers
-            //     for (const peerId in peers) {
-            //         if (peerId !== myPeerId && !peerConnections.current.has(peerId)) {
-            //             const pc = createPeerConnection(peerId, stream!);
-            //             // Create a data channel for the initiator
-            //             const channel = pc.createDataChannel('chat');
-            //             channel.onmessage = handleDataChannelMessage;
-            //             dataChannels.current.set(peerId, channel);
+            const peers = snapshot.val();
+            if (peers) {
+                // Create peer connections for new peers
+                for (const peerId in peers) {
+                    if (peerId !== myPeerId && !peerConnections.current.has(peerId)) {
+                        const pc = createPeerConnection(peerId, stream!);
+                        // Create a data channel for the initiator
+                        const channel = pc.createDataChannel('chat');
+                        channel.onmessage = handleDataChannelMessage;
+                        dataChannels.current.set(peerId, channel);
 
-            //             const offer = await pc.createOffer();
-            //             await pc.setLocalDescription(offer);
-            //             const offerRef = ref(database, `video-rooms/${roomId}/offers/${myPeerId}/${peerId}`);
-            //             await set(offerRef, { type: 'offer', sdp: offer.sdp });
-            //         }
-            //     }
-            // }
+                        const offer = await pc.createOffer();
+                        await pc.setLocalDescription(offer);
+                        const offerRef = ref(database, `video-rooms/${roomId}/offers/${myPeerId}/${peerId}`);
+                        await set(offerRef, { type: 'offer', sdp: offer.sdp });
+                    }
+                }
+            }
         });
 
         // Listen for answers
         const myAnswerRef = ref(database, `video-rooms/${roomId}/offers/${myPeerId}`);
         onValue(myAnswerRef, async (snapshot) => {
-            // const answers = snapshot.val();
-            // if(answers) {
-            //      for (const peerId in answers) {
-            //          if(answers[peerId].type === 'answer'){
-            //             const pc = peerConnections.current.get(peerId);
-            //             if(pc && pc.signalingState !== 'stable') {
-            //                await pc.setRemoteDescription(new RTCSessionDescription(answers[peerId]));
-            //             }
-            //          }
-            //      }
-            // }
+            const answers = snapshot.val();
+            if(answers) {
+                 for (const peerId in answers) {
+                     if(answers[peerId].type === 'answer'){
+                        const pc = peerConnections.current.get(peerId);
+                        if(pc && pc.signalingState !== 'stable') {
+                           await pc.setRemoteDescription(new RTCSessionDescription(answers[peerId]));
+                        }
+                     }
+                 }
+            }
         });
 
         // Listen for offers from other peers
         const allOffersRef = ref(database, `video-rooms/${roomId}/offers`);
         onValue(allOffersRef, async (snapshot) => {
-            // const allOffers = snapshot.val();
-            // if(allOffers){
-            //     for(const senderId in allOffers){
-            //         if(allOffers[senderId][myPeerId] && allOffers[senderId][myPeerId].type === 'offer'){
-            //             const pc = createPeerConnection(senderId, stream!);
-            //             await pc.setRemoteDescription(new RTCSessionDescription(allOffers[senderId][myPeerId]));
-            //             const answer = await pc.createAnswer();
-            //             await pc.setLocalDescription(answer);
-            //             const answerRef = ref(database, `video-rooms/${roomId}/offers/${myPeerId}/${senderId}`);
-            //             await set(answerRef, { type: 'answer', sdp: answer.sdp });
-            //         }
-            //     }
-            // }
+            const allOffers = snapshot.val();
+            if(allOffers){
+                for(const senderId in allOffers){
+                    if(allOffers[senderId][myPeerId] && allOffers[senderId][myPeerId].type === 'offer'){
+                        const pc = createPeerConnection(senderId, stream!);
+                        await pc.setRemoteDescription(new RTCSessionDescription(allOffers[senderId][myPeerId]));
+                        const answer = await pc.createAnswer();
+                        await pc.setLocalDescription(answer);
+                        const answerRef = ref(database, `video-rooms/${roomId}/offers/${myPeerId}/${senderId}`);
+                        await set(answerRef, { type: 'answer', sdp: answer.sdp });
+                    }
+                }
+            }
         });
 
         // Listen for ICE candidates
