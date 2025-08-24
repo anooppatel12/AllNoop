@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -23,6 +24,7 @@ import { Pen, Smile, Text, Highlighter, Underline, Strikethrough, Square, Circle
 
 
 type Tool = 'ai' | 'crop' | 'filters' | 'adjust';
+type EditorTool = 'text' | 'highlight' | 'underline' | 'strikethrough' | 'square' | 'circle' | 'line' | 'arrow' | 'signature' | 'sticker';
 type AdjustTool = 'erase' | 'restore';
 type Filter = 'none' | 'grayscale' | 'sepia' | 'invert' | 'noisy' | 'stripe';
 type ExportFormat = 'png' | 'jpeg';
