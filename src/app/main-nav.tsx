@@ -23,6 +23,7 @@ import {
   BookOpenCheck,
   Search,
   VideoIcon,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -35,6 +36,7 @@ const links = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/hashtag-generator', label: 'Hashtag Generator', icon: Hash },
   { href: '/tools/keyword-analyzer', label: 'Keyword Analyzer', icon: Search },
+  { href: '/tools/plagiarism-checker', label: 'Plagiarism Checker', icon: ShieldCheck },
   { href: '/calculators', label: 'Calculators', icon: Calculator },
   { href: '/pdf-tools', label: 'PDF Tools', icon: FileText },
   { href: '/image-editor', label: 'Image Editor', icon: ImageIcon },

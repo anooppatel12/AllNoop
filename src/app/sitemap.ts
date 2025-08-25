@@ -23,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/tools/password-generator',
     '/tools/qrcode',
     '/tools/text-formatter',
+    '/tools/plagiarism-checker',
   ];
 
   const calculatorPages = [

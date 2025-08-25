@@ -17,6 +17,7 @@ import {
 import { generateQuote } from '@/ai/flows/generate-quote';
 import { analyzeKeyword, type AnalyzeKeywordInput } from '@/ai/flows/analyze-keyword';
 import { generateSmartNotes, GenerateSmartNotesInput } from '@/ai/flows/generate-smart-notes';
+import { checkPlagiarism, PlagiarismInput } from '@/ai/flows/plagiarism-checker';
 
 
 export async function generateHashtags(topic: string) {
@@ -86,5 +87,15 @@ export async function generateSmartNotesAction(input: GenerateSmartNotesInput) {
     } catch (error) {
         console.error(error);
         return { error: 'Failed to generate smart notes. Please try again.' };
+    }
+}
+
+export async function checkPlagiarismAction(input: PlagiarismInput) {
+    try {
+        const result = await checkPlagiarism(input);
+        return { analysis: result };
+    } catch (error) {
+        console.error(error);
+        return { error: 'Failed to check for plagiarism. Please try again.' };
     }
 }

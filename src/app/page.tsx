@@ -1,7 +1,7 @@
 
 'use client';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode, MessageCircle, Lock, Baseline, BookOpenCheck, Search, VideoIcon } from 'lucide-react';
+import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode, MessageCircle, Lock, Baseline, BookOpenCheck, Search, VideoIcon, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { FloatingElements } from '@/components/floating-elements';
 import { useState, useMemo } from 'react';
@@ -25,6 +25,7 @@ const BrickBreakerIcon = () => (
 const features = [
   { name: 'AI Hashtag Generator', icon: Hash, href: '/hashtag-generator' },
   { name: 'Keyword Analyzer', icon: Search, href: '/tools/keyword-analyzer' },
+  { name: 'Plagiarism Checker', icon: ShieldCheck, href: '/tools/plagiarism-checker' },
   { name: 'Calculators', icon: Calculator, href: '/calculators' },
   { name: 'PDF Tools', icon: FileText, href: '/pdf-tools' },
   { name: 'Image Editor', icon: ImageIcon, href: '/image-editor' },
