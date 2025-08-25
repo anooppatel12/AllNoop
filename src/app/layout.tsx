@@ -121,6 +121,8 @@ export default function RootLayout({
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2296905809539851"
+     crossorigin="anonymous"></script>
       </head>
       <body className={cn("font-body antialiased", inter.variable, spaceGrotesk.variable, homemadeApple.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
