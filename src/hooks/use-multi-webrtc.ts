@@ -54,48 +54,51 @@ export const useMultiWebRTC = (roomId: string) => {
     }
   }, []);
 
-  const replaceTrack = useCallback((track: MediaStreamTrack) => {
+  const replaceTrack = useCallback((track: MediaStreamTrack | null) => {
     peerConnections.current.forEach(pc => {
-      const sender = pc.getSenders().find(s => s.track?.kind === track.kind);
-      if (sender) {
-        sender.replaceTrack(track);
-      }
+        const sender = pc.getSenders().find(s => s.track?.kind === track?.kind);
+        if (sender) {
+            sender.replaceTrack(track);
+        }
     });
   }, []);
 
   const getMedia = useCallback(async (
-    newVideoConstraint: boolean | MediaTrackConstraints,
-    newAudioConstraint: boolean | MediaTrackConstraints = true
+    videoConstraint: boolean | MediaTrackConstraints,
+    audioConstraint: boolean | MediaTrackConstraints = true
   ) => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-        video: newVideoConstraint,
-        audio: newAudioConstraint
-    });
-    setLocalStream(stream);
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: videoConstraint,
+            audio: audioConstraint
+        });
 
-    const videoTrack = stream.getVideoTracks()[0];
-    const audioTrack = stream.getAudioTracks()[0];
-
-    if (localStream) {
-        const oldVideoTrack = localStream.getVideoTracks()[0];
-        if (oldVideoTrack) {
-            oldVideoTrack.stop();
-            localStream.removeTrack(oldVideoTrack);
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
         }
-        localStream.addTrack(videoTrack);
-        replaceTrack(videoTrack);
-
-        const oldAudioTrack = localStream.getAudioTracks()[0];
-        if (oldAudioTrack) {
-            oldAudioTrack.stop();
-            localStream.removeTrack(oldAudioTrack);
-        }
-        localStream.addTrack(audioTrack);
-        replaceTrack(audioTrack);
-    } else {
+        
         setLocalStream(stream);
+        
+        peerConnections.current.forEach(pc => {
+            stream.getTracks().forEach(track => {
+                const sender = pc.getSenders().find(s => s.track?.kind === track.kind);
+                if (sender) {
+                    sender.replaceTrack(track);
+                } else {
+                    pc.addTrack(track, stream);
+                }
+            });
+        });
+
+    } catch(error) {
+        console.error("Error accessing media devices:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Camera/Mic Access Denied',
+          description: 'Please enable permissions to use the video room.',
+        });
     }
-  }, [localStream, replaceTrack]);
+  }, [localStream, toast]);
 
   const toggleScreenShare = useCallback(async () => {
     if (isScreenSharing) {
@@ -110,29 +113,20 @@ export const useMultiWebRTC = (roomId: string) => {
       setIsScreenSharing(true);
       
       const screenVideoTrack = screenStream.getVideoTracks()[0];
-      const screenAudioTrack = screenStream.getAudioTracks()[0];
 
       if (localStream) {
-        const oldVideoTrack = localStream.getVideoTracks()[0];
-        if(oldVideoTrack) oldVideoTrack.stop();
-        localStream.removeTrack(oldVideoTrack);
-        localStream.addTrack(screenVideoTrack);
-        replaceTrack(screenVideoTrack);
-
-        if(screenAudioTrack) {
-            const oldAudioTrack = localStream.getAudioTracks()[0];
-            if(oldAudioTrack) oldAudioTrack.stop();
-            localStream.removeTrack(oldAudioTrack);
-            localStream.addTrack(screenAudioTrack);
-            replaceTrack(screenAudioTrack);
-        }
-
-        // When screen sharing ends (e.g., user clicks browser's stop sharing button)
-        screenVideoTrack.onended = () => {
-          getMedia({facingMode});
-          setIsScreenSharing(false);
-        };
+          replaceTrack(screenVideoTrack);
+          const oldVideoTrack = localStream.getVideoTracks()[0];
+          localStream.removeTrack(oldVideoTrack);
+          oldVideoTrack.stop();
+          localStream.addTrack(screenVideoTrack);
       }
+      
+      // When screen sharing ends (e.g., user clicks browser's stop sharing button)
+      screenVideoTrack.onended = () => {
+        getMedia({facingMode});
+        setIsScreenSharing(false);
+      };
     }
   }, [isScreenSharing, getMedia, localStream, replaceTrack, facingMode]);
   
@@ -197,7 +191,7 @@ export const useMultiWebRTC = (roomId: string) => {
 
   // Request media permissions on mount
   useEffect(() => {
-    getMedia({facingMode}).catch(error => {
+    getMedia({facingMode: 'user'}).catch(error => {
         console.error("Error accessing media devices:", error);
         toast({
           variant: 'destructive',

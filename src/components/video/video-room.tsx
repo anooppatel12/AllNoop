@@ -233,8 +233,12 @@ export function VideoRoom({ roomId }: { roomId: string }) {
   }
   
   const numParticipants = allStreams.length;
-  const gridCols = numParticipants > 4 ? 'grid-cols-3' : 'grid-cols-2';
-  const gridRows = numParticipants > 2 ? 'grid-rows-2' : 'grid-rows-1';
+  const gridLayout = 
+      numParticipants <= 1 ? 'grid-cols-1 grid-rows-1' :
+      numParticipants === 2 ? 'grid-cols-1 sm:grid-cols-2 grid-rows-2 sm:grid-rows-1' :
+      numParticipants <= 4 ? 'grid-cols-2 grid-rows-2' :
+      numParticipants <= 6 ? 'grid-cols-3 grid-rows-2' :
+      'grid-cols-3 grid-rows-3';
 
   return (
     <div className="flex h-screen flex-col bg-muted/40 text-foreground">
@@ -249,7 +253,7 @@ export function VideoRoom({ roomId }: { roomId: string }) {
         </Button>
       </header>
       
-      <main className={cn("flex-1 p-2 sm:p-4 grid gap-2 sm:gap-4", gridCols, gridRows)}>
+      <main className={cn("flex-1 p-2 sm:p-4 grid gap-2 sm:gap-4", gridLayout)}>
         {allStreams.map(({ id, stream }, index) => (
              <div key={id} className="relative aspect-video overflow-hidden rounded-lg border shadow-md">
                 <VideoPlayer stream={stream} isMuted={id === 'local'} />
@@ -275,7 +279,7 @@ export function VideoRoom({ roomId }: { roomId: string }) {
                  <Button onClick={toggleScreenShare} variant={isScreenSharing ? 'default' : 'secondary'} size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12">
                     <ScreenShare />
                 </Button>
-                 <Button onClick={flipCamera} variant="secondary" size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12 hidden sm:flex" disabled={isScreenSharing}>
+                 <Button onClick={flipCamera} variant="secondary" size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12" disabled={isScreenSharing}>
                     <FlipHorizontal />
                 </Button>
                 <Button onClick={handleLeave} variant="destructive" size="lg" className="rounded-full h-12 w-12 sm:h-14 sm:w-14">
