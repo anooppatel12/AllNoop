@@ -62,6 +62,12 @@ export const useMultiWebRTC = (roomId: string) => {
         }
     });
   }, []);
+  
+  const stopCurrentStream = useCallback(() => {
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+    }
+  }, [localStream]);
 
   const getMedia = useCallback(async (
     videoConstraint: boolean | MediaTrackConstraints,
@@ -74,13 +80,11 @@ export const useMultiWebRTC = (roomId: string) => {
         });
 
         if (localStream) {
-            // Stop only the tracks, not the whole stream object
             localStream.getTracks().forEach(track => track.stop());
         }
         
         setLocalStream(stream);
         
-        // If peer connections exist, replace tracks
         if (peerConnections.current.size > 0) {
             stream.getTracks().forEach(track => {
                 replaceTrack(track);
@@ -100,64 +104,64 @@ export const useMultiWebRTC = (roomId: string) => {
     }
   }, [localStream, replaceTrack, toast]);
 
- const toggleScreenShare = useCallback(async () => {
+  const toggleScreenShare = useCallback(async () => {
     if (isScreenSharing) {
-      // Stop screen share and revert to camera
+      stopCurrentStream();
       await getMedia({ facingMode });
       setIsScreenSharing(false);
-    } else {
-      try {
-        // Start screen share
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-        setIsScreenSharing(true);
-        
-        const screenVideoTrack = screenStream.getVideoTracks()[0];
+      return;
+    }
 
-        if (localStream) {
-            const oldVideoTrack = localStream.getVideoTracks()[0];
-            localStream.removeTrack(oldVideoTrack);
-            oldVideoTrack.stop();
-            localStream.addTrack(screenVideoTrack);
-            replaceTrack(screenVideoTrack);
-        }
-        
-        // When screen sharing ends (e.g., user clicks browser's stop sharing button)
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      
+      stopCurrentStream();
+      setLocalStream(screenStream);
+      setIsScreenSharing(true);
+
+      screenStream.getTracks().forEach(track => replaceTrack(track));
+      
+      const screenVideoTrack = screenStream.getVideoTracks()[0];
+      if (screenVideoTrack) {
         screenVideoTrack.onended = () => {
-          if(isScreenSharing) { // check if it was us who stopped it
-            getMedia({facingMode});
+          if (isScreenSharing) {
+            stopCurrentStream();
+            getMedia({ facingMode });
             setIsScreenSharing(false);
           }
         };
-      } catch (err) {
-        console.error("Screen share failed:", err);
-        toast({
-          variant: "destructive",
-          title: "Screen Share Failed",
-          description: "Could not start screen sharing. Please check browser permissions."
-        })
       }
+    } catch (err) {
+      console.error("Screen share failed:", err);
+      toast({
+        variant: "destructive",
+        title: "Screen Share Failed",
+        description: "Could not start screen sharing. Please check browser permissions."
+      });
+      // Revert to camera if screen share fails
+      await getMedia({ facingMode });
+      setIsScreenSharing(false);
     }
-  }, [isScreenSharing, getMedia, localStream, replaceTrack, facingMode, toast]);
+}, [isScreenSharing, getMedia, stopCurrentStream, facingMode, replaceTrack, toast]);
 
   const flipCamera = useCallback(async () => {
     if (isScreenSharing || !localStream) return;
+    
+    stopCurrentStream();
 
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
-    const oldVideoTrack = localStream.getVideoTracks()[0];
-    
-    // Stop the current video track before requesting a new one
-    if(oldVideoTrack) oldVideoTrack.stop();
-    
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newFacingMode } });
         const newVideoTrack = stream.getVideoTracks()[0];
         
-        // Replace the old track with the new one in the local stream
-        if(oldVideoTrack) localStream.removeTrack(oldVideoTrack);
-        localStream.addTrack(newVideoTrack);
-
-        // Update the track for all peer connections
-        replaceTrack(newVideoTrack);
+        if (localStream) {
+            const audioTrack = localStream.getAudioTracks()[0];
+            const newStream = new MediaStream([newVideoTrack, audioTrack]);
+            setLocalStream(newStream);
+            replaceTrack(newVideoTrack);
+        } else {
+            setLocalStream(stream);
+        }
         
         setFacingMode(newFacingMode);
     } catch (err) {
@@ -167,10 +171,9 @@ export const useMultiWebRTC = (roomId: string) => {
             title: "Camera Flip Failed",
             description: "Could not switch cameras. Please ensure you have another camera available and have granted permissions."
          });
-         // Attempt to restore the old stream
-         getMedia({ facingMode });
+         await getMedia({ facingMode });
     }
-  }, [isScreenSharing, localStream, facingMode, replaceTrack, toast, getMedia]);
+  }, [isScreenSharing, localStream, facingMode, replaceTrack, toast, getMedia, stopCurrentStream]);
 
 
   const createPeerConnection = useCallback((peerId: string, stream: MediaStream) => {
