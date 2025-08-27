@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMultiWebRTC, type SmartNotes } from '@/hooks/use-multi-webrtc';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Copy, Check, MessageSquare, Bot, FileDown, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Copy, Check, MessageSquare, Bot, FileDown, Loader2, ScreenShare, Camera, FlipHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
@@ -42,7 +42,7 @@ const SmartNotesPanel = ({ notes, isGenerating }: { notes: SmartNotes | null, is
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
         const ratio = canvasWidth / canvasHeight;
-        const imgWidth = pdfWidth - 20; // with margin
+        let imgWidth = pdfWidth - 20; // with margin
         let imgHeight = imgWidth / ratio;
         let heightLeft = imgHeight;
         let position = 10;
@@ -193,7 +193,10 @@ export function VideoRoom({ roomId }: { roomId: string }) {
     sendMessage,
     messages,
     smartNotes,
-    isGeneratingNotes
+    isGeneratingNotes,
+    toggleScreenShare,
+    isScreenSharing,
+    flipCamera,
   } = useMultiWebRTC(roomId);
   
   const [hasCopied, setHasCopied] = useState(false);
@@ -213,7 +216,7 @@ export function VideoRoom({ roomId }: { roomId: string }) {
     setTimeout(() => setHasCopied(false), 2000);
   };
   
-  if (!localStream && remoteStreams.length === 0) {
+  if (!localStream) {
       return (
         <div className="flex h-screen w-full items-center justify-center bg-background p-4">
              <Alert className="max-w-md">
@@ -228,6 +231,10 @@ export function VideoRoom({ roomId }: { roomId: string }) {
         </div>
       )
   }
+  
+  const numParticipants = allStreams.length;
+  const gridCols = numParticipants > 4 ? 'grid-cols-3' : 'grid-cols-2';
+  const gridRows = numParticipants > 2 ? 'grid-rows-2' : 'grid-rows-1';
 
   return (
     <div className="flex h-screen flex-col bg-muted/40 text-foreground">
@@ -242,16 +249,13 @@ export function VideoRoom({ roomId }: { roomId: string }) {
         </Button>
       </header>
       
-      <main className="flex-1 p-2 sm:p-4 grid gap-2 sm:gap-4 grid-cols-2">
-        {localStream && (
-             <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-primary shadow-lg">
-                <VideoPlayer stream={localStream} isMuted={true} />
-                <div className="absolute bottom-2 left-2 rounded-full bg-black/50 px-3 py-1 text-sm text-white">You</div>
-            </div>
-        )}
-        {remoteStreams.map(({ id, stream }) => (
-            <div key={id} className="relative aspect-video overflow-hidden rounded-lg border shadow-md">
-                <VideoPlayer stream={stream} isMuted={false} />
+      <main className={cn("flex-1 p-2 sm:p-4 grid gap-2 sm:gap-4", gridCols, gridRows)}>
+        {allStreams.map(({ id, stream }, index) => (
+             <div key={id} className="relative aspect-video overflow-hidden rounded-lg border shadow-md">
+                <VideoPlayer stream={stream} isMuted={id === 'local'} />
+                <div className="absolute bottom-2 left-2 rounded-full bg-black/50 px-3 py-1 text-sm text-white">
+                    {id === 'local' ? 'You' : `Peer ${index}`}
+                </div>
             </div>
         ))}
       </main>
@@ -262,11 +266,17 @@ export function VideoRoom({ roomId }: { roomId: string }) {
                 <ChatPanel sendMessage={sendMessage} messages={messages} />
             </div>
             <div className="flex justify-center gap-2 sm:gap-4">
-                <Button onClick={toggleMic} variant={isMicOn ? 'secondary' : 'destructive'} size="lg" className="rounded-full h-12 w-12 sm:h-14 sm:w-14">
+                <Button onClick={toggleMic} variant={isMicOn ? 'secondary' : 'destructive'} size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12">
                     {isMicOn ? <Mic /> : <MicOff />}
                 </Button>
-                <Button onClick={toggleCamera} variant={isCameraOn ? 'secondary' : 'destructive'} size="lg" className="rounded-full h-12 w-12 sm:h-14 sm:w-14">
+                <Button onClick={toggleCamera} variant={isCameraOn ? 'secondary' : 'destructive'} size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12" disabled={isScreenSharing}>
                     {isCameraOn ? <Video /> : <VideoOff />}
+                </Button>
+                 <Button onClick={toggleScreenShare} variant={isScreenSharing ? 'default' : 'secondary'} size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12">
+                    <ScreenShare />
+                </Button>
+                 <Button onClick={flipCamera} variant="secondary" size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12 hidden sm:flex" disabled={isScreenSharing}>
+                    <FlipHorizontal />
                 </Button>
                 <Button onClick={handleLeave} variant="destructive" size="lg" className="rounded-full h-12 w-12 sm:h-14 sm:w-14">
                     <PhoneOff />

@@ -35,7 +35,9 @@ export const useMultiWebRTC = (roomId: string) => {
   
   const [isMicOn, setIsMicOn] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(true);
-  
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+
   // Chat and Notes state
   const [messages, setMessages] = useState<Message[]>([]);
   const [smartNotes, setSmartNotes] = useState<SmartNotes | null>(null);
@@ -51,6 +53,96 @@ export const useMultiWebRTC = (roomId: string) => {
         setMessages(prev => [...prev, data.payload]);
     }
   }, []);
+
+  const replaceTrack = useCallback((track: MediaStreamTrack) => {
+    peerConnections.current.forEach(pc => {
+      const sender = pc.getSenders().find(s => s.track?.kind === track.kind);
+      if (sender) {
+        sender.replaceTrack(track);
+      }
+    });
+  }, []);
+
+  const getMedia = useCallback(async (
+    newVideoConstraint: boolean | MediaTrackConstraints,
+    newAudioConstraint: boolean | MediaTrackConstraints = true
+  ) => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+        video: newVideoConstraint,
+        audio: newAudioConstraint
+    });
+    setLocalStream(stream);
+
+    const videoTrack = stream.getVideoTracks()[0];
+    const audioTrack = stream.getAudioTracks()[0];
+
+    if (localStream) {
+        const oldVideoTrack = localStream.getVideoTracks()[0];
+        if (oldVideoTrack) {
+            oldVideoTrack.stop();
+            localStream.removeTrack(oldVideoTrack);
+        }
+        localStream.addTrack(videoTrack);
+        replaceTrack(videoTrack);
+
+        const oldAudioTrack = localStream.getAudioTracks()[0];
+        if (oldAudioTrack) {
+            oldAudioTrack.stop();
+            localStream.removeTrack(oldAudioTrack);
+        }
+        localStream.addTrack(audioTrack);
+        replaceTrack(audioTrack);
+    } else {
+        setLocalStream(stream);
+    }
+  }, [localStream, replaceTrack]);
+
+  const toggleScreenShare = useCallback(async () => {
+    if (isScreenSharing) {
+      // Stop screen share and revert to camera
+      await getMedia({
+        facingMode
+      });
+      setIsScreenSharing(false);
+    } else {
+      // Start screen share
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      setIsScreenSharing(true);
+      
+      const screenVideoTrack = screenStream.getVideoTracks()[0];
+      const screenAudioTrack = screenStream.getAudioTracks()[0];
+
+      if (localStream) {
+        const oldVideoTrack = localStream.getVideoTracks()[0];
+        if(oldVideoTrack) oldVideoTrack.stop();
+        localStream.removeTrack(oldVideoTrack);
+        localStream.addTrack(screenVideoTrack);
+        replaceTrack(screenVideoTrack);
+
+        if(screenAudioTrack) {
+            const oldAudioTrack = localStream.getAudioTracks()[0];
+            if(oldAudioTrack) oldAudioTrack.stop();
+            localStream.removeTrack(oldAudioTrack);
+            localStream.addTrack(screenAudioTrack);
+            replaceTrack(screenAudioTrack);
+        }
+
+        // When screen sharing ends (e.g., user clicks browser's stop sharing button)
+        screenVideoTrack.onended = () => {
+          getMedia({facingMode});
+          setIsScreenSharing(false);
+        };
+      }
+    }
+  }, [isScreenSharing, getMedia, localStream, replaceTrack, facingMode]);
+  
+  const flipCamera = useCallback(async () => {
+      if(isScreenSharing) return;
+      const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+      await getMedia({facingMode: { exact: newFacingMode }});
+      setFacingMode(newFacingMode);
+  }, [isScreenSharing, facingMode, getMedia]);
+
 
   const createPeerConnection = useCallback((peerId: string, stream: MediaStream) => {
     if (peerConnections.current.has(peerId)) {
@@ -105,21 +197,16 @@ export const useMultiWebRTC = (roomId: string) => {
 
   // Request media permissions on mount
   useEffect(() => {
-    const initializeLocalStream = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        setLocalStream(stream);
-      } catch (error) {
+    getMedia({facingMode}).catch(error => {
         console.error("Error accessing media devices:", error);
         toast({
           variant: 'destructive',
           title: 'Camera/Mic Access Denied',
           description: 'Please enable permissions to use the video room.',
         });
-      }
-    };
-    initializeLocalStream();
-  }, [toast]);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
 
   useEffect(() => {
@@ -160,11 +247,9 @@ export const useMultiWebRTC = (roomId: string) => {
           // Listen for answers to my offers
           if(allOffers[myPeerId]){
             for(const peerId in allOffers[myPeerId]) {
-              if (allOffers[myPeerId][peerId].type === 'answer') {
-                 const pc = peerConnections.current.get(peerId);
-                 if(pc && pc.signalingState === 'have-local-offer') {
-                    await pc.setRemoteDescription(new RTCSessionDescription(allOffers[myPeerId][peerId]));
-                 }
+              const pc = peerConnections.current.get(peerId);
+              if (pc && pc.signalingState === 'have-local-offer' && allOffers[myPeerId][peerId]?.type === 'answer') {
+                 await pc.setRemoteDescription(new RTCSessionDescription(allOffers[myPeerId][peerId]));
               }
             }
           }
@@ -177,7 +262,7 @@ export const useMultiWebRTC = (roomId: string) => {
                 await pc.setRemoteDescription(new RTCSessionDescription(allOffers[senderId][myPeerId]));
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
-                const answerRef = ref(database, `video-rooms/${roomId}/offers/${myPeerId}/${senderId}`);
+                const answerRef = ref(database, `video-rooms/${roomId}/offers/${senderId}/${myPeerId}`);
                 set(answerRef, { type: 'answer', sdp: answer.sdp });
               }
             }
@@ -190,7 +275,7 @@ export const useMultiWebRTC = (roomId: string) => {
         const allCandidates = snapshot.val();
         if (allCandidates) {
           for (const senderId in allCandidates) {
-            if(peerConnections.current.has(senderId) && allCandidates[senderId][myPeerId]) {
+            if(senderId !== myPeerId && peerConnections.current.has(senderId) && allCandidates[senderId][myPeerId]) {
                 const pc = peerConnections.current.get(senderId);
                 pc?.addIceCandidate(new RTCIceCandidate(allCandidates[senderId][myPeerId])).catch(() => {});
             }
@@ -265,5 +350,5 @@ export const useMultiWebRTC = (roomId: string) => {
 
   useInterval(generateNotesPeriodically, 15000); // every 15 seconds
 
-  return { localStream, remoteStreams, toggleMic, toggleCamera, leaveRoom, isMicOn, isCameraOn, sendMessage, messages, smartNotes, isGeneratingNotes };
+  return { localStream, remoteStreams, toggleMic, toggleCamera, leaveRoom, isMicOn, isCameraOn, sendMessage, messages, smartNotes, isGeneratingNotes, toggleScreenShare, isScreenSharing, flipCamera };
 };
