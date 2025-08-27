@@ -143,17 +143,17 @@ export const useMultiWebRTC = (roomId: string) => {
     if (isScreenSharing || !localStream) return;
 
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+    const oldVideoTrack = localStream.getVideoTracks()[0];
     
     // Stop the current video track before requesting a new one
-    localStream.getVideoTracks().forEach(track => track.stop());
+    if(oldVideoTrack) oldVideoTrack.stop();
     
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newFacingMode }, audio: false });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newFacingMode } });
         const newVideoTrack = stream.getVideoTracks()[0];
         
         // Replace the old track with the new one in the local stream
-        const oldVideoTrack = localStream.getVideoTracks()[0];
-        localStream.removeTrack(oldVideoTrack);
+        if(oldVideoTrack) localStream.removeTrack(oldVideoTrack);
         localStream.addTrack(newVideoTrack);
 
         // Update the track for all peer connections
@@ -227,11 +227,11 @@ export const useMultiWebRTC = (roomId: string) => {
 
   // Request media permissions on mount
   useEffect(() => {
-    getMedia({facingMode: 'user'}).catch(error => {
+    getMedia({ facingMode: 'user' }).catch(error => {
         console.error("Error on initial media access:", error);
-        // Toast is already shown in getMedia
     });
-  }, [getMedia]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
 
   useEffect(() => {
@@ -271,9 +271,11 @@ export const useMultiWebRTC = (roomId: string) => {
           // Listen for answers to my offers
           if(allOffers[myPeerId]){
             for(const peerId in allOffers[myPeerId]) {
-              const pc = peerConnections.current.get(peerId);
-              if (pc && pc.signalingState === 'have-local-offer' && allOffers[myPeerId][peerId]?.type === 'answer') {
-                 await pc.setRemoteDescription(new RTCSessionDescription(allOffers[myPeerId][peerId]));
+              if (allOffers[myPeerId][peerId]?.type === 'answer') {
+                 const pc = peerConnections.current.get(peerId);
+                 if (pc && pc.signalingState === 'have-local-offer') {
+                    await pc.setRemoteDescription(new RTCSessionDescription(allOffers[myPeerId][peerId]));
+                 }
               }
             }
           }
