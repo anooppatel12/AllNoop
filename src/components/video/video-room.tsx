@@ -16,14 +16,14 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Input } from '../ui/input';
 
-const VideoPlayer = ({ stream, isMuted }: { stream: MediaStream, isMuted: boolean }) => {
+const VideoPlayer = ({ stream, isMuted, id }: { stream: MediaStream, isMuted: boolean, id: string }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     useEffect(() => {
         if (videoRef.current) {
             videoRef.current.srcObject = stream;
         }
     }, [stream]);
-    return <video ref={videoRef} autoPlay muted={isMuted} className="w-full h-full object-cover rounded-lg bg-black" />;
+    return <video ref={videoRef} autoPlay muted={isMuted} className={cn("w-full h-full object-cover rounded-lg bg-black", id === 'local' && 'transform -scale-x-100')} />;
 }
 
 const SmartNotesPanel = ({ notes, isGenerating }: { notes: SmartNotes | null, isGenerating: boolean }) => {
@@ -256,7 +256,7 @@ export function VideoRoom({ roomId }: { roomId: string }) {
       <main className={cn("flex-1 p-2 sm:p-4 grid gap-2 sm:gap-4", gridLayout)}>
         {allStreams.map(({ id, stream }, index) => (
              <div key={id} className="relative aspect-video overflow-hidden rounded-lg border shadow-md">
-                <VideoPlayer stream={stream} isMuted={id === 'local'} />
+                <VideoPlayer stream={stream} isMuted={id === 'local'} id={id} />
                 <div className="absolute bottom-2 left-2 rounded-full bg-black/50 px-3 py-1 text-sm text-white">
                     {id === 'local' ? 'You' : `Peer ${index}`}
                 </div>

@@ -53,127 +53,88 @@ export const useMultiWebRTC = (roomId: string) => {
         setMessages(prev => [...prev, data.payload]);
     }
   }, []);
-
-  const replaceTrack = useCallback((track: MediaStreamTrack | null) => {
-    peerConnections.current.forEach(pc => {
+  
+  const replaceTrackInPeers = useCallback((track: MediaStreamTrack | null) => {
+    for (const pc of peerConnections.current.values()) {
         const sender = pc.getSenders().find(s => s.track?.kind === track?.kind);
         if (sender) {
-            sender.replaceTrack(track);
+            sender.replaceTrack(track).catch(e => console.error("Error replacing track:", e));
         }
-    });
+    }
   }, []);
-  
-  const stopCurrentStream = useCallback(() => {
-    if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-    }
-  }, [localStream]);
 
-  const getMedia = useCallback(async (
-    videoConstraint: boolean | MediaTrackConstraints,
-    audioConstraint: boolean | MediaTrackConstraints = true
+  const getMediaStream = useCallback(async (
+    constraints: MediaStreamConstraints
   ) => {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: videoConstraint,
-            audio: audioConstraint
-        });
-
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-        }
-        
-        setLocalStream(stream);
-        
-        if (peerConnections.current.size > 0) {
-            stream.getTracks().forEach(track => {
-                replaceTrack(track);
-            });
-        }
-        
-        return stream;
-
-    } catch(error) {
-        console.error("Error accessing media devices:", error);
-        toast({
-          variant: 'destructive',
-          title: 'Camera/Mic Access Denied',
-          description: 'Please enable permissions to use the video room.',
-        });
-        throw error; // re-throw to be caught by callers
-    }
-  }, [localStream, replaceTrack, toast]);
+      try {
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          localStream?.getTracks().forEach(track => track.stop());
+          setLocalStream(stream);
+          stream.getTracks().forEach(track => replaceTrackInPeers(track));
+          return stream;
+      } catch (error) {
+          console.error("Error getting media stream:", error);
+          toast({
+              variant: 'destructive',
+              title: 'Media Access Error',
+              description: 'Could not access camera or microphone. Please check permissions.',
+          });
+          throw error;
+      }
+  }, [localStream, replaceTrackInPeers, toast]);
 
   const toggleScreenShare = useCallback(async () => {
     if (isScreenSharing) {
-      stopCurrentStream();
-      await getMedia({ facingMode });
-      setIsScreenSharing(false);
-      return;
-    }
+        // Stop screen sharing, switch back to camera
+        await getMediaStream({ video: { facingMode }, audio: true });
+        setIsScreenSharing(false);
+        setIsCameraOn(true);
+    } else {
+        // Start screen sharing
+        try {
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            
+            localStream?.getTracks().forEach(track => track.stop());
+            setLocalStream(screenStream);
+            setIsScreenSharing(true);
+            setIsCameraOn(false);
 
-    try {
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-      
-      stopCurrentStream();
-      setLocalStream(screenStream);
-      setIsScreenSharing(true);
+            screenStream.getTracks().forEach(track => {
+                replaceTrackInPeers(track);
+                if (track.kind === 'video') {
+                    track.onended = () => {
+                        if (isScreenSharingRef.current) { // Use ref to get latest state
+                           toggleScreenShare();
+                        }
+                    };
+                }
+            });
 
-      screenStream.getTracks().forEach(track => replaceTrack(track));
-      
-      const screenVideoTrack = screenStream.getVideoTracks()[0];
-      if (screenVideoTrack) {
-        screenVideoTrack.onended = () => {
-          if (isScreenSharing) {
-            stopCurrentStream();
-            getMedia({ facingMode });
-            setIsScreenSharing(false);
-          }
-        };
-      }
-    } catch (err) {
-      console.error("Screen share failed:", err);
-      toast({
-        variant: "destructive",
-        title: "Screen Share Failed",
-        description: "Could not start screen sharing. Please check browser permissions."
-      });
-      // Revert to camera if screen share fails
-      await getMedia({ facingMode });
-      setIsScreenSharing(false);
+        } catch (err) {
+            console.error("Screen share failed:", err);
+            toast({
+                variant: "destructive",
+                title: "Screen Share Failed",
+                description: "Could not start screen sharing. Please check browser permissions."
+            });
+            // Revert to camera
+            await getMediaStream({ video: { facingMode }, audio: true });
+        }
     }
-}, [isScreenSharing, getMedia, stopCurrentStream, facingMode, replaceTrack, toast]);
+  }, [isScreenSharing, getMediaStream, localStream, replaceTrackInPeers, toast, facingMode]);
+  
+  // Ref to get the latest state inside onended callback
+  const isScreenSharingRef = useRef(isScreenSharing);
+  useEffect(() => {
+    isScreenSharingRef.current = isScreenSharing;
+  }, [isScreenSharing]);
 
   const flipCamera = useCallback(async () => {
-    if (isScreenSharing || !localStream) return;
-    
-    stopCurrentStream();
-
+    if (isScreenSharing) return;
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newFacingMode } });
-        const newVideoTrack = stream.getVideoTracks()[0];
-        
-        if (localStream) {
-            const audioTrack = localStream.getAudioTracks()[0];
-            const newStream = new MediaStream([newVideoTrack, audioTrack]);
-            setLocalStream(newStream);
-            replaceTrack(newVideoTrack);
-        } else {
-            setLocalStream(stream);
-        }
-        
-        setFacingMode(newFacingMode);
-    } catch (err) {
-         console.error("Error flipping camera:", err);
-         toast({
-            variant: "destructive",
-            title: "Camera Flip Failed",
-            description: "Could not switch cameras. Please ensure you have another camera available and have granted permissions."
-         });
-         await getMedia({ facingMode });
-    }
-  }, [isScreenSharing, localStream, facingMode, replaceTrack, toast, getMedia, stopCurrentStream]);
+    await getMediaStream({ video: { facingMode: newFacingMode }, audio: true });
+    setFacingMode(newFacingMode);
+  }, [isScreenSharing, facingMode, getMediaStream]);
 
 
   const createPeerConnection = useCallback((peerId: string, stream: MediaStream) => {
@@ -228,12 +189,11 @@ export const useMultiWebRTC = (roomId: string) => {
     }
   }, [localStream, roomId]);
 
-  // Request media permissions on mount
   useEffect(() => {
-    getMedia({ facingMode: 'user' }).catch(error => {
-        console.error("Error on initial media access:", error);
+    getMediaStream({ video: { facingMode: 'user' }, audio: true }).catch(err => {
+      console.error("Initial media access failed:", err);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
 
@@ -270,28 +230,27 @@ export const useMultiWebRTC = (roomId: string) => {
       const offersRef = ref(database, `video-rooms/${roomId}/offers`);
       onValue(offersRef, async (snapshot) => {
         const allOffers = snapshot.val();
-        if (allOffers) {
-          // Listen for answers to my offers
-          if(allOffers[myPeerId]){
-            for(const peerId in allOffers[myPeerId]) {
-              if (allOffers[myPeerId][peerId]?.type === 'answer') {
+        if (allOffers && myPeerIdRef.current) {
+          const myOffers = allOffers[myPeerIdRef.current];
+          if(myOffers){
+            for(const peerId in myOffers) {
+              if (myOffers[peerId]?.type === 'answer') {
                  const pc = peerConnections.current.get(peerId);
                  if (pc && pc.signalingState === 'have-local-offer') {
-                    await pc.setRemoteDescription(new RTCSessionDescription(allOffers[myPeerId][peerId]));
+                    await pc.setRemoteDescription(new RTCSessionDescription(myOffers[peerId]));
                  }
               }
             }
           }
 
-          // Listen for offers from others
           for(const senderId in allOffers) {
-            if(senderId !== myPeerIdRef.current && allOffers[senderId][myPeerId] && allOffers[senderId][myPeerId].type === 'offer') {
+            if(senderId !== myPeerIdRef.current && allOffers[senderId][myPeerIdRef.current] && allOffers[senderId][myPeerIdRef.current].type === 'offer') {
               const pc = createPeerConnection(senderId, localStream);
               if (pc.signalingState === 'stable') {
-                await pc.setRemoteDescription(new RTCSessionDescription(allOffers[senderId][myPeerId]));
+                await pc.setRemoteDescription(new RTCSessionDescription(allOffers[senderId][myPeerIdRef.current]));
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
-                const answerRef = ref(database, `video-rooms/${roomId}/offers/${senderId}/${myPeerId}`);
+                const answerRef = ref(database, `video-rooms/${roomId}/offers/${senderId}/${myPeerIdRef.current}`);
                 set(answerRef, { type: 'answer', sdp: answer.sdp });
               }
             }
@@ -344,6 +303,7 @@ export const useMultiWebRTC = (roomId: string) => {
   };
 
   const toggleCamera = () => {
+    if (isScreenSharing) return;
     if (localStream) {
       localStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
       setIsCameraOn(prev => !prev);
@@ -364,14 +324,13 @@ export const useMultiWebRTC = (roomId: string) => {
         channel.send(JSON.stringify(message));
       }
     });
-    // Also add to own messages
     setMessages(prev => [...prev, message.payload]);
   }, []);
   
   const generateNotesPeriodically = useCallback(async () => {
     const fullTranscript = messages.map(m => `${m.sender}: ${m.text}`).join('\n');
     
-    if(fullTranscript.length > transcriptRef.current.length + 50) { // Only generate if there's enough new text
+    if(fullTranscript.length > transcriptRef.current.length + 50) {
         setIsGeneratingNotes(true);
         transcriptRef.current = fullTranscript;
         const result = await generateSmartNotesAction({ transcript: fullTranscript });
@@ -384,7 +343,7 @@ export const useMultiWebRTC = (roomId: string) => {
 
   }, [messages, roomId]);
 
-  useInterval(generateNotesPeriodically, 15000); // every 15 seconds
+  useInterval(generateNotesPeriodically, 15000);
 
   return { localStream, remoteStreams, toggleMic, toggleCamera, leaveRoom, isMicOn, isCameraOn, sendMessage, messages, smartNotes, isGeneratingNotes, toggleScreenShare, isScreenSharing, flipCamera };
 };
