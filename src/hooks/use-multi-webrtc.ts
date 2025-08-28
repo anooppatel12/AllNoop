@@ -46,6 +46,12 @@ export const useMultiWebRTC = (roomId: string) => {
 
   const roomRef = ref(database, `video-rooms/${roomId}`);
   const peersRef = ref(database, `video-rooms/${roomId}/peers`);
+  
+  // Ref to get the latest state inside callbacks
+  const isScreenSharingRef = useRef(isScreenSharing);
+  useEffect(() => {
+    isScreenSharingRef.current = isScreenSharing;
+  }, [isScreenSharing]);
 
   const handleDataChannelMessage = useCallback((event: MessageEvent) => {
     const data = JSON.parse(event.data);
@@ -54,99 +60,88 @@ export const useMultiWebRTC = (roomId: string) => {
     }
   }, []);
   
-  const replaceTrackInPeers = useCallback((track: MediaStreamTrack | null) => {
+  const replaceTrackInPeers = useCallback(async (track: MediaStreamTrack | null) => {
     for (const pc of peerConnections.current.values()) {
         const sender = pc.getSenders().find(s => s.track?.kind === track?.kind);
         if (sender) {
-            sender.replaceTrack(track).catch(e => console.error("Error replacing track:", e));
+           await sender.replaceTrack(track).catch(e => console.error("Error replacing track:", e));
         }
     }
   }, []);
 
-  const getMediaStream = useCallback(async (
-    constraints: MediaStreamConstraints
-  ): Promise<MediaStream> => {
-      try {
-          const stream = await navigator.mediaDevices.getUserMedia(constraints);
-          // Stop old tracks before setting new stream to avoid resource conflicts
-          if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-          }
-          setLocalStream(stream);
-          return stream;
-      } catch (error) {
-          console.error("Error getting media stream:", error);
-          toast({
-              variant: 'destructive',
-              title: 'Media Access Error',
-              description: 'Could not access camera or microphone. Please check permissions.',
-          });
-          throw error;
-      }
-  }, [localStream, toast]);
-
-   const toggleScreenShare = useCallback(async () => {
-    if (isScreenSharing) {
-      // Stop screen sharing, switch back to camera
-      const cameraStream = await getMediaStream({ video: { facingMode }, audio: true });
-      replaceTrackInPeers(cameraStream.getVideoTracks()[0]);
-      setIsScreenSharing(false);
-      setIsCameraOn(true);
-    } else {
-      // Start screen sharing
-      try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-        const screenTrack = screenStream.getVideoTracks()[0];
-        
-        replaceTrackInPeers(screenTrack);
-        
-        // Stop the camera track and update local state
-        localStream?.getVideoTracks().forEach(track => track.stop());
-        const newStream = new MediaStream([screenTrack, ...localStream?.getAudioTracks() || []]);
-        setLocalStream(newStream);
-
-        setIsScreenSharing(true);
-        setIsCameraOn(false);
-
-        screenTrack.onended = () => {
-          if (isScreenSharingRef.current) { // Use ref to get latest state
-             toggleScreenShare();
-          }
-        };
-      } catch (err) {
-        console.error("Screen share failed:", err);
-        toast({
-          variant: "destructive",
-          title: "Screen Share Failed",
-          description: "Could not start screen sharing. Please check browser permissions."
-        });
-      }
+  const getMedia = useCallback(async (constraints: MediaStreamConstraints) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setLocalStream(stream);
+      return stream;
+    } catch (err) {
+      console.error('Error getting media:', err);
+      toast({
+        title: 'Media Access Error',
+        description: 'Could not access camera or microphone. Please check permissions.',
+        variant: 'destructive',
+      });
+      return null;
     }
-  }, [isScreenSharing, getMediaStream, replaceTrackInPeers, toast, facingMode, localStream]);
+  }, [toast]);
   
-  // Ref to get the latest state inside onended callback
-  const isScreenSharingRef = useRef(isScreenSharing);
-  useEffect(() => {
-    isScreenSharingRef.current = isScreenSharing;
-  }, [isScreenSharing]);
+  const toggleScreenShare = useCallback(async () => {
+    if (isScreenSharingRef.current) {
+        // Stop screen sharing, switch back to camera
+        const cameraStream = await getMedia({ video: { facingMode }, audio: true });
+        if(cameraStream) {
+            await replaceTrackInPeers(cameraStream.getVideoTracks()[0]);
+            localStream?.getTracks().forEach(track => track.stop());
+            setLocalStream(cameraStream);
+            setIsScreenSharing(false);
+            setIsCameraOn(true);
+        }
+    } else {
+        // Start screen sharing
+        try {
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            const screenTrack = screenStream.getVideoTracks()[0];
+            
+            await replaceTrackInPeers(screenTrack);
+            
+            localStream?.getVideoTracks().forEach(track => track.stop());
+            const newStream = new MediaStream([screenTrack, ...localStream?.getAudioTracks() || []]);
+            setLocalStream(newStream);
+
+            setIsScreenSharing(true);
+            setIsCameraOn(false); // Can't have camera on during screen share
+
+            screenTrack.onended = () => {
+              if (isScreenSharingRef.current) {
+                toggleScreenShare();
+              }
+            };
+        } catch (err) {
+            console.error("Screen share failed:", err);
+            toast({
+              variant: "destructive",
+              title: "Screen Share Failed",
+              description: "Could not start screen sharing. Please check browser permissions."
+            });
+        }
+    }
+  }, [getMedia, localStream, replaceTrackInPeers, toast, facingMode]);
 
   const flipCamera = useCallback(async () => {
     if (isScreenSharing || !localStream) return;
-    
+
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
     
+    // Stop the current video track first to release the camera
+    localStream.getVideoTracks().forEach(track => track.stop());
+
     try {
-        // Get the new video track
         const newMediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newFacingMode } });
         const newVideoTrack = newMediaStream.getVideoTracks()[0];
-
-        // Replace the track in all peer connections
-        replaceTrackInPeers(newVideoTrack);
-
-        // Stop the old video track
-        localStream.getVideoTracks().forEach(track => track.stop());
-
-        // Update the local stream with the new video track and existing audio tracks
+        
+        await replaceTrackInPeers(newVideoTrack);
+        
+        // Create a new stream with the new video track and existing audio tracks
         const newLocalStream = new MediaStream([newVideoTrack, ...localStream.getAudioTracks()]);
         setLocalStream(newLocalStream);
         setFacingMode(newFacingMode);
@@ -157,9 +152,12 @@ export const useMultiWebRTC = (roomId: string) => {
             title: "Camera Flip Failed",
             description: "Could not switch cameras. Please ensure you have another camera available and permissions are granted."
         });
-    }
-  }, [isScreenSharing, localStream, facingMode, replaceTrackInPeers, toast]);
+        // Try to recover the original stream
+        const originalStream = await getMedia({ video: { facingMode: facingMode }, audio: true });
+        if(originalStream) await replaceTrackInPeers(originalStream.getVideoTracks()[0]);
 
+    }
+  }, [isScreenSharing, localStream, facingMode, replaceTrackInPeers, toast, getMedia]);
 
   const createPeerConnection = useCallback((peerId: string, stream: MediaStream) => {
     if (peerConnections.current.has(peerId)) {
@@ -214,14 +212,7 @@ export const useMultiWebRTC = (roomId: string) => {
   }, [localStream, roomId]);
 
   useEffect(() => {
-    const initializeMedia = async () => {
-        try {
-            await getMediaStream({ video: { facingMode: 'user' }, audio: true });
-        } catch (err) {
-             console.error("Initial media access failed:", err);
-        }
-    }
-    initializeMedia();
+    getMedia({ video: { facingMode: 'user' }, audio: true });
     // This effect should only run once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
