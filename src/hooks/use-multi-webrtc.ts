@@ -131,20 +131,24 @@ export const useMultiWebRTC = (roomId: string) => {
     if (isScreenSharing || !localStream) return;
 
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+    const oldTrack = localStream.getVideoTracks()[0];
+    oldTrack.stop();
     
-    // Stop the current video track first to release the camera
-    localStream.getVideoTracks().forEach(track => track.stop());
-
     try {
         const newMediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newFacingMode } });
         const newVideoTrack = newMediaStream.getVideoTracks()[0];
         
         await replaceTrackInPeers(newVideoTrack);
         
-        // Create a new stream with the new video track and existing audio tracks
-        const newLocalStream = new MediaStream([newVideoTrack, ...localStream.getAudioTracks()]);
-        setLocalStream(newLocalStream);
+        // Remove the old track and add the new one to the existing stream
+        localStream.removeTrack(oldTrack);
+        localStream.addTrack(newVideoTrack);
+        
+        // No need to setLocalStream, just trigger a re-render if necessary
         setFacingMode(newFacingMode);
+        // Force a re-render of components that use localStream, if they don't automatically update
+        setLocalStream(new MediaStream(localStream.getTracks()));
+
     } catch(err) {
         console.error("Error flipping camera: ", err);
         toast({
@@ -152,10 +156,9 @@ export const useMultiWebRTC = (roomId: string) => {
             title: "Camera Flip Failed",
             description: "Could not switch cameras. Please ensure you have another camera available and permissions are granted."
         });
-        // Try to recover the original stream
-        const originalStream = await getMedia({ video: { facingMode: facingMode }, audio: true });
-        if(originalStream) await replaceTrackInPeers(originalStream.getVideoTracks()[0]);
-
+        // Try to recover the original stream by getting the camera again
+         const originalStream = await getMedia({ video: { facingMode: facingMode }, audio: true });
+         if(originalStream) await replaceTrackInPeers(originalStream.getVideoTracks()[0]);
     }
   }, [isScreenSharing, localStream, facingMode, replaceTrackInPeers, toast, getMedia]);
 
