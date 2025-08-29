@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMultiWebRTC, type SmartNotes } from '@/hooks/use-multi-webrtc';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Copy, Check, MessageSquare, Bot, FileDown, Loader2, ScreenShare, Camera, FlipHorizontal, RefreshCw } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Copy, Check, MessageSquare, Bot, FileDown, Loader2, ScreenShare, Camera, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
@@ -318,4 +319,3 @@ export function VideoRoom({ roomId }: { roomId: string }) {
     </div>
   );
 }
-

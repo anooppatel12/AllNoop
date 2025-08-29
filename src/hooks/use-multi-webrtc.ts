@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -97,27 +98,25 @@ export const useMultiWebRTC = (roomId: string) => {
   const switchCamera = useCallback(async (deviceId: string) => {
     if (isScreenSharing || !localStream) return;
     
-    // Stop the current video track
-    localStream.getVideoTracks().forEach(track => track.stop());
-
+    // Stop the current video track to release the camera
+    const currentVideoTrack = localStream.getVideoTracks()[0];
+    if(currentVideoTrack){
+        currentVideoTrack.stop();
+    }
+    
     try {
       // Get a new stream with the new camera
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: { deviceId: { exact: deviceId } },
-        audio: true // Keep audio consistent
+        audio: true // Keep audio consistent, assuming mic is still needed
       });
       const newVideoTrack = newStream.getVideoTracks()[0];
 
       // Replace the track in all peer connections
       await replaceTrackInPeers(newVideoTrack);
       
-      // Update local stream state
-      // Remove old video track
-      const oldVideoTrack = localStream.getVideoTracks()[0];
-      if (oldVideoTrack) {
-        localStream.removeTrack(oldVideoTrack);
-      }
-      // Add new video track
+      // Update local stream state by replacing the track on the existing stream
+      localStream.removeTrack(currentVideoTrack);
       localStream.addTrack(newVideoTrack);
 
       // This is a bit of a hack to force React to notice the stream change
@@ -130,20 +129,27 @@ export const useMultiWebRTC = (roomId: string) => {
       toast({
         variant: "destructive",
         title: "Camera Switch Failed",
-        description: "Could not switch to the selected camera."
+        description: "Could not switch to the selected camera. Please ensure you have another camera available and permissions are granted."
       });
+      // Try to re-acquire original camera if switch fails
+      getMedia({video: true, audio: true});
     }
-  }, [isScreenSharing, localStream, replaceTrackInPeers, toast]);
+  }, [isScreenSharing, localStream, replaceTrackInPeers, toast, getMedia]);
 
 
   const toggleScreenShare = useCallback(async () => {
     try {
+      const currentVideoTrack = localStream?.getVideoTracks()[0];
       if (isScreenSharingRef.current) {
         // Stop screen sharing, switch back to camera
-        const newStream = await getMedia({ video: true, audio: true });
+        currentVideoTrack?.stop(); // Stop the screen share track
+        const newStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         if (newStream) {
           const videoTrack = newStream.getVideoTracks()[0];
           await replaceTrackInPeers(videoTrack);
+          localStream?.removeTrack(currentVideoTrack!);
+          localStream?.addTrack(videoTrack);
+          setLocalStream(new MediaStream(localStream?.getTracks()));
           setIsScreenSharing(false);
           setIsCameraOn(true);
         }
@@ -154,20 +160,17 @@ export const useMultiWebRTC = (roomId: string) => {
 
         await replaceTrackInPeers(screenTrack);
         
-        // Keep the audio track from the local stream
-        const audioTrack = localStream?.getAudioTracks()[0];
-        const newStream = new MediaStream([screenTrack]);
-        if (audioTrack) {
-          newStream.addTrack(audioTrack);
-        }
-        setLocalStream(newStream);
+        localStream?.removeTrack(currentVideoTrack!);
+        localStream?.addTrack(screenTrack);
+        
+        setLocalStream(new MediaStream(localStream?.getTracks()));
 
         setIsScreenSharing(true);
-        setIsCameraOn(false);
+        setIsCameraOn(false); // Can't use camera while screen sharing
 
         screenTrack.onended = () => {
-          if (isScreenSharingRef.current) {
-            toggleScreenShare(); // Toggles back to camera
+           if (isScreenSharingRef.current) {
+              toggleScreenShare(); // Toggles back to camera
           }
         };
       }
@@ -179,7 +182,7 @@ export const useMultiWebRTC = (roomId: string) => {
           description: "Could not start or stop screen sharing. Please check browser permissions."
         });
     }
-  }, [getMedia, localStream, replaceTrackInPeers, toast]);
+  }, [localStream, replaceTrackInPeers, toast]);
   
   const createPeerConnection = useCallback((peerId: string, stream: MediaStream) => {
     if (peerConnections.current.has(peerId)) {
