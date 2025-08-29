@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMultiWebRTC, type SmartNotes } from '@/hooks/use-multi-webrtc';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Copy, Check, MessageSquare, Bot, FileDown, Loader2, ScreenShare, Camera, FlipHorizontal } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Copy, Check, MessageSquare, Bot, FileDown, Loader2, ScreenShare, Camera, FlipHorizontal, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
@@ -15,6 +14,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Input } from '../ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 const VideoPlayer = ({ stream, isMuted, id }: { stream: MediaStream, isMuted: boolean, id: string }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -23,7 +29,11 @@ const VideoPlayer = ({ stream, isMuted, id }: { stream: MediaStream, isMuted: bo
             videoRef.current.srcObject = stream;
         }
     }, [stream]);
-    return <video ref={videoRef} autoPlay muted={isMuted} className={cn("w-full h-full object-cover rounded-lg bg-black", id === 'local' && 'transform -scale-x-100')} />;
+    
+    // We want to flip the local camera feed for a more natural mirror-like view.
+    const isLocalCamera = id === 'local' && stream.getVideoTracks().length > 0 && stream.getVideoTracks()[0].getSettings().facingMode;
+
+    return <video ref={videoRef} autoPlay muted={isMuted} className={cn("w-full h-full object-cover rounded-lg bg-black", isLocalCamera && 'transform -scale-x-100')} />;
 }
 
 const SmartNotesPanel = ({ notes, isGenerating }: { notes: SmartNotes | null, isGenerating: boolean }) => {
@@ -196,7 +206,9 @@ export function VideoRoom({ roomId }: { roomId: string }) {
     isGeneratingNotes,
     toggleScreenShare,
     isScreenSharing,
-    flipCamera,
+    videoDevices,
+    currentVideoDevice,
+    switchCamera
   } = useMultiWebRTC(roomId);
   
   const [hasCopied, setHasCopied] = useState(false);
@@ -279,9 +291,21 @@ export function VideoRoom({ roomId }: { roomId: string }) {
                  <Button onClick={toggleScreenShare} variant={isScreenSharing ? 'default' : 'secondary'} size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12">
                     <ScreenShare />
                 </Button>
-                 <Button onClick={flipCamera} variant="secondary" size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12" disabled={isScreenSharing}>
-                    <FlipHorizontal />
-                </Button>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                         <Button variant="secondary" size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12" disabled={isScreenSharing || videoDevices.length < 2}>
+                            <RefreshCw />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        {videoDevices.map(device => (
+                            <DropdownMenuItem key={device.deviceId} onSelect={() => switchCamera(device.deviceId)} disabled={device.deviceId === currentVideoDevice}>
+                               {device.deviceId === currentVideoDevice && <Check className="mr-2 h-4 w-4"/>}
+                               {device.label || `Camera ${videoDevices.indexOf(device) + 1}`}
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
                 <Button onClick={handleLeave} variant="destructive" size="lg" className="rounded-full h-12 w-12 sm:h-14 sm:w-14">
                     <PhoneOff />
                 </Button>
@@ -294,3 +318,4 @@ export function VideoRoom({ roomId }: { roomId: string }) {
     </div>
   );
 }
+
