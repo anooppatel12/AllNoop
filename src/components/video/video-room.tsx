@@ -31,10 +31,9 @@ const VideoPlayer = ({ stream, isMuted, id }: { stream: MediaStream, isMuted: bo
         }
     }, [stream]);
     
-    // We want to flip the local camera feed for a more natural mirror-like view.
     const isLocalCamera = id === 'local' && stream.getVideoTracks().length > 0 && stream.getVideoTracks()[0].getSettings().facingMode;
 
-    return <video ref={videoRef} autoPlay muted={isMuted} className={cn("w-full h-full object-cover rounded-lg bg-black", isLocalCamera && 'transform -scale-x-100')} />;
+    return <video ref={videoRef} autoPlay playsInline muted={isMuted} className={cn("w-full h-full object-cover rounded-lg", isLocalCamera && 'transform -scale-x-100')} />;
 }
 
 const SmartNotesPanel = ({ notes, isGenerating }: { notes: SmartNotes | null, isGenerating: boolean }) => {
@@ -268,7 +267,7 @@ export function VideoRoom({ roomId }: { roomId: string }) {
       
       <main className={cn("flex-1 p-2 sm:p-4 grid gap-2 sm:gap-4", gridLayout)}>
         {allStreams.map(({ id, stream }, index) => (
-             <div key={id} className="relative aspect-video overflow-hidden rounded-lg border shadow-md">
+             <div key={id} className="relative aspect-video overflow-hidden rounded-lg border shadow-md bg-muted">
                 <VideoPlayer stream={stream} isMuted={id === 'local'} id={id} />
                 <div className="absolute bottom-2 left-2 rounded-full bg-black/50 px-3 py-1 text-sm text-white">
                     {id === 'local' ? 'You' : `Peer ${index}`}
