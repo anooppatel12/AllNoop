@@ -143,7 +143,9 @@ export const useMultiWebRTC = (roomId: string) => {
     if (isScreenSharing || !localStream) return;
 
     const oldTrack = localStream.getVideoTracks()[0];
-    oldTrack.stop(); // Release the current camera
+    if (oldTrack) {
+      oldTrack.stop(); // Release the current camera
+    }
 
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
     
@@ -158,7 +160,9 @@ export const useMultiWebRTC = (roomId: string) => {
         await replaceTrackInPeers(newVideoTrack);
         
         // Modify the existing stream object instead of creating a new one
-        localStream.removeTrack(oldTrack);
+        if(oldTrack){
+            localStream.removeTrack(oldTrack);
+        }
         localStream.addTrack(newVideoTrack);
         
         setFacingMode(newFacingMode);
@@ -174,8 +178,9 @@ export const useMultiWebRTC = (roomId: string) => {
             description: "Could not switch cameras. Please ensure you have another camera available and permissions are granted."
         });
         // Try to recover by getting the original facing mode camera again
-        const originalStream = await getMedia({ video: { facingMode: facingMode }, audio: true });
-        if(originalStream) await replaceTrackInPeers(originalStream.getVideoTracks()[0]);
+        if(oldTrack) {
+            localStream.addTrack(oldTrack); // Re-add the old track
+        }
     }
   }, [isScreenSharing, localStream, facingMode, replaceTrackInPeers, toast, getMedia]);
 
