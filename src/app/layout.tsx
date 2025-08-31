@@ -121,8 +121,18 @@ export default function RootLayout({
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+<<<<<<< HEAD
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2296905809539851"
      crossorigin="anonymous"></script>
+=======
+        {/* 
+          To enable Google AdSense, you will need to place your ad code here.
+          This typically involves adding a <script> tag provided by AdSense.
+          For example:
+          <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_CLIENT_ID"
+               crossOrigin="anonymous"></script>
+        */}
+>>>>>>> 6db16f5 (you add everythng for adssense policy)
       </head>
       <body className={cn("font-body antialiased", inter.variable, spaceGrotesk.variable, homemadeApple.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

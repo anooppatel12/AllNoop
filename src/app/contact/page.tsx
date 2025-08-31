@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import emailjs from '@emailjs/browser';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -75,13 +75,14 @@ export default function ContactPage() {
           Contact Us
         </h1>
         <p className="max-w-[700px] text-muted-foreground md:text-xl">
-          Have a question or feedback? Fill out the form below to get in touch.
+          Have a question, feedback, or a suggestion for a new tool? We'd love to hear from you! Fill out the form below to get in touch with the AllNoop team.
         </p>
       </div>
 
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>Contact Form</CardTitle>
+          <CardDescription>We typically respond within 24-48 hours.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
