@@ -56,9 +56,13 @@ export const useMultiWebRTC = (roomId: string) => {
   }, [isScreenSharing]);
 
   const handleDataChannelMessage = useCallback((event: MessageEvent) => {
-    const data = JSON.parse(event.data);
-    if(data.type === 'chat') {
-        setMessages(prev => [...prev, data.payload]);
+    try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'chat' && data.payload) {
+            setMessages(prev => [...prev, data.payload]);
+        }
+    } catch (e) {
+        console.error("Failed to parse data channel message", e);
     }
   }, []);
   
@@ -104,14 +108,12 @@ export const useMultiWebRTC = (roomId: string) => {
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: { deviceId: { exact: deviceId } },
-        audio: false // We only need the video track
+        audio: true 
       });
       const newVideoTrack = newStream.getVideoTracks()[0];
 
-      // Replace the track for all connected peers
       await replaceTrackInPeers(newVideoTrack);
       
-      // Modify the existing localStream in place to avoid UI reset
       localStream.removeTrack(currentVideoTrack);
       localStream.addTrack(newVideoTrack);
       
@@ -124,14 +126,12 @@ export const useMultiWebRTC = (roomId: string) => {
         title: "Camera Switch Failed",
         description: "Could not switch to the selected camera. Please ensure permissions are granted."
       });
-      // Attempt to restore the original stream
       getMedia({video: true, audio: true});
     }
   }, [localStream, replaceTrackInPeers, toast, getMedia]);
 
 
   const toggleScreenShare = useCallback(async () => {
-    // Check if the API is available
     if (!navigator.mediaDevices || !('getDisplayMedia' in navigator.mediaDevices)) {
       toast({
         variant: "destructive",
@@ -144,8 +144,7 @@ export const useMultiWebRTC = (roomId: string) => {
     try {
       const currentVideoTrack = localStream?.getVideoTracks()[0];
       if (isScreenSharingRef.current) {
-        // Stop screen sharing, switch back to camera
-        currentVideoTrack?.stop(); // Stop the screen share track
+        currentVideoTrack?.stop();
         const newStream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: currentVideoDevice } });
         const videoTrack = newStream.getVideoTracks()[0];
         await replaceTrackInPeers(videoTrack);
@@ -154,7 +153,6 @@ export const useMultiWebRTC = (roomId: string) => {
         setIsScreenSharing(false);
         setIsCameraOn(true);
       } else {
-        // Start screen sharing
         const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
         const screenTrack = screenStream.getVideoTracks()[0];
 
@@ -164,11 +162,11 @@ export const useMultiWebRTC = (roomId: string) => {
         localStream?.addTrack(screenTrack);
 
         setIsScreenSharing(true);
-        setIsCameraOn(false); // Can't use camera while screen sharing
+        setIsCameraOn(false);
 
         screenTrack.onended = () => {
            if (isScreenSharingRef.current) {
-              toggleScreenShare(); // Toggles back to camera
+              toggleScreenShare();
           }
         };
       }
@@ -203,11 +201,9 @@ export const useMultiWebRTC = (roomId: string) => {
       setRemoteStreams((prev) => {
         const existingStream = prev.find((s) => s.id === peerId);
         if (existingStream) {
-          // If a stream container for this peer already exists, add the track to it
           existingStream.stream.addTrack(event.track);
-          return [...prev]; // Return a new array to trigger re-render
+          return [...prev];
         } else {
-          // If no stream container exists, create a new one
           return [...prev, { id: peerId, stream: event.streams[0] }];
         }
       });
@@ -245,7 +241,6 @@ export const useMultiWebRTC = (roomId: string) => {
 
   useEffect(() => {
     getMedia({ video: true, audio: true });
-    // This effect should only run once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
