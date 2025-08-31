@@ -96,10 +96,10 @@ export const useMultiWebRTC = (roomId: string) => {
   }, [toast]);
   
   const switchCamera = useCallback(async (deviceId: string) => {
-    if (isScreenSharing || !localStream) return;
+    if (isScreenSharingRef.current || !localStream) return;
     
     const currentVideoTrack = localStream.getVideoTracks()[0];
-    currentVideoTrack.stop();
+    currentVideoTrack?.stop(); // Release the current camera
     
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({
@@ -108,9 +108,10 @@ export const useMultiWebRTC = (roomId: string) => {
       });
       const newVideoTrack = newStream.getVideoTracks()[0];
 
+      // Replace the track for all connected peers
       await replaceTrackInPeers(newVideoTrack);
       
-      // Modify the existing stream, don't create a new one
+      // Modify the existing localStream in place to avoid UI reset
       localStream.removeTrack(currentVideoTrack);
       localStream.addTrack(newVideoTrack);
       
@@ -121,30 +122,37 @@ export const useMultiWebRTC = (roomId: string) => {
       toast({
         variant: "destructive",
         title: "Camera Switch Failed",
-        description: "Could not switch to the selected camera. Please ensure you have another camera available and permissions are granted."
+        description: "Could not switch to the selected camera. Please ensure permissions are granted."
       });
-      // Try to re-acquire original camera if switch fails
+      // Attempt to restore the original stream
       getMedia({video: true, audio: true});
     }
-  }, [isScreenSharing, localStream, replaceTrackInPeers, toast, getMedia]);
+  }, [localStream, replaceTrackInPeers, toast, getMedia]);
 
 
   const toggleScreenShare = useCallback(async () => {
+    // Check if the API is available
+    if (!navigator.mediaDevices || !('getDisplayMedia' in navigator.mediaDevices)) {
+      toast({
+        variant: "destructive",
+        title: "Screen Sharing Not Supported",
+        description: "Your browser does not support screen sharing, or you are not in a secure (HTTPS) context."
+      });
+      return;
+    }
+
     try {
       const currentVideoTrack = localStream?.getVideoTracks()[0];
       if (isScreenSharingRef.current) {
         // Stop screen sharing, switch back to camera
         currentVideoTrack?.stop(); // Stop the screen share track
-        const newStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        if (newStream) {
-          const videoTrack = newStream.getVideoTracks()[0];
-          await replaceTrackInPeers(videoTrack);
-          localStream?.removeTrack(currentVideoTrack!);
-          localStream?.addTrack(videoTrack);
-          setLocalStream(new MediaStream(localStream?.getTracks()));
-          setIsScreenSharing(false);
-          setIsCameraOn(true);
-        }
+        const newStream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: currentVideoDevice } });
+        const videoTrack = newStream.getVideoTracks()[0];
+        await replaceTrackInPeers(videoTrack);
+        localStream?.removeTrack(currentVideoTrack!);
+        localStream?.addTrack(videoTrack);
+        setIsScreenSharing(false);
+        setIsCameraOn(true);
       } else {
         // Start screen sharing
         const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
@@ -154,8 +162,6 @@ export const useMultiWebRTC = (roomId: string) => {
         
         localStream?.removeTrack(currentVideoTrack!);
         localStream?.addTrack(screenTrack);
-        
-        setLocalStream(new MediaStream(localStream?.getTracks()));
 
         setIsScreenSharing(true);
         setIsCameraOn(false); // Can't use camera while screen sharing
@@ -168,13 +174,15 @@ export const useMultiWebRTC = (roomId: string) => {
       }
     } catch (err) {
         console.error("Screen share toggle failed:", err);
-        toast({
-          variant: "destructive",
-          title: "Screen Share Failed",
-          description: "Could not start or stop screen sharing. Please check browser permissions."
-        });
+        if ((err as Error).name !== 'NotAllowedError') {
+             toast({
+                variant: "destructive",
+                title: "Screen Share Failed",
+                description: "Could not start or stop screen sharing. Please check browser permissions."
+            });
+        }
     }
-  }, [localStream, replaceTrackInPeers, toast]);
+  }, [localStream, replaceTrackInPeers, toast, currentVideoDevice]);
   
   const createPeerConnection = useCallback((peerId: string, stream: MediaStream) => {
     if (peerConnections.current.has(peerId)) {
