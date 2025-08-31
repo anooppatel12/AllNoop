@@ -199,10 +199,17 @@ export const useMultiWebRTC = (roomId: string) => {
       }
     };
 
-    pc.ontrack = event => {
-      setRemoteStreams(prev => {
-        if (prev.some(s => s.id === peerId)) return prev;
-        return [...prev, { id: peerId, stream: event.streams[0] }];
+    pc.ontrack = (event) => {
+      setRemoteStreams((prev) => {
+        const existingStream = prev.find((s) => s.id === peerId);
+        if (existingStream) {
+          // If a stream container for this peer already exists, add the track to it
+          existingStream.stream.addTrack(event.track);
+          return [...prev]; // Return a new array to trigger re-render
+        } else {
+          // If no stream container exists, create a new one
+          return [...prev, { id: peerId, stream: event.streams[0] }];
+        }
       });
     };
     
