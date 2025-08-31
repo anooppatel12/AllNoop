@@ -173,6 +173,7 @@ export function BollywoodPersonalityQuiz() {
   
   const QuestionScreen = () => {
       const question = questions[currentQuestionIndex];
+      if (!question) return null;
       return (
         <AnimatePresence mode="wait">
             <motion.div
