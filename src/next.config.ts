@@ -50,7 +50,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Permissions-Policy',
-            value: 'clipboard-write self, display-capture self',
+            value: 'camera=*, microphone=*, display-capture=*, clipboard-write=self',
           },
         ],
       },
