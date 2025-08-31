@@ -98,30 +98,22 @@ export const useMultiWebRTC = (roomId: string) => {
   const switchCamera = useCallback(async (deviceId: string) => {
     if (isScreenSharing || !localStream) return;
     
-    // Stop the current video track to release the camera
     const currentVideoTrack = localStream.getVideoTracks()[0];
-    if(currentVideoTrack){
-        currentVideoTrack.stop();
-    }
+    currentVideoTrack.stop();
     
     try {
-      // Get a new stream with the new camera
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: { deviceId: { exact: deviceId } },
-        audio: true // Keep audio consistent, assuming mic is still needed
+        audio: false // We only need the video track
       });
       const newVideoTrack = newStream.getVideoTracks()[0];
 
-      // Replace the track in all peer connections
       await replaceTrackInPeers(newVideoTrack);
       
-      // Update local stream state by replacing the track on the existing stream
+      // Modify the existing stream, don't create a new one
       localStream.removeTrack(currentVideoTrack);
       localStream.addTrack(newVideoTrack);
-
-      // This is a bit of a hack to force React to notice the stream change
-      // without unmounting the video element.
-      setLocalStream(new MediaStream(localStream.getTracks()));
+      
       setCurrentVideoDevice(deviceId);
 
     } catch (err) {
