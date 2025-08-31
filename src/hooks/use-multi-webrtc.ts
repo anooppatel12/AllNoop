@@ -99,7 +99,11 @@ export const useMultiWebRTC = (roomId: string) => {
     if (isScreenSharingRef.current || !localStream) return;
     
     const currentVideoTrack = localStream.getVideoTracks()[0];
+<<<<<<< HEAD
     currentVideoTrack?.stop(); // Release the current camera
+=======
+    currentVideoTrack.stop();
+>>>>>>> fd90586 (there are issues in video room with switch camera camera 1, facing front)
     
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({
@@ -108,10 +112,16 @@ export const useMultiWebRTC = (roomId: string) => {
       });
       const newVideoTrack = newStream.getVideoTracks()[0];
 
+<<<<<<< HEAD
       // Replace the track for all connected peers
       await replaceTrackInPeers(newVideoTrack);
       
       // Modify the existing localStream in place to avoid UI reset
+=======
+      await replaceTrackInPeers(newVideoTrack);
+      
+      // Modify the existing stream, don't create a new one
+>>>>>>> fd90586 (there are issues in video room with switch camera camera 1, facing front)
       localStream.removeTrack(currentVideoTrack);
       localStream.addTrack(newVideoTrack);
       
