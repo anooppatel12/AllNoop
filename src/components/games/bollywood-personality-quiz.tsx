@@ -210,7 +210,7 @@ export function BollywoodPersonalityQuiz() {
       <CardContent className="p-8 min-h-[400px] flex items-center justify-center">
         {gameState === 'start' && <StartScreen />}
         {gameState === 'gender-select' && <GenderSelectScreen />}
-        {gameState === 'playing' && questions.length > 0 && <QuestionScreen />}
+        {gameState === 'playing' && <QuestionScreen />}
         {gameState === 'result' && <ResultScreen />}
       </CardContent>
     </Card>
