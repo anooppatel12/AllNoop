@@ -43,9 +43,9 @@ const questions: Question[] = [
   {
     text: 'How do you dress for a casual coffee run?',
     answers: [
-      { text: 'A carefully curated "effortless" look. You never know who you\'\'\'ll run into.', score: 2 },
+      { text: 'A carefully curated "effortless" look. You never know who you\'ll run into.', score: 2 },
       { text: 'Jeans and a comfy top. The usual.', score: 1 },
-      { text: 'Whatever I grabbed off the floor first. It\'\'\'s just coffee.', score: 0 },
+      { text: 'Whatever I grabbed off the floor first. It\'s just coffee.', score: 0 },
     ],
   },
    {
@@ -60,8 +60,8 @@ const questions: Question[] = [
 
 const results = {
   main: { title: 'Main Character 🎬✨', advice: 'You are the moment. Your life has a plot, a soundtrack, and probably a few love interests. Keep shining, star!', color: 'text-amber-400' },
-  side: { title: 'Supportive Side Character 😅', advice: 'You\'\'\'re the reliable, funny best friend! You get the best one-liners and everyone loves you. The story wouldn\'\'\'t be the same without you.', color: 'text-blue-400' },
-  extra: { title: 'Background Extra 🪑', advice: 'You\'\'\'re an essential part of the scenery, adding atmosphere and realism. You\'\'\'re low-drama, unproblematic, and just vibing. We respect it.', color: 'text-gray-400' },
+  side: { title: 'Supportive Side Character 😅', advice: 'You\'re the reliable, funny best friend! You get the best one-liners and everyone loves you. The story wouldn\'t be the same without you.', color: 'text-blue-400' },
+  extra: { title: 'Background Extra 🪑', advice: 'You\'re an essential part of the scenery, adding atmosphere and realism. You\'re low-drama, unproblematic, and just vibing. We respect it.', color: 'text-gray-400' },
 };
 
 export function MainCharacterQuiz() {
