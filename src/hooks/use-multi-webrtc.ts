@@ -201,15 +201,13 @@ export const useMultiWebRTC = (roomId: string) => {
       setRemoteStreams((prev) => {
         const existingStream = prev.find((s) => s.id === peerId);
         if (existingStream) {
-          // If a stream already exists, add the track to it
           event.streams[0].getTracks().forEach(track => {
             if (!existingStream.stream.getTrackById(track.id)) {
                 existingStream.stream.addTrack(track);
             }
           });
-          return [...prev]; // Return a new array to trigger re-render
+          return [...prev];
         } else {
-          // If no stream exists for this peer, create a new one
           return [...prev, { id: peerId, stream: event.streams[0] }];
         }
       });
@@ -247,8 +245,7 @@ export const useMultiWebRTC = (roomId: string) => {
 
   useEffect(() => {
     getMedia({ video: true, audio: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getMedia]);
   
 
   useEffect(() => {
@@ -420,5 +417,3 @@ export const useMultiWebRTC = (roomId: string) => {
     switchCamera
   };
 };
-
-    
