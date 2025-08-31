@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -172,6 +171,7 @@ export function BollywoodPersonalityQuiz() {
   };
   
   const QuestionScreen = () => {
+      if (questions.length === 0) return null;
       const question = questions[currentQuestionIndex];
       if (!question) return null;
       return (
