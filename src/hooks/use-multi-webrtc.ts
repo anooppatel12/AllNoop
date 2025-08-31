@@ -334,10 +334,12 @@ export const useMultiWebRTC = (roomId: string) => {
     return () => {
       handleBeforeUnload();
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      off(peersRef);
-      off(ref(database, `video-rooms/${roomId}/offers`));
-      off(ref(database, `video-rooms/${roomId}/iceCandidates`));
-      off(ref(database, `video-rooms/${roomId}/smartNotes`));
+      if (myPeerIdRef.current) {
+        off(peersRef);
+        off(ref(database, `video-rooms/${roomId}/offers`));
+        off(ref(database, `video-rooms/${roomId}/iceCandidates`));
+        off(ref(database, `video-rooms/${roomId}/smartNotes`));
+      }
     };
   }, [localStream, roomId, createPeerConnection, handleDataChannelMessage, leaveRoom]);
   
