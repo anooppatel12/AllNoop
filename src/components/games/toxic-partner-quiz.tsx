@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -114,6 +113,7 @@ export function ToxicPartnerQuiz() {
   
   const QuestionScreen = () => {
       const question = questions[currentQuestionIndex];
+      if (!question || questions.length === 0) return null;
       return (
         <AnimatePresence mode="wait">
             <motion.div
