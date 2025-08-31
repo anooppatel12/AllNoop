@@ -10,6 +10,7 @@ import {
   SidebarFooter,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenu,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { MainNav } from '@/components/main-nav';
@@ -152,38 +153,40 @@ export default function RootLayout({
                   <MainNav />
                 </SidebarContent>
                 <SidebarFooter>
-                   <SidebarMenuItem>
-                      <SidebarMenuButton asChild tooltip="About">
-                        <Link href="/about">
-                            <Info />
-                            <span className="group-data-[collapsible=icon]:hidden">About</span>
-                        </Link>
-                      </SidebarMenuButton>
-                   </SidebarMenuItem>
-                   <SidebarMenuItem>
-                      <SidebarMenuButton asChild tooltip="Privacy Policy">
-                        <Link href="/privacy-policy">
-                            <Lock />
-                            <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
-                        </Link>
-                      </SidebarMenuButton>
-                   </SidebarMenuItem>
-                   <SidebarMenuItem>
-                      <SidebarMenuButton asChild tooltip="Terms & Conditions">
-                        <Link href="/terms-and-conditions">
-                            <FileText />
-                            <span className="group-data-[collapsible=icon]:hidden">Terms &amp; Conditions</span>
-                        </Link>
-                      </SidebarMenuButton>
-                   </SidebarMenuItem>
+                  <SidebarMenu>
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild tooltip="Disclaimer">
-                        <Link href="/disclaimer">
-                            <AlertTriangle />
-                            <span className="group-data-[collapsible=icon]:hidden">Disclaimer</span>
-                        </Link>
-                      </SidebarMenuButton>
-                   </SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="About">
+                          <Link href="/about">
+                              <Info />
+                              <span className="group-data-[collapsible=icon]:hidden">About</span>
+                          </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="Privacy Policy">
+                          <Link href="/privacy-policy">
+                              <Lock />
+                              <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
+                          </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="Terms & Conditions">
+                          <Link href="/terms-and-conditions">
+                              <FileText />
+                              <span className="group-data-[collapsible=icon]:hidden">Terms &amp; Conditions</span>
+                          </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="Disclaimer">
+                          <Link href="/disclaimer">
+                              <AlertTriangle />
+                              <span className="group-data-[collapsible=icon]:hidden">Disclaimer</span>
+                          </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
                 </SidebarFooter>
               </Sidebar>
               <div className="flex flex-1 flex-col h-screen max-h-screen">
