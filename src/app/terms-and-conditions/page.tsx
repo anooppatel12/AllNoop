@@ -19,32 +19,46 @@ export default function TermsAndConditionsPage() {
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
-            By using AllNoop (the "Site"), you agree to be bound by these Terms and Conditions and our Privacy Policy. If you do not agree to these terms, you are prohibited from using or accessing this site. The materials contained in this website are protected by applicable copyright and trademark law. Your access to and use of the service is conditioned on your acceptance of and compliance with these terms.
+            By accessing and using AllNoop (the "Site"), you accept and agree to be bound by the terms and provision of this agreement. These Terms apply to all visitors, users, and others who access or use the Service. If you disagree with any part of the terms, then you may not access the Site. Your access to and use of the Service is also conditioned on your acceptance of and compliance with our Privacy Policy.
           </p>
         </CardContent>
       </Card>
       
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>2. Use License</CardTitle>
+          <CardTitle>2. Use of Our Services</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
-            Permission is granted to temporarily use the tools and information on AllNoop's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+            AllNoop grants you a non-exclusive, non-transferable, revocable license to use our tools and information for your personal, non-commercial use only, in accordance with these Terms. Under this license you may not:
           </p>
           <ul className="list-decimal pl-6 space-y-2">
-            <li>Modify, copy, or create derivative works from the materials;</li>
-            <li>Use the materials for any commercial purpose, or for any public display (commercial or non-commercial) without prior written consent;</li>
-            <li>Attempt to decompile or reverse engineer any software contained on AllNoop's website;</li>
-            <li>Remove any copyright or other proprietary notations from the materials; or</li>
-            <li>Transfer the materials to another person or "mirror" the materials on any other server.</li>
+            <li>Modify, copy, or create derivative works from the materials or underlying code;</li>
+            <li>Use the materials for any commercial purpose, or for any public display without prior written consent;</li>
+            <li>Attempt to decompile, reverse engineer, or otherwise attempt to discover the source code of any software contained on AllNoop's website;</li>
+            <li>Use any automated system, such as "robots," "spiders," or "offline readers," to access the Site in a manner that sends more request messages to the AllNoop servers than a human can reasonably produce in the same period by using a conventional on-line web browser;</li>
+            <li>Remove any copyright or other proprietary notations from the materials.</li>
           </ul>
-          <p>This license shall automatically terminate if you violate any of these restrictions and may be terminated by AllNoop at any time. Upon terminating your viewing of these materials or upon the termination of this license, you must destroy any downloaded materials in your possession whether in electronic or printed format.</p>
+          <p>This license shall automatically terminate if you violate any of these restrictions and may be terminated by AllNoop at any time. All content, trademarks, service marks, trade names, logos, and intellectual property are owned by AllNoop.</p>
         </CardContent>
       </Card>
        <Card className="mt-8">
         <CardHeader>
-          <CardTitle>3. Disclaimer</CardTitle>
+          <CardTitle>3. User-Generated Content and Uploaded Files</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-muted-foreground">
+          <p>
+            You are solely responsible for the content, including files and data, that you upload, process, or generate using our tools. You affirm, represent, and warrant that you own or have the necessary licenses, rights, consents, and permissions to use and authorize AllNoop to use all patent, trademark, trade secret, copyright or other proprietary rights in and to any and all user submissions to enable inclusion and use of the submissions in the manner contemplated by the Site and these Terms.
+          </p>
+           <p>
+            AllNoop does not store your files permanently. All uploaded files are automatically deleted from our servers within one hour. We do not claim any ownership rights over the content you provide.
+          </p>
+        </CardContent>
+      </Card>
+      
+       <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>4. Disclaimer of Warranties</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
@@ -57,11 +71,24 @@ export default function TermsAndConditionsPage() {
       </Card>
        <Card className="mt-8">
         <CardHeader>
-          <CardTitle>4. Limitations of Liability</CardTitle>
+          <CardTitle>5. Limitation of Liability</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
             In no event shall AllNoop or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on AllNoop's website, even if AllNoop or an AllNoop authorized representative has been notified orally or in writing of the possibility of such damage.
+          </p>
+        </CardContent>
+      </Card>
+        <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>6. Governing Law & Changes to Terms</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-muted-foreground">
+          <p>
+            Any claim relating to AllNoop's website shall be governed by the laws of our operating jurisdiction without regard to its conflict of law provisions.
+          </p>
+           <p>
+            We reserve the right, at our sole discretion, to modify or replace these Terms at any time. We will provide notice of any changes by posting the new Terms and Conditions on this page. Your continued use of the Site after any such changes constitutes your acceptance of the new Terms.
           </p>
         </CardContent>
       </Card>

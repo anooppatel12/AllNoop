@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { MainNav } from '@/components/main-nav';
-import { Info, Lock, FileText } from 'lucide-react';
+import { Info, Lock, FileText, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { AppHeader } from '@/components/header';
 import { Toaster } from '@/components/ui/toaster';
@@ -173,6 +173,14 @@ export default function RootLayout({
                         <Link href="/terms-and-conditions">
                             <FileText />
                             <span className="group-data-[collapsible=icon]:hidden">Terms &amp; Conditions</span>
+                        </Link>
+                      </SidebarMenuButton>
+                   </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild tooltip="Disclaimer">
+                        <Link href="/disclaimer">
+                            <AlertTriangle />
+                            <span className="group-data-[collapsible=icon]:hidden">Disclaimer</span>
                         </Link>
                       </SidebarMenuButton>
                    </SidebarMenuItem>
