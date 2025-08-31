@@ -1,5 +1,6 @@
 
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import {
@@ -118,7 +119,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script
+        <Script
+            id="json-ld"
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
@@ -130,8 +132,8 @@ export default function RootLayout({
           To enable Google AdSense, you will need to place your ad code here.
           This typically involves adding a <script> tag provided by AdSense.
           For example:
-          <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_CLIENT_ID"
-               crossOrigin="anonymous"></script>
+          <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_CLIENT_ID"
+               crossOrigin="anonymous" strategy="afterInteractive" />
         */}
 >>>>>>> 6db16f5 (you add everythng for adssense policy)
       </head>
@@ -153,8 +155,6 @@ export default function RootLayout({
                   <MainNav />
                 </SidebarContent>
                 <SidebarFooter>
-<<<<<<< HEAD
-<<<<<<< HEAD
                   <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild tooltip="About">
@@ -189,76 +189,6 @@ export default function RootLayout({
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                   </SidebarMenu>
-=======
-                   <SidebarMenuItem>
-                      <SidebarMenuButton asChild tooltip="About">
-                        <Link href="/about">
-                            <Info />
-                            <span className="group-data-[collapsible=icon]:hidden">About</span>
-                        </Link>
-                      </SidebarMenuButton>
-                   </SidebarMenuItem>
-                   <SidebarMenuItem>
-                      <SidebarMenuButton asChild tooltip="Privacy Policy">
-                        <Link href="/privacy-policy">
-                            <Lock />
-                            <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
-                        </Link>
-                      </SidebarMenuButton>
-                   </SidebarMenuItem>
-                   <SidebarMenuItem>
-                      <SidebarMenuButton asChild tooltip="Terms & Conditions">
-                        <Link href="/terms-and-conditions">
-                            <FileText />
-                            <span className="group-data-[collapsible=icon]:hidden">Terms &amp; Conditions</span>
-                        </Link>
-                      </SidebarMenuButton>
-                   </SidebarMenuItem>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild tooltip="Disclaimer">
-                        <Link href="/disclaimer">
-                            <AlertTriangle />
-                            <span className="group-data-[collapsible=icon]:hidden">Disclaimer</span>
-                        </Link>
-                      </SidebarMenuButton>
-                   </SidebarMenuItem>
->>>>>>> 3ba94d9 (**"Check my entire website thoroughly for Google AdSense approval compli)
-=======
-                  <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="About">
-                          <Link href="/about">
-                              <Info />
-                              <span className="group-data-[collapsible=icon]:hidden">About</span>
-                          </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="Privacy Policy">
-                          <Link href="/privacy-policy">
-                              <Lock />
-                              <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
-                          </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="Terms & Conditions">
-                          <Link href="/terms-and-conditions">
-                              <FileText />
-                              <span className="group-data-[collapsible=icon]:hidden">Terms &amp; Conditions</span>
-                          </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="Disclaimer">
-                          <Link href="/disclaimer">
-                              <AlertTriangle />
-                              <span className="group-data-[collapsible=icon]:hidden">Disclaimer</span>
-                          </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenu>
->>>>>>> 71d3fe3 (Improve the sidebar design:)
                 </SidebarFooter>
               </Sidebar>
               <div className="flex flex-1 flex-col h-screen max-h-screen">
