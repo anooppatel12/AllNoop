@@ -154,6 +154,7 @@ export default function RootLayout({
                 </SidebarContent>
                 <SidebarFooter>
 <<<<<<< HEAD
+<<<<<<< HEAD
                   <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild tooltip="About">
@@ -222,6 +223,42 @@ export default function RootLayout({
                       </SidebarMenuButton>
                    </SidebarMenuItem>
 >>>>>>> 3ba94d9 (**"Check my entire website thoroughly for Google AdSense approval compli)
+=======
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="About">
+                          <Link href="/about">
+                              <Info />
+                              <span className="group-data-[collapsible=icon]:hidden">About</span>
+                          </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="Privacy Policy">
+                          <Link href="/privacy-policy">
+                              <Lock />
+                              <span className="group-data-[collapsible=icon]:hidden">Privacy Policy</span>
+                          </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="Terms & Conditions">
+                          <Link href="/terms-and-conditions">
+                              <FileText />
+                              <span className="group-data-[collapsible=icon]:hidden">Terms &amp; Conditions</span>
+                          </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="Disclaimer">
+                          <Link href="/disclaimer">
+                              <AlertTriangle />
+                              <span className="group-data-[collapsible=icon]:hidden">Disclaimer</span>
+                          </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+>>>>>>> 71d3fe3 (Improve the sidebar design:)
                 </SidebarFooter>
               </Sidebar>
               <div className="flex flex-1 flex-col h-screen max-h-screen">
