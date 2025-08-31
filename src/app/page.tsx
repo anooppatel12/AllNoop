@@ -3,12 +3,13 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Calculator, FileText, Hash, ImageIcon, MessageSquare, Users, VenetianMask, Keyboard, Quote, Gamepad2, Puzzle, BrainCircuit, QrCode, MessageCircle, Lock, Baseline, BookOpenCheck, Search, VideoIcon, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import { FloatingElements } from '@/components/floating-elements';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
+const FloatingElements = lazy(() => import('@/components/floating-elements').then(module => ({ default: module.FloatingElements })));
 
 const SnakeIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-snake"><path d="M9.5 12a2.5 2.5 0 0 1 0-5h0A2.5 2.5 0 0 1 12 9.5v0a2.5 2.5 0 0 1-5 0h0a2.5 2.5 0 0 1 2.5-2.5v0a2.5 2.5 0 0 1 0 5h0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 1 5 0h0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 1 0-5" /><path d="M7 17a2 2 0 1 0-4 0" /></svg>
@@ -50,6 +51,45 @@ const features = [
   { name: 'Pong', icon: Gamepad2, href: '/games/pong' },
 ];
 
+const FeatureGrid = () => {
+    const [loadingTool, setLoadingTool] = useState<string | null>(null);
+
+    return (
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {features.map((feature, i) => (
+            <motion.div
+              key={feature.name}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.5, delay: i * 0.05 }}
+            >
+              <Link href={feature.href} className="group block h-full" onClick={() => setLoadingTool(feature.href)}>
+                <div className={cn(
+                    "h-full rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-2xl hover:shadow-primary/20",
+                    loadingTool === feature.href && "animate-glow"
+                  )}>
+                  <div className="flex items-center gap-4">
+                    <div className="rounded-lg bg-primary/10 p-3 text-primary">
+                      <feature.icon className="h-8 w-8" />
+                    </div>
+                    <h3 className="font-headline text-xl font-bold text-foreground">{feature.name}</h3>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+    );
+};
+
+
 export default function LandingPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingTool, setLoadingTool] = useState<string | null>(null);
@@ -66,7 +106,9 @@ export default function LandingPage() {
   return (
     <div className="relative overflow-hidden bg-background">
       <div className="absolute inset-0 bg-[url(/grid.svg)] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
-      <FloatingElements />
+      <Suspense fallback={<div className="absolute inset-0 z-0"/>}>
+        <FloatingElements />
+      </Suspense>
       <div className="relative z-10 flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center p-4 text-center">
         <motion.h1
           initial={{ opacity: 0, y: -50 }}
@@ -136,44 +178,11 @@ export default function LandingPage() {
       </div>
 
       <div className={cn("relative z-10 mx-auto max-w-7xl px-4 pb-16 transition-opacity duration-300", searchQuery && "pointer-events-none opacity-30 blur-sm")}>
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {features.map((feature, i) => (
-            <motion.div
-              key={feature.name}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-            >
-              <Link href={feature.href} className="group block h-full" onClick={() => setLoadingTool(feature.href)}>
-                <div className={cn(
-                    "h-full rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-2xl hover:shadow-primary/20",
-                    loadingTool === feature.href && "animate-glow"
-                  )}>
-                  <div className="flex items-center gap-4">
-                    <div className="rounded-lg bg-primary/10 p-3 text-primary">
-                      <feature.icon className="h-8 w-8" />
-                    </div>
-                    <h3 className="font-headline text-xl font-bold text-foreground">{feature.name}</h3>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
+        <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
+            <FeatureGrid />
+        </Suspense>
       </div>
       
     </div>
   );
 }
-
-
-
-
-    
