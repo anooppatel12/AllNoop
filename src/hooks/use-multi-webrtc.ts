@@ -201,9 +201,15 @@ export const useMultiWebRTC = (roomId: string) => {
       setRemoteStreams((prev) => {
         const existingStream = prev.find((s) => s.id === peerId);
         if (existingStream) {
-          existingStream.stream.addTrack(event.track);
-          return [...prev];
+          // If a stream already exists, add the track to it
+          event.streams[0].getTracks().forEach(track => {
+            if (!existingStream.stream.getTrackById(track.id)) {
+                existingStream.stream.addTrack(track);
+            }
+          });
+          return [...prev]; // Return a new array to trigger re-render
         } else {
+          // If no stream exists for this peer, create a new one
           return [...prev, { id: peerId, stream: event.streams[0] }];
         }
       });
